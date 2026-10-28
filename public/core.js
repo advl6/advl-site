@@ -335,7 +335,7 @@ A.mountLot = async (el) => {
     if (el._desk && window.ADVL_LOT) window.ADVL_LOT.sync(msgs);   // desktop: the same messages float in the lot
   };
   const st = await lotStore();
-  if (!st) { status.textContent = window.ADVL_LOT_DB ? 'The Parking Lot is offline right now. Try again later.' + (window.ADVL_LOT_ERR ? ' [' + window.ADVL_LOT_ERR + ']' : '') : 'Chat is read-only here. Open this page signed in to claude.ai to post.'; form.querySelector('button').disabled = true; field.disabled = true; show([]); return; }
+  if (!st) { status.textContent = window.ADVL_LOT_DB ? 'The Parking Lot is offline right now. Try again later.' : 'Chat is read-only here. Open this page signed in to claude.ai to post.'; form.querySelector('button').disabled = true; field.disabled = true; show([]); return; }
   if (!st.canPost) { status.textContent = 'Chat is read-only for this view.'; field.disabled = true; }
   st.subscribe(show, () => { status.textContent = 'The Parking Lot lost its connection. Reload to reconnect.'; });
   form.addEventListener('submit', async e => { e.preventDefault(); const text = field.value.trim(); if (!text || !st.canPost) return;
