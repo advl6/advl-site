@@ -1,0 +1,6 @@
+{
+  // Cloudflare Worker that serves the static site in ./public
+  "name": "advl-site",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./public", "not_found_handling": "single-page-application" }
+}
