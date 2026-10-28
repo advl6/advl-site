@@ -16,6 +16,7 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 
 ## Standing rules
 - Show mockups / wireframes and get approval before changing a page's design. One page at a time.
+- Always ask Ariana for approval before taking actions (changes, pushes, anything outside the conversation).
 - Desktop (≥1024px) is the designed format; keep mobile working but unchanged unless asked.
 - Never use files from the Physical Intelligence folder on the site. Keep cover letters off the site.
 - Never mention the skip gesture on the site.
