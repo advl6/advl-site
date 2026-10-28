@@ -62,9 +62,11 @@ document.addEventListener('touchend', e => { const t = Date.now(); if (t - lastT
 document.addEventListener('dblclick', () => skip());
 
 let frameL = 0;
-function fitFrame() { const rs = [...document.querySelectorAll('#frame rect')], r = rs[rs.length - 1]; if (!r || !r.getTotalLength) return; let L = 0; try { L = Math.ceil(r.getTotalLength() + 24); } catch (e) { return; }
-  if (L > 100 && Math.abs(L - frameL) > 8) { frameL = L; rs.forEach(x => x.style.setProperty('--L', L + 'px')); } }
+function fitFrame() { const rs = [...document.querySelectorAll('#frame rect')], r = rs[rs.length - 1]; if (!r || !r.getTotalLength) return; let L = 0; try { L = Math.ceil((r.getTotalLength() + 24) * Math.max(1, window.devicePixelRatio || 1)); /* non-scaling stroke dashes are measured on screen: scaled displays need the longer dash, or the frame keeps a gap at its start (top left) */ } catch (e) { return; }
+  if (frameL === -1) return; if (L > 100 && Math.abs(L - frameL) > 8) { frameL = L; rs.forEach(x => x.style.setProperty('--L', L + 'px')); } }
 addEventListener('resize', fitFrame); addEventListener('load', fitFrame);
+/* once the frame has drawn itself in, drop the dash entirely so no screen scaling or zoom can leave a gap */
+document.addEventListener('transitionend', e => { if (frameL !== -1 && e.target.closest && e.target.closest('#frame') && e.propertyName === 'stroke-dashoffset' && document.body.dataset.phase === 'ui') { frameL = -1; document.querySelectorAll('#frame rect').forEach(x => x.style.setProperty('--L', 'none')); } });
 
 /* ---------- backgrounds ---------- */
 let bgFlip = 0;
