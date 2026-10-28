@@ -23,3 +23,13 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 - Artifacts page: not being changed.
 - Transitions stay smooth and slow, matching the rest of the site (fades ~0.9–2.4s).
 - Cloudflare Pages limit: 25 MiB per file.
+
+## Open items (as of 2026-10-27)
+1. Mobile: bring the Parking Lot and About pages in line with the new desktop versions (Ariana reviewed mobile on 10/27), plus general mobile tweaks. Show mockups first.
+2. Link preview image (`public/img/og.jpg`): the current one is a crop of the Learning Bodies title card (cut-off title, shows "Vivian"). Ariana is choosing between three options: A = site frame (dark ground, chartreuse frame and column, name, four stair treads), B = 8-image project collage with name band, C = amber petals render with name and title.
+3. Missing media: 06 and 15 images and films, 08 source files, About featured image.
+4. Headers: 06, 12, 13, 14, 15 use their stair treads on the Projects card; 10 keeps its first gallery image (decided 10/27).
+
+## Related claude.ai pages
+- Original site preview (private): https://claude.ai/artifact/QRuZkZSmwXp2eQUnHmweLe
+- Domain advl.studio is registered and active on Cloudflare; Supabase project kytehsjeyzaqfobqyuhx.
