@@ -298,7 +298,7 @@ A.mountRoom = (el) => { if (!window.MiniGL || !ART) { el.innerHTML = '<p class="
 async function lotStore() {
   const cfg = window.ADVL_LOT_DB;
   if (cfg && cfg.url && cfg.key) {
-    const H = { apikey: cfg.key, Authorization: 'Bearer ' + cfg.key, 'Content-Type': 'application/json' };
+    const H = { apikey: cfg.key, 'Content-Type': 'application/json' }; /* publishable key goes in apikey only; requests run as the anon role */
     const api = (path, o = {}) => fetch(cfg.url.replace(/\/$/, '') + path, { ...o, headers: { ...H, ...(o.headers || {}) } }).then(r => { if (!r.ok) throw new Error(r.status); return r.status === 204 ? null : r.json(); });
     let tok = '', mine = [];
     try { tok = localStorage.getItem('advl-lot-tok') || ''; if (!tok) { tok = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('advl-lot-tok', tok); } mine = JSON.parse(localStorage.getItem('advl-lot-mine') || '[]'); } catch (e) { tok = tok || Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2); }
