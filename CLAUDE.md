@@ -1,6 +1,6 @@
 # ADVL site — working notes
 
-Portfolio of Ariana Dorothea Levy. Static site served by a Cloudflare Worker (static assets, see `wrangler.jsonc`) from `public/`; live at advl-site.arianadorothealevy.workers.dev. Every push to `main` should redeploy (Workers Builds).
+Portfolio of Ariana Dorothea Levy. Static site served by a Cloudflare Worker (static assets, see `wrangler.jsonc`) from `public/`; live at https://advl.studio (also advl-site.arianadorothealevy.workers.dev). Every push to `main` should redeploy (Workers Builds).
 
 ## Layout
 - `public/` — exactly what is served. Edit these files directly.
