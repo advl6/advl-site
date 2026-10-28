@@ -1,0 +1,147 @@
+{
+ "thisland-00": {
+  "src": "/_blob/dd9b0e8ae324393c44461d13e7ca96bf",
+  "dur": 42.021,
+  "local": "/home/claude/vhq/thisland-00.mp4"
+ },
+ "thisland-01": {
+  "src": "/_blob/529826e158c3ae47839817bba6a8ac05",
+  "dur": 42.0,
+  "local": "/home/claude/vhq/thisland-01.mp4"
+ },
+ "thisland-02": {
+  "src": "/_blob/3e07f52d0eced91bb0be54ca811644a6",
+  "dur": 42.0,
+  "local": "/home/claude/vhq/thisland-02.mp4"
+ },
+ "thisland-03": {
+  "src": "/_blob/f5e36be5b9975a0a62640f8ad6bf056b",
+  "dur": 42.0,
+  "local": "/home/claude/vhq/thisland-03.mp4"
+ },
+ "thisland-04": {
+  "src": "/_blob/8ad014bb31bab119856b66ecd7d1be2a",
+  "dur": 42.0,
+  "local": "/home/claude/vhq/thisland-04.mp4"
+ },
+ "thisland-05": {
+  "src": "/_blob/a679a52819acec5ad6ffc90b540190b3",
+  "dur": 42.0,
+  "local": "/home/claude/vhq/thisland-05.mp4"
+ },
+ "thisland-06": {
+  "src": "/_blob/518b66f6d08f145f57ca9b112a1fdef3",
+  "dur": 2.229,
+  "local": "/home/claude/vhq/thisland-06.mp4"
+ },
+ "cfai-00": {
+  "src": "/_blob/0a2270802ee56f594fd4b489d27ba106",
+  "dur": 55.043,
+  "local": "/home/claude/vhq/cfai-00.mp4"
+ },
+ "cfai-01": {
+  "src": "/_blob/2dafa9f51b81e691e65b726ad964381e",
+  "dur": 54.988,
+  "local": "/home/claude/vhq/cfai-01.mp4"
+ },
+ "cfai-02": {
+  "src": "/_blob/86bef7a59a0b676bbe51d33bd0370e62",
+  "dur": 55.022,
+  "local": "/home/claude/vhq/cfai-02.mp4"
+ },
+ "cfai-03": {
+  "src": "/_blob/9631efba9b0c3a00624ca51fff5c0e80",
+  "dur": 54.988,
+  "local": "/home/claude/vhq/cfai-03.mp4"
+ },
+ "cfai-04": {
+  "src": "/_blob/48c3feccc37685fc16daa405f101cdd4",
+  "dur": 51.362,
+  "local": "/home/claude/vhq/cfai-04.mp4"
+ },
+ "watermelon-00": {
+  "src": "/_blob/98909860c3b6af27affd3e8a27f623f3",
+  "dur": 36.021,
+  "local": "/home/claude/vhq/wm/watermelon-00.mp4"
+ },
+ "watermelon-01": {
+  "src": "/_blob/34f7b8bff5702cb6911fab89884a7dbf",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-01.mp4"
+ },
+ "watermelon-02": {
+  "src": "/_blob/32c9fb45e45f78d382f8d645e493bebb",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-02.mp4"
+ },
+ "watermelon-03": {
+  "src": "/_blob/3ad535d0e04a7f0ac0f375164c03be65",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-03.mp4"
+ },
+ "watermelon-04": {
+  "src": "/_blob/ab9ff3caffae1703b88e0c0fd0869cf2",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-04.mp4"
+ },
+ "watermelon-05": {
+  "src": "/_blob/4d7d5dafa531f68303d6aa4ed51cc14f",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-05.mp4"
+ },
+ "watermelon-06": {
+  "src": "/_blob/46016e004d4525ee5e8af7e27e2be693",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-06.mp4"
+ },
+ "watermelon-07": {
+  "src": "/_blob/509363022a415092c8128ab2f919df47",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-07.mp4"
+ },
+ "watermelon-08": {
+  "src": "/_blob/4289fa7038eafa43f2bd54889239473f",
+  "dur": 36.0,
+  "local": "/home/claude/vhq/wm/watermelon-08.mp4"
+ },
+ "watermelon-09": {
+  "src": "/_blob/3cb853f5ee98b8fb95665290b6084535",
+  "dur": 4.341,
+  "local": "/home/claude/vhq/wm/watermelon-09.mp4"
+ },
+ "m1ndfield-00": {
+  "src": "/_blob/33eb9db6ab8a841bb4d84f3f9daac0b7",
+  "dur": 48.036,
+  "local": "/home/claude/vhq/mf/m1ndfield-00.mp4"
+ },
+ "m1ndfield-01": {
+  "src": "/_blob/7238aae6013b4fabd15a59cd6ead21a6",
+  "dur": 47.998,
+  "local": "/home/claude/vhq/mf/m1ndfield-01.mp4"
+ },
+ "m1ndfield-02": {
+  "src": "/_blob/652ad783c8325fd8c481320d3a6ccc90",
+  "dur": 47.998,
+  "local": "/home/claude/vhq/mf/m1ndfield-02.mp4"
+ },
+ "m1ndfield-03": {
+  "src": "/_blob/70eb9482620772aebcccd48471f52908",
+  "dur": 47.998,
+  "local": "/home/claude/vhq/mf/m1ndfield-03.mp4"
+ },
+ "m1ndfield-04": {
+  "src": "/_blob/b7969ce703322747e6da2a6ec4fd97d3",
+  "dur": 47.998,
+  "local": "/home/claude/vhq/mf/m1ndfield-04.mp4"
+ },
+ "m1ndfield-05": {
+  "src": "/_blob/72ff1af39a09f7053dfb4203c9ac0adb",
+  "dur": 47.998,
+  "local": "/home/claude/vhq/mf/m1ndfield-05.mp4"
+ },
+ "m1ndfield-06": {
+  "src": "/_blob/1c428552fa80b00fbd23ba4a9c2e6cca",
+  "dur": 3.324,
+  "local": "/home/claude/vhq/mf/m1ndfield-06.mp4"
+ }
+}
