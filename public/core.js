@@ -299,7 +299,7 @@ async function lotStore() {
   const cfg = window.ADVL_LOT_DB;
   if (cfg && cfg.url && cfg.key) {
     const H = { apikey: cfg.key, 'Content-Type': 'application/json' }; /* publishable key goes in apikey only; requests run as the anon role */
-    const api = (path, o = {}) => fetch(cfg.url.replace(/\/$/, '') + path, { ...o, headers: { ...H, ...(o.headers || {}) } }).then(r => { if (!r.ok) throw new Error(r.status); return r.status === 204 ? null : r.json(); });
+    const api = (path, o = {}) => fetch(cfg.url.replace(/\/$/, '') + path, { ...o, headers: { ...H, ...(o.headers || {}) } }).then(async r => { if (!r.ok) { let t = ''; try { t = await r.text(); } catch (e) {} throw new Error(r.status + ' ' + t.slice(0, 200)); } return r.status === 204 ? null : r.json(); });
     let tok = '', mine = [];
     try { tok = localStorage.getItem('advl-lot-tok') || ''; if (!tok) { tok = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join(''); localStorage.setItem('advl-lot-tok', tok); } mine = JSON.parse(localStorage.getItem('advl-lot-mine') || '[]'); } catch (e) { tok = tok || Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2); }
     const keep = () => { try { localStorage.setItem('advl-lot-mine', JSON.stringify(mine.slice(-200))); } catch (e) {} };
@@ -308,7 +308,7 @@ async function lotStore() {
         const msgs = rows.map(r => ({ id: String(r.id), ts: Date.parse(r.created_at), name: r.name || '', text: r.body, u: 'p', del: mine.includes(String(r.id)) }));
         const sig = msgs.map(m => m.id + (m.del ? '*' : '')).join(','); if (sig !== last) { last = sig; cb && cb(msgs); } }
       catch (e) { fail && fail(e); } };
-    try { await api('/rest/v1/lot_messages?select=id&limit=1'); } catch (e) { return null; }
+    try { await api('/rest/v1/lot_messages?select=id&limit=1'); } catch (e) { console.warn('[ADVL lot]', e); window.ADVL_LOT_ERR = String(e && e.message || e); return null; }
     return { canPost: true,
       subscribe(f, onErr) { cb = f; fail = onErr; pull(); clearInterval(timer); timer = setInterval(() => { if (!document.hidden) pull(); }, 15000); },
       async add(m) { const r = await api('/rest/v1/lot_messages?select=id', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ name: m.name, body: m.text, author_token: tok }) });
@@ -335,7 +335,7 @@ A.mountLot = async (el) => {
     if (el._desk && window.ADVL_LOT) window.ADVL_LOT.sync(msgs);   // desktop: the same messages float in the lot
   };
   const st = await lotStore();
-  if (!st) { status.textContent = window.ADVL_LOT_DB ? 'The Parking Lot is offline right now. Try again later.' : 'Chat is read-only here. Open this page signed in to claude.ai to post.'; form.querySelector('button').disabled = true; field.disabled = true; show([]); return; }
+  if (!st) { status.textContent = window.ADVL_LOT_DB ? 'The Parking Lot is offline right now. Try again later.' + (window.ADVL_LOT_ERR ? ' [' + window.ADVL_LOT_ERR + ']' : '') : 'Chat is read-only here. Open this page signed in to claude.ai to post.'; form.querySelector('button').disabled = true; field.disabled = true; show([]); return; }
   if (!st.canPost) { status.textContent = 'Chat is read-only for this view.'; field.disabled = true; }
   st.subscribe(show, () => { status.textContent = 'The Parking Lot lost its connection. Reload to reconnect.'; });
   form.addEventListener('submit', async e => { e.preventDefault(); const text = field.value.trim(); if (!text || !st.canPost) return;
