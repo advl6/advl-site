@@ -26,7 +26,7 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 - Cloudflare Pages limit: 25 MiB per file.
 
 ## Open items (as of 2026-10-29)
-0. Project pages, in order, each through mockups → approval. 01 Learning Bodies: phone layout live 10/29 (mosaic of the 8 motion studies at top, Generative AI and CAD section with side-by-side callouts, new order). Desktop for 01 not yet approved: Ariana said push mobile only. Stardrum / cybernetic images could become callouts once she says which are generated vs modeled.
+0. Project pages, in order, each through mockups → approval. 01 Learning Bodies: phone layout live 10/29 (mosaic of the 8 motion studies at top, This Land This Water film right under the project details, Generative AI and CAD section with side-by-side callouts, new order). Desktop for 01 not yet approved: Ariana said push mobile only. Stardrum / cybernetic images could become callouts once she says which are generated vs modeled.
 1. Mobile: bring the Parking Lot and About pages in line with the new desktop versions (Ariana reviewed mobile on 10/27), plus general mobile tweaks. Show mockups first.
 2. Link preview image (`public/img/og.jpg`, referenced as `og.jpg?v=2`): replaced 10/30 with the Chartreuse "Parking Lot" card (Ariana chose it "for now"). Blurred Green anchor background, Syne 800 name in a glowing chartreuse box with a Visit pill, bush and door with a fading ground line, advl.studio top right. Other palettes (Ultraviolet, Bloom, Ice) are in `tools/mockups/og_lot/` in case she switches; bump `?v=` when replacing.
 3. Missing media: 06 and 15 images and films, 08 source files, About featured image.
