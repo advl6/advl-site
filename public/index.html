@@ -156,6 +156,27 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
 .gal{display:grid;gap:10px;margin:0}.gal.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.gal.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .gal img{width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--glass2)}.gal.c1 img{object-fit:contain;max-height:78vh}
 .gal figcaption,.vid figcaption{grid-column:1/-1;font:400 .72rem var(--f-mono);color:var(--soft)}
+/* moving generations mosaic + generated/CAD pairs (10/28) */
+.mos{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mos .mt{border-radius:10px;overflow:hidden;background:#000}.mos .mt.w{grid-column:1/-1;aspect-ratio:16/9}.mos .mt.s{aspect-ratio:1}
+.mos video{display:block;width:100%;height:100%;object-fit:cover;cursor:pointer}
+.mos figcaption,.pair figcaption{grid-column:1/-1;font:400 .72rem var(--f-mono);color:var(--soft)}
+.pair{margin:0;display:grid;gap:8px}
+.pair .pr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pair .pt{position:relative;aspect-ratio:4/5;border-radius:10px;overflow:hidden;background:var(--glass2)}
+.pair .pt img{display:block;width:100%;height:100%;object-fit:cover}
+.pair .pl{position:absolute;left:8px;top:8px;font:500 .6rem/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 7px;border-radius:99px;background:rgb(21 23 42/.78);color:#EEF3EC}
+.pair .pl.cad{background:var(--acc,#CFF002);color:#15172A}
+@media (min-width:1024px){.pair{max-width:780px}.pair .pt{aspect-ratio:1}.mos{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.mos .mt.w{grid-column:span 2;aspect-ratio:2.04}.mos .mt.s{aspect-ratio:1}}
+@media (max-width:1023px){
+  /* iPhone Safari stretched gallery photos past their rows; fixed tile shapes keep rows from colliding */
+  .gal{align-items:start}
+  .gal img{height:auto;aspect-ratio:1}
+  .gal.c1 img{aspect-ratio:auto;max-height:none}
+  .gal figcaption,.vid figcaption,.mos figcaption,.pair figcaption{margin-top:2px;line-height:1.45}
+  /* soft band behind the pinned name and Style button so scrolling text passes under cleanly */
+  body:not([data-route=landing]):not([data-route=home])::before{content:"";position:fixed;left:0;right:0;top:0;height:calc(84px + env(safe-area-inset-top,0px));z-index:15;pointer-events:none;background:linear-gradient(rgb(18 19 34/.6),rgb(18 19 34/.25));-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+}
 @media (max-width:620px){.gal.c3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .vid{margin:0;display:grid;gap:6px}.vid.multi .vstack{position:relative;aspect-ratio:var(--ar);border-radius:8px;overflow:hidden;background:#000;cursor:pointer}.vid.multi video{position:absolute;inset:0;height:100%;object-fit:contain;opacity:0;border-radius:0}.vid.multi video.on{opacity:1}.vid video{width:100%;border-radius:8px;cursor:pointer}.vid.port video{max-width:340px}
 blockquote{margin:0;font:300 clamp(1.3rem,2.8vw,1.9rem)/1.3 var(--f-disp);padding-left:18px;border-left:2px solid var(--acc)}
@@ -638,7 +659,7 @@ const cfg={
    ft.innerHTML=`<div class="pic">${(p.hero||p.hero2)?`<img src="${p.hero||p.hero2}" alt="">`:`<img class="orbpic" src="${p.tread||`orb/${p.img}.webp`}" alt="">`}</div><div class="tx"><span class="num">${p.num}</span><h2 class="tt">${p.full||p.t}</h2>${p.sub?`<p class="sub">${esc(p.sub)}</p>`:''}<p class="meta">${esc(A.strip(p.meta))}</p>${l?`<p class="lead">${l}</p>`:''}<span class="open">Open project →</span></div>`})},
  project(v,p,D){const N=D.projects.length,i=D.projects.indexOf(p),pr=D.projects[(i+N-1)%N],nx=D.projects[(i+1)%N];
   v.innerHTML=`<p class="lvl">${LV.projects}</p><header class="steps"><span class="num">${p.num}</span><h1 class="big">${p.full||p.t}</h1>${p.sub?`<p class="sub">${esc(p.sub)}</p>`:''}</header><p class="meta">${esc(A.strip(p.meta))}</p>
-   <div class="slab blocks">${p.blocks.length?A.blocks(p.blocks):'<p class="soft">Images and a write-up for this project are on their way.</p>'}</div>
+   <div class="slab blocks">${(()=>{const bl=(p.mblocks&&matchMedia('(max-width:1023px)').matches)?p.mblocks:p.blocks;return bl.length?A.blocks(bl):'<p class="soft">Images and a write-up for this project are on their way.</p>'})()}</div>
    <nav class="pager" aria-label="More projects"><a href="#p${pr.num}"><small>Up a step · ${pr.num}</small><span>${pr.t}</span></a><a href="#p${nx.num}"><small>Down a step · ${nx.num}</small><span>${nx.t}</span></a></nav>`},
  background(v,D){const item=h=>{const d=document.createElement('div');d.innerHTML=h;const w=d.querySelector('.when')?.textContent||'',t=d.querySelector('h3')?.innerHTML||'',r=d.querySelector('.role')?.innerHTML||'',p=d.querySelector('article>p:last-child')?.innerHTML||'';
    return `<li><span class="when">${w}</span><div><h3>${t}</h3><p class="role">${r}</p><p>${p}</p></div></li>`};

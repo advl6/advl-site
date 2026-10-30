@@ -156,6 +156,10 @@ const R = {
   gal: b => `<figure class="gal c${b.cols}">${b.imgs.map(([k, a]) => `<img src="${img(k)}" alt="${esc(a)}" loading="lazy" decoding="async">`).join('')}${b.cap ? `<figcaption>${b.cap}</figcaption>` : ''}</figure>`,
   video: b => b.parts ? `<figure class="vid multi" data-parts='${esc(JSON.stringify(b.parts))}' style="--ar:${b.ar || '16/9'}"><div class="vstack"><video class="on" muted playsinline preload="none" poster="g/${b.poster}.webp" aria-label="${esc(b.title)}"></video><video muted playsinline preload="none" aria-hidden="true"></video></div><figcaption>${esc(b.title)} · ${esc(b.dur)}</figcaption></figure>` :
            `<figure class="vid${b.portrait ? ' port' : ''}"><video muted loop playsinline preload="none" data-src="v/${b.src}.mp4" poster="g/${b.poster}.webp" aria-label="${esc(b.title)}"></video><figcaption>${esc(b.title)} · ${esc(b.dur)}</figcaption></figure>`,
+  /* moving generations, tiled: wide clips run full width, square clips pair up (play muted on loop while in view) */
+  mosaic: b => `<figure class="mos">${b.x.map(v => `<div class="mt ${v.shape === 's' ? 's' : 'w'}"><video muted loop playsinline preload="none" data-src="v/${v.src}.mp4" poster="g/${v.poster}.webp" aria-label="${esc(v.title)}"></video></div>`).join('')}${b.cap ? `<figcaption>${esc(b.cap)}</figcaption>` : ''}</figure>`,
+  /* a generated image beside the CAD model it became */
+  pair: b => `<figure class="pair">${b.rows.map(r => `<div class="pr">${r.map((c, k) => `<div class="pt"><img src="${img(c.k)}" alt="${esc(c.a || '')}" loading="lazy" decoding="async"><span class="pl${k ? ' cad' : ''}">${esc(c.l)}</span></div>`).join('')}</div>`).join('')}${b.cap ? `<figcaption>${b.cap}</figcaption>` : ''}</figure>`,
   gauges: b => gauges(b.x), bars, timeline, spectrum, drops, stat,
   responses: b => `<div class="resp">${b.x.map(([f, r]) => `<div><b>${f}</b>${r.map(x => `<span>${x}</span>`).join('')}</div>`).join('')}</div>`,
   quote: b => `<blockquote>${esc(b.x)}</blockquote>`,
@@ -372,6 +376,8 @@ A.boot = async cfg => {
   A.D = D; cfg.init && cfg.init(D);
   go();
 };
+/* project pages can carry a phone-only layout (mblocks): redraw when the window crosses the desktop breakpoint */
+matchMedia('(max-width:1023px)').addEventListener('change', () => { if (route && /^p\d\d$/.test(route.id) && D && D.projects.some(p => 'p' + p.num === route.id && p.mblocks)) go(); });
 A.esc = esc; A.strip = strip; A.RM = RM; A.skip = skip; A.go = go;
 window.ADVL = A;
 })();
