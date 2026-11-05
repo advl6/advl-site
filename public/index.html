@@ -200,7 +200,8 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
   body:not([data-phase=ui]) .mgl,body:not([data-phase=ui]) .mdial{pointer-events:none}
   /* home: stair cascade of project wireframes down the right side */
   .mcasc{display:block;position:absolute;right:-4px;top:17vh;width:212px;height:62vh;z-index:0;perspective:700px}
-  .home{position:relative;z-index:1}
+  .home{position:relative;z-index:1;pointer-events:none}  /* the name sits over the tiles but lets taps through to them */
+  .home a,.home button{pointer-events:auto}
   .mcasc a{position:absolute;left:calc(var(--k) * 18px);top:calc(var(--k) * 9.6vh);z-index:calc(10 - var(--k));width:118px;height:104px;border-radius:8px;border:1px solid rgb(255 255 255/.22);background:rgb(255 255 255/.06);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);transform:rotateY(-24deg) rotateX(8deg);display:grid;place-items:center;transition:border-color 1.6s ease,box-shadow 1.6s ease}
   .mcasc a img{width:86%;height:auto;filter:drop-shadow(0 0 5px rgb(207 240 2/.3))}
   .mcasc a span{position:absolute;left:6px;top:4px;font:500 .48rem var(--f-mono);color:var(--soft)}
