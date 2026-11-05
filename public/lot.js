@@ -155,7 +155,7 @@ function onResize() { if (!root) return; layout(); for (const b of bodies) { b.x
 window.ADVL_LOT = {
   mount(view, compose) { stop(); root = document.createElement('div'); root.className = 'lotd'; root._first = true;
     root.innerHTML = `<div class="ld-bg"></div><div class="ld-bg"></div><div class="ld-shade"></div><svg class="ld-scene" aria-hidden="true"></svg>
-      <div class="ld-head"><p class="lvl">L5 · Parking Lot</p><h1 class="big">Parking Lot</h1><p class="ld-count"><b class="ld-n">0</b> messages parked</p></div>
+      <div class="ld-head"><p class="lvl">L5<span class="lvn"> · Parking Lot</span></p><h1 class="big">Parking Lot</h1><p class="ld-count"><b class="ld-n">0</b> messages parked</p></div>
       <div class="ld-world" aria-label="Messages" aria-live="polite"></div><div class="ld-compose"></div>
       <div class="ld-tools"><div class="ld-pal" role="group" aria-label="Palette">${PALETTES.map((p, i) => `<button type="button" title="${p.name}" aria-label="${p.name} palette">${p.sw.map(c => `<i style="background:${c}"></i>`).join('')}</button>`).join('')}</div></div>`;
     view.appendChild(root); compose.forEach(n => n && q('.ld-compose').appendChild(n));

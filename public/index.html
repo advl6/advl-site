@@ -162,7 +162,7 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
 .pmore{display:none}
 @media (max-width:720px){
   .pstage{min-height:calc(100svh - 170px - env(safe-area-inset-top,0px));display:flex;flex-direction:column}
-  .pstage .spiral-wrap{flex:none;height:max(360px,calc(100svh - 158px - 210px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)))}
+  .pstage .spiral-wrap{flex:none;height:max(380px,calc(100svh - 158px - 186px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)))}
   .pstage .alllist{margin-top:28vh}
   .pmore{all:unset;display:flex;flex-direction:column;align-items:center;gap:4px;margin:22px auto calc(96px + env(safe-area-inset-bottom,0px));cursor:pointer;font:400 .59rem/1 var(--f-mono);color:#CFF002;opacity:.72;transition:opacity .9s ease}
   .pmore b{font-weight:400;opacity:.6}
@@ -172,7 +172,8 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
   .alllist{opacity:0;transform:translateY(18px);transition:opacity 1.6s ease,transform 1.6s cubic-bezier(.2,.7,.2,1);scroll-margin-top:96px;margin-top:0}
   .alllist.shown{opacity:1;transform:none}
 }
-@media (max-width:720px){.phead .lvn{display:none}}  /* the goto line and the title already say Projects */
+@media (max-width:720px){.lvl .lvn{display:none}}  /* the goto line already names the level */
+body:is([data-route=projects],[data-route=background],[data-route=about],[data-route=lot]) .lvl .lvn{display:none}  /* the page title already names it */
 @media (max-width:720px) and (prefers-reduced-motion:reduce){.pmore i{animation:none}.alllist{transition:none;opacity:1;transform:none}}
 /* ---- phone navigation + home cascade (approved 11/4: H1, N5 with D1) ---- */
 .mgl,.mdial,.mcasc,.mtop{display:none}
@@ -667,7 +668,8 @@ function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;con
    <p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p></div></div>
    <article class="abd-card"><figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>
    <div class="abd-tx">${rest}<h2>Strengths</h2><ul class="tags">${D.skills.slice(0,10).map(s=>`<li>${s}</li>`).join('')}</ul></div></article></div>`}
-const LV={home:'L0 · Home',projects:'L1 · Projects',background:'L2 · Background',about:'L3 · About',artifacts:'L4 · Artifacts',lot:'L5 · Parking Lot'};
+/* level labels: the name part (.lvn) hides wherever the page already says it (phone goto line, desktop page titles) */
+const LV={home:'L0<span class="lvn"> · Home</span>',projects:'L1<span class="lvn"> · Projects</span>',background:'L2<span class="lvn"> · Background</span>',about:'L3<span class="lvn"> · About</span>',artifacts:'L4<span class="lvn"> · Artifacts</span>',lot:'L5<span class="lvn"> · Parking Lot</span>'};
 const dialKind='D';
 const drawDial=()=>A.dial($('#dialwrap'),dialKind);
 /* progress rail on project pages */
@@ -723,7 +725,7 @@ const cfg={
  bgFor:k=>{const set=window.ADVL_BG.sets.find(x=>x.key===(document.documentElement.dataset.bg||''))||window.ADVL_BG.sets[0];return set.map[k]||({background:'frost/collage.webp',about:'frost/collage_alt.webp',artifacts:'frost/mural_bg.webp',lot:'frost/lot.webp'})[k]},
  onRoute(r){if(r.tab!=='artifacts'&&window.ADVL_VIEWER)ADVL_VIEWER.close();if(A._roomEl&&r.tab!=='artifacts')A._roomEl.style.display='none';if(r.tab==='artifacts'&&A.room)A.room.start()},
  landing(v){A.door(v,'arch')},
- home(v,D){v.innerHTML=`<section class="home"><p class="lvl">L0 · Home</p><h1 class="name"><span>Ariana</span><span>Dorothea</span><span>Levy</span></h1><p class="role">${esc(D.title)}</p><p class="hint">San Francisco</p></section><nav class="mcasc" aria-label="Featured projects">${[1,2,9,10,5,17].map((n,k)=>{const p=D.projects.find(x=>+x.num===n);return p?`<a href="#p${p.num}" style="--k:${k}" aria-label="Open ${esc(A.strip(p.t))}" class="${k?'':'on'}"><span>${p.num}</span><img src="img/tread/${p.num}.webp" alt=""></a>`:''}).join('')}</nav><div class="h3-arc" aria-hidden="true"></div><div class="h3" role="group" aria-label="3D models, drag to turn"></div>`;
+ home(v,D){v.innerHTML=`<section class="home"><p class="lvl">L0<span class="lvn"> · Home</span></p><h1 class="name"><span>Ariana</span><span>Dorothea</span><span>Levy</span></h1><p class="role">${esc(D.title)}</p><p class="hint">San Francisco</p></section><nav class="mcasc" aria-label="Featured projects">${[1,2,9,10,5,17].map((n,k)=>{const p=D.projects.find(x=>+x.num===n);return p?`<a href="#p${p.num}" style="--k:${k}" aria-label="Open ${esc(A.strip(p.t))}" class="${k?'':'on'}"><span>${p.num}</span><img src="img/tread/${p.num}.webp" alt=""></a>`:''}).join('')}</nav><div class="h3-arc" aria-hidden="true"></div><div class="h3" role="group" aria-label="3D models, drag to turn"></div>`;
   {const ps=[...v.querySelectorAll('.mcasc a')];let k=0;const t=setInterval(()=>{if(!ps[0]||!ps[0].isConnected)return clearInterval(t);if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;ps[k].classList.remove('on');k=(k+1)%ps.length;ps[k].classList.add('on')},4200)}
   const h=v.querySelector('.h3'),mq=matchMedia('(min-width:1024px)');
   if(mq.matches)ADVL_HOME3D.mount(h);else mq.addEventListener('change',function f(e){if(e.matches&&h.isConnected){mq.removeEventListener('change',f);ADVL_HOME3D.mount(h)}})},
