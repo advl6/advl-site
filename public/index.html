@@ -692,7 +692,7 @@ function spiral(host,D,onFront){
  const idx=()=>((Math.round(pos)%N)+N)%N;
  const draw=()=>{const f=idx();tr.forEach((t,i)=>{let d=((i-pos)%N+N)%N;if(d>N/2)d-=N;const a=d*STEP,ad=Math.abs(d);
    t.style.transform=`rotateY(${a.toFixed(3)}deg) translateZ(${rr}px) translateY(${(d*RISE).toFixed(2)}px)`;
-   const vis=ad<=5.5;t.style.opacity=vis?String(Math.max(0,1-ad*.15)):'0';t.style.zIndex=String(20-Math.round(ad));t.style.pointerEvents=vis?'auto':'none';
+   const vis=ad<=5.5;t.style.opacity=vis?String(Math.max(0,1-ad*.15)):'0';t.style.zIndex=String(20-Math.round(ad));t.style.pointerEvents=(DESK.matches?vis:ad<.5)?'auto':'none';  /* phones: only the lit front tread takes a tap; turn the stair to reach the next */
    const fr=i===f;t.classList.toggle('front',fr);t.setAttribute('aria-selected',String(fr));t.tabIndex=fr?0:-1});
   if(f!==shown){shown=f;const p=P[f];ft.textContent=A.strip(p.t);ff.textContent=`${p.num} · ${p.f}`;onFront&&onFront(p);try{sessionStorage.setItem('advl-c2-tread',f)}catch(e){}}};
  const tick=t=>{const dt=Math.min(3,(t-(last||t))/16.67||1);last=t;
