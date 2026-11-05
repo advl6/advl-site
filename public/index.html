@@ -157,6 +157,23 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
 .gal img{width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--glass2)}.gal.c1 img{object-fit:contain;max-height:78vh}
 .gal figcaption,.vid figcaption{grid-column:1/-1;font:400 .72rem var(--f-mono);color:var(--soft)}
 
+
+/* phone projects: the stair fills the first screen; a script arrow leads down to the list, which fades in (11/5) */
+.pmore{display:none}
+@media (max-width:720px){
+  .pstage{min-height:calc(100svh - 170px - env(safe-area-inset-top,0px));display:flex;flex-direction:column}
+  .pstage .spiral-wrap{flex:none;height:max(360px,calc(100svh - 158px - 210px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)))}
+  .pstage .alllist{margin-top:28vh}
+  .pmore{all:unset;display:flex;flex-direction:column;align-items:center;gap:4px;margin:22px auto calc(96px + env(safe-area-inset-bottom,0px));cursor:pointer;font:400 .59rem/1 var(--f-mono);color:#CFF002;opacity:.72;transition:opacity .9s ease}
+  .pmore b{font-weight:400;opacity:.6}
+  .pmore i{font-style:normal;font-size:.95rem;line-height:1;animation:pmore 2.6s ease-in-out infinite}
+  .pmore:hover,.pmore:focus-visible{opacity:.95}.pmore:focus-visible{outline:1px solid #CFF002;outline-offset:4px;border-radius:4px}
+  @keyframes pmore{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  .alllist{opacity:0;transform:translateY(18px);transition:opacity 1.6s ease,transform 1.6s cubic-bezier(.2,.7,.2,1);scroll-margin-top:96px;margin-top:0}
+  .alllist.shown{opacity:1;transform:none}
+}
+@media (max-width:720px){.phead .lvn{display:none}}  /* the goto line and the title already say Projects */
+@media (max-width:720px) and (prefers-reduced-motion:reduce){.pmore i{animation:none}.alllist{transition:none;opacity:1;transform:none}}
 /* ---- phone navigation + home cascade (approved 11/4: H1, N5 with D1) ---- */
 .mgl,.mdial,.mcasc,.mtop{display:none}
 @media (max-width:720px){
@@ -662,7 +679,10 @@ function spiral(host,D,onFront){
  host.innerHTML=`<div class="spiral-wrap" tabindex="0" role="listbox" aria-label="Projects, turn with arrow keys"><span class="spiral-col"></span><div class="spiral">${P.map((p,i)=>`<a class="tread" href="#p${p.num}" role="option" data-i="${i}" aria-label="${p.num} ${esc(A.strip(p.t))}"><span class="n">${p.num}</span><img src="${p.tread||`orb/${p.img}.webp`}"${p.tread?' class="wire"':''} alt="" draggable="false"></a>`).join('')}</div>
   <div class="front-card" aria-live="polite"><span class="t"></span><span class="f"></span></div></div>
   <div class="spin-ctl"><button type="button" data-d="-1">Up a step</button><button type="button" data-d="1">Down a step</button></div>
+  <button type="button" class="pmore" aria-label="Show all projects as a list"><span>list(<b>all</b>)</span><i aria-hidden="true">↓</i></button>
   <ol class="alllist">${P.map(p=>`<li><a href="#p${p.num}"><span>${p.num}</span>${p.t}</a></li>`).join('')}</ol>`;
+ {const mb=host.querySelector('.pmore'),al=host.querySelector('.alllist');mb.onclick=()=>al.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){al.classList.add('shown');io.disconnect()}}),{threshold:.08});io.observe(al)}else al.classList.add('shown')}
  const wrap=host.querySelector('.spiral-wrap'),sp=host.querySelector('.spiral'),tr=[...host.querySelectorAll('.tread')],ft=host.querySelector('.front-card .t'),ff=host.querySelector('.front-card .f');
  /* the stair turns like a ball bearing: one continuous position (in steps) with momentum, low friction and a soft settle onto the nearest tread */
  let pos=0,vel=0,target=null,raf=0,last=0,shown=-1,rr=R();
@@ -707,7 +727,7 @@ const cfg={
   {const ps=[...v.querySelectorAll('.mcasc a')];let k=0;const t=setInterval(()=>{if(!ps[0]||!ps[0].isConnected)return clearInterval(t);if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;ps[k].classList.remove('on');k=(k+1)%ps.length;ps[k].classList.add('on')},4200)}
   const h=v.querySelector('.h3'),mq=matchMedia('(min-width:1024px)');
   if(mq.matches)ADVL_HOME3D.mount(h);else mq.addEventListener('change',function f(e){if(e.matches&&h.isConnected){mq.removeEventListener('change',f);ADVL_HOME3D.mount(h)}})},
- projects(v,D){v.innerHTML=`<div class="phead"><p class="lvl">${LV.projects}</p><h1 class="big">Projects</h1></div><div class="pstage"></div><a class="pfeat" aria-live="polite"></a>`;
+ projects(v,D){v.innerHTML=`<div class="phead"><p class="lvl">L1<span class="lvn"> · Projects</span></p><h1 class="big">Projects</h1></div><div class="pstage"></div><a class="pfeat" aria-live="polite"></a>`;
   const ft=v.querySelector('.pfeat'),lead=p=>{const b=p.blocks.find(x=>x.t==='lead');return b?b.x:''};
   spiral(v.querySelector('.pstage'),D,p=>{const l=lead(p);ft.href='#p'+p.num;ft.setAttribute('aria-label',`Open ${A.strip(p.t)}`);
    ft.innerHTML=`<div class="pic">${(p.hero||p.hero2)?`<img src="${p.hero||p.hero2}" alt="">`:`<img class="orbpic" src="${p.tread||`orb/${p.img}.webp`}" alt="">`}</div><div class="tx"><span class="num">${p.num}</span><h2 class="tt">${p.full||p.t}</h2>${p.sub?`<p class="sub">${esc(p.sub)}</p>`:''}<p class="meta">${esc(A.strip(p.meta))}</p>${l?`<p class="lead">${l}</p>`:''}<span class="open">Open project →</span></div>`})},
