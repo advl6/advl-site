@@ -105,9 +105,20 @@ function render() {
   view.scrollTop = 0; window.scrollTo(0, 0);
   CFG.onRoute && CFG.onRoute(r, prev);
   wireBlocks(view);
+  audSync(view);
   perform();
 }
 window.addEventListener('hashchange', go);
+
+/* ---------- advl auditory (project 18) ----------
+   the beat maker's script and styles load only when its page opens; leaving the page stops the sound */
+let audP = null;
+function audSync(view) {
+  const el = $('[data-aud]', view);
+  if (!el) { window.ADVL_AUD && ADVL_AUD.unmount(); return; }
+  audP = audP || new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'auditory.js'; s.onload = ok; s.onerror = () => { audP = null; no(); }; document.head.appendChild(s); });
+  audP.then(() => { if (el.isConnected) ADVL_AUD.mount(el); }).catch(() => { el.innerHTML = '<p class="soft">The beat maker didn’t load. Refresh the page to try again.</p>'; });
+}
 
 /* ---------- content blocks ---------- */
 const img = k => (k.includes('/') ? k : `g/${k}.webp`);
@@ -164,6 +175,8 @@ const R = {
   responses: b => `<div class="resp">${b.x.map(([f, r]) => `<div><b>${f}</b>${r.map(x => `<span>${x}</span>`).join('')}</div>`).join('')}</div>`,
   quote: b => `<blockquote>${esc(b.x)}</blockquote>`,
   poem: b => `<div class="poem">${b.x.map(l => l ? `<span>${esc(l)}</span>` : '<br>').join('')}</div>`,
+  /* advl auditory: the beat maker mounts here (auditory.js, loaded only on this page) */
+  auditory: () => '<div class="aud" data-aud></div>',
 };
 A.blocks = bl => bl.map(b => (R[b.t] ? R[b.t](b) : '')).join('');
 /* a film cut into parts on a project page: two stacked videos, the next part loaded while this one plays,
