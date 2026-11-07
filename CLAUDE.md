@@ -38,5 +38,7 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 5. Unused files: 54 files no page used (old background sets, This Land / Watermelon posters 2–4, extra Frost/Light images, `equip2/3`, 12 Learning Bodies stills) were removed 11/7 after Ariana saved a zip of them. They stay recoverable from git history (commit before the removal).
 
 ## Related claude.ai pages
+- Full project context and history: the claude.ai Project "advl.studio website and repositories", doc `claude/advl-project-context.md`. It draws on three chats: "Building your own website" (the site), "Rhino 3DM installation" (3D models from `C:\Users\arian\Desktop\Portfolio\projs`, exports follow Rhino layer visibility, backups in `projs\backups`), and "DJ mixing software in C++" (advl auditory). Check those before asking Ariana about past decisions.
+- ADVL Model Viewer: https://claude.ai/artifact/9ETgDGyAv58q48za24JkQc
 - Original site preview (private): https://claude.ai/artifact/QRuZkZSmwXp2eQUnHmweLe
 - Domain advl.studio is registered and active on Cloudflare; Supabase project kytehsjeyzaqfobqyuhx.
