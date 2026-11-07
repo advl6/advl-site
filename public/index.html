@@ -623,6 +623,7 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .pjd-tab.narrow{grid-template-columns:min(24vw,340px) minmax(0,1fr)}
   .pjd-tab.hero:not(:has(.pjd-ed .abd-row)){grid-template-rows:1fr}.pjd-tab.hero:not(:has(.pjd-ed .abd-row)) .pjd-ed{display:none}.pjd-tab.hero:not(:has(.pjd-ed .abd-row)) .pjd-hero{border:0;display:grid;align-content:center}.pjd-tab.hero:not(:has(.pjd-ed .abd-row)) .pjd-hero .vid.multi .vstack{height:min(70vh,calc((100vw - 200px - max(64px,6vw) - 36px) / (var(--arn,16 / 9))))}
   .pjd-tab.narrow .pjd-ed{padding-right:18px}
+  .pjd-tab.narrow .abd-l.h{font-size:clamp(1.55rem,2.2vw,2.2rem);overflow-wrap:break-word;hyphens:auto}
   .pjd .abd-row:has(.dr) .abd-l{max-width:400px}
   .pjd .dr-head b{font-size:clamp(2rem,3.4vw,3rem)}.pjd .dr{gap:8px;margin-top:12px}.pjd .dr i{width:clamp(18px,1.9vw,26px)}
   .pjd-ed{padding:20px 22px 40px 0;overflow-y:auto;scrollbar-width:thin}
@@ -781,7 +782,7 @@ function pjDesk(p){let n=0;const row=(t,x)=>`<div class="abd-row"><span class="a
   return `<div class="pjd"><nav class="pjd-tabs" role="tablist" aria-label="${esc(p.t)} files">${p.tabs.map((t,i)=>`<button type="button" role="tab" data-t="${i}" aria-selected="${i?'false':'true'}">${esc(t.f)}</button>`).join('')}</nav><div class="pjd-pane">${p.tabs.map(tab).join('')}</div></div>`}
 function pjWire(v){const W=v.querySelector('.pjd');if(!W)return;const tabs=[...W.querySelectorAll('.pjd-tabs button')],panes=[...W.querySelectorAll('.pjd-tab')];
   const show=(tab,si)=>{const pv=[...tab.querySelectorAll('.pjd-pv')];if(!pv.length)return;let pick=pv.filter(x=>+x.dataset.s<=si).pop()||pv[0];pv.forEach(x=>x.classList.toggle('on',x===pick))};
-  const track=tab=>{const ed=tab.querySelector('.pjd-ed');if(!ed||!tab.querySelector('.pjd-side'))return;let raf=0;ed.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const top=ed.getBoundingClientRect().top+ed.clientHeight*.35;let si=0;ed.querySelectorAll('.pjd-sec').forEach(s=>{if(s.getBoundingClientRect().top<top)si=+s.dataset.s});show(tab,si)})},{passive:true});
+  const track=tab=>{const ed=tab.querySelector('.pjd-ed');if(!ed||!tab.querySelector('.pjd-side'))return;let raf=0;ed.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const top=ed.getBoundingClientRect().top+ed.clientHeight*.35;let si=0;ed.querySelectorAll('.pjd-sec').forEach(s=>{if(s.getBoundingClientRect().top<top)si=+s.dataset.s});if(ed.scrollTop+ed.clientHeight>=ed.scrollHeight-4){const l=[...tab.querySelectorAll('.pjd-pv')].pop();if(l)si=Math.max(si,+l.dataset.s)}show(tab,si)})},{passive:true});
    tab.querySelectorAll('.pjd-go').forEach(b=>b.addEventListener('click',()=>show(tab,+b.dataset.s)))};
   const align=tab=>{const ch=tab.querySelector('.pjd-ed .abd-row:has(.dr)'),pv=tab.querySelector('.pjd-pv.on');if(!ch||!pv)return;const f=pv.querySelector('figure');if(!f)return;f.style.marginTop='0px';const d=ch.getBoundingClientRect().top-f.getBoundingClientRect().top;if(d>0)f.style.marginTop=d+'px'};
   panes.forEach(track);panes.forEach(t=>{if(!t.hidden)requestAnimationFrame(()=>align(t))});addEventListener('resize',()=>panes.forEach(t=>{if(!t.hidden)align(t)}));
