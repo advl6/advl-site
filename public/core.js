@@ -414,3 +414,10 @@ matchMedia('(max-width:1023px)').addEventListener('change', () => { if (route &&
 A.esc = esc; A.strip = strip; A.RM = RM; A.skip = skip; A.go = go;
 window.ADVL = A;
 })();
+
+/* frames follow each film's own shape (no black bands): cinematic stage and project hero films */
+(function () {
+  const fit = v => { const w = v.videoWidth, h = v.videoHeight; if (!w || !h) return; const box = v.closest('.cine-stage') || v.closest('.vstack'); if (!box) return; box.style.setProperty('--ar', `${w}/${h}`); box.style.setProperty('--arn', String(w / h)); };
+  document.addEventListener('loadedmetadata', e => { const v = e.target; if (v.tagName === 'VIDEO' && (v.classList.contains('on') || !v.closest('.cine-stage'))) fit(v); }, true);
+  new MutationObserver(ms => ms.forEach(m => { const v = m.target; if (v.tagName === 'VIDEO' && v.classList.contains('on')) fit(v); })).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+})();

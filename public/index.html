@@ -432,7 +432,7 @@ body[data-tab=about]{--cur:var(--ch-about)}body[data-tab=artifacts]{--cur:var(--
 /* the dial never touches anything: the cinematic reel narrows to leave the dial's side free; on phones the dial rises above the level bar and the remote */
 :root{--dial-w:clamp(120px,14vw,160px)}
 body #dialwrap{width:var(--dial-w)}
-body .cine-stage{width:min(92vw,calc((100vh - 250px) * 16 / 9),calc(100vw - 2 * (var(--dial-w) + var(--col) + 72px)))}
+body .cine-stage{width:min(92vw,calc((100vh - 250px) * var(--arn,16 / 9)),calc(100vw - 2 * (var(--dial-w) + var(--col) + 72px)))}
 @media (max-width:760px){#dialwrap{bottom:calc(104px + env(safe-area-inset-bottom,0px))}body.cine #dialwrap{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
   body .cine-stage{width:92vw;margin-top:-140px}}
 /* type switcher: top left beside the column on wide screens, top right on phones */
@@ -460,9 +460,9 @@ body .cine-stage{width:min(92vw,calc((100vh - 250px) * 16 / 9),calc(100vw - 2 * 
 /* cinematic */
 #cine{position:fixed;inset:0;z-index:15;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;pointer-events:none;padding:70px 16px 120px}
 body.cine #cine{display:flex}
-.cine-stage{position:relative;width:min(92vw,calc((100vh - 250px) * 16 / 9));margin-top:-30px;aspect-ratio:16/9;max-width:100%}
+.cine-stage{position:relative;width:min(92vw,calc((100vh - 250px) * var(--arn,16 / 9)));margin-top:-30px;aspect-ratio:var(--ar,16/9);max-width:100%;transition:width 1.2s ease}
 .cine-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 1.6s;
-  border-radius:14px;background:#000}
+  border-radius:14px;background:transparent}
 .cine-stage video.cut{transition:none}
 .cine-stage video.on{opacity:1}
 .cine-ctl{position:fixed;left:50%;bottom:calc(var(--ctl-b) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);pointer-events:auto;display:flex;align-items:center;gap:14px;padding:0;background:none;border:0}
@@ -575,8 +575,8 @@ body.cine #levels,body.cine #view,body.cine .wm{display:none}
 @media (min-width:1024px){
   /* cinematic, layout C (approved 10/26 19:04, moved down and centred): the film centred in the open space, caption and controls under it */
   #cine{left:200px;right:28px;top:28px;bottom:28px;width:auto;padding:0;justify-content:center;gap:18px}
-  body .cine-stage{width:min(calc(100vw - 200px - 140px),calc((100vh - 270px) * 16 / 9));margin-top:48px}
-  .cine-cap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;width:min(calc(100vw - 200px - 140px),calc((100vh - 270px) * 16 / 9))}
+  body .cine-stage{width:min(calc(100vw - 200px - 140px),calc((100vh - 270px) * var(--arn,16 / 9)));margin-top:48px}
+  .cine-cap{display:flex;justify-content:space-between;align-items:baseline;gap:16px;width:min(calc(100vw - 200px - 140px),calc((100vh - 270px) * var(--arn,16 / 9)))}
   .cine-cap p{margin:0}.cc-t{font:300 1.6rem/1.15 var(--f-disp);letter-spacing:-.015em}
   .cc-f{margin-top:4px!important;font:400 .68rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--soft)}
   .cc-parts{font:400 .64rem var(--f-mono);letter-spacing:.08em;color:var(--soft);white-space:nowrap}
@@ -614,7 +614,7 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   @keyframes pjdIn{from{opacity:0}to{opacity:1}}
   .pjd-tab.hero{grid-template-rows:auto minmax(0,1fr)}
   .pjd-hero{grid-column:1/-1;padding:18px 18px 4px;border-bottom:1px solid rgb(255 255 255/.1)}
-  .pjd-hero .vid.multi .vstack{aspect-ratio:auto;height:min(54vh,calc((100vw - 200px - max(64px,6vw) - 36px)*9/16));border-radius:12px}
+  .pjd-hero .vid.multi .vstack{aspect-ratio:var(--ar,16/9);height:min(54vh,calc((100vw - 200px - max(64px,6vw) - 36px) / (var(--arn,16 / 9))));width:auto;max-width:100%;margin:0 auto;border-radius:12px;background:transparent}
   .pjd-hero figcaption{font:400 .7rem var(--f-mono);color:#CFF002;opacity:.75}
   .pjd-tab.wide{grid-template-columns:minmax(0,1fr) min(58vw,880px)}
   .pjd-tab.narrow{grid-template-columns:min(24vw,340px) minmax(0,1fr)}
