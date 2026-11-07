@@ -35,7 +35,7 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 2. Link preview image (`public/img/og.jpg`, referenced as `og.jpg?v=2`): replaced 10/30 with the Chartreuse "Parking Lot" card (Ariana chose it "for now"). Blurred Green anchor background, Syne 800 name in a glowing chartreuse box with a Visit pill, bush and door with a fading ground line, advl.studio top right. Other palettes (Ultraviolet, Bloom, Ice) are in `tools/mockups/og_lot/` in case she switches; bump `?v=` when replacing.
 3. Missing media: 06 and 15 images and films, 08 source files, About featured image.
 4. Headers: 06, 12, 13, 14, 15 use their stair treads on the Projects card; 10 keeps its first gallery image (decided 10/27).
-5. Unused files (audit 11/7): 54 files in `public/` (~3.5 MB) are referenced nowhere on the site, Artifacts room included: older background sets (`frost/lot_*`, `p_*`, `spI_/spII_*` except the ones the background sets use, `bg_flcast`), This Land / Watermelon posters 2–4, Frost/Light `mirror_4,5,6,9,10`, `sq_3,5,7`, `fl_room`, `fl_square`, `equip2/3`, and 12 Learning Bodies stills in `img/lb/`. Ariana approved offloading them once she confirms she has copies on her computer. Don't remove before that.
+5. Unused files: 54 files no page used (old background sets, This Land / Watermelon posters 2–4, extra Frost/Light images, `equip2/3`, 12 Learning Bodies stills) were removed 11/7 after Ariana saved a zip of them. They stay recoverable from git history (commit before the removal).
 
 ## Related claude.ai pages
 - Original site preview (private): https://claude.ai/artifact/QRuZkZSmwXp2eQUnHmweLe
