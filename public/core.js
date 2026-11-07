@@ -159,7 +159,7 @@ function drops(b) {
 }
 function stat(b) { return chartFrame(`<div class="st"><b>${esc(b.n)}</b><span>${esc(b.u)}</span></div><p>${esc(b.x)}</p>`, 'st-viz'); }
 const R = {
-  spec: b => `<dl class="spec">${b.x.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`,
+  spec: b => `<dl class="spec">${b.x.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}${b.ver && b.ver.length ? `<div class="vrow"><dt>Version</dt><dd><button type="button" class="ver" data-ver="${esc(JSON.stringify(b.ver))}" aria-haspopup="dialog" aria-expanded="false">${esc(b.ver[0].v)} · ${esc(b.ver[0].d)}<span>History</span></button></dd></div>` : ''}</dl>`,
   lead: b => `<p class="lead">${b.x}</p>`, p: b => `<p>${b.x}</p>`, h2: b => `<h2>${b.x}</h2>`, h3: b => `<h3>${b.x}</h3>`,
   tags: b => `<ul class="tags">${b.x.map(t => `<li>${t}</li>`).join('')}</ul>`,
   items: b => `<dl class="items">${b.x.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`,
@@ -193,12 +193,32 @@ function partsPlayer(fig) {
            off() { live = false; vs.forEach(v => v.pause()); } };
 }
 function wireBlocks(root) {
+  $$('[data-ver]', root).forEach(btn => btn.addEventListener('click', () => verOpen(btn)));
   const multi = $$('figure.vid.multi', root);
   if (multi.length) { const io2 = new IntersectionObserver(es => es.forEach(e => { const f = e.target; f._p = f._p || partsPlayer(f); e.isIntersecting ? f._p.on() : f._p.off(); }), { rootMargin: '200px' }); multi.forEach(f => io2.observe(f)); }
   const vids = $$('video[data-src]', root); if (!vids.length) return;
   const io = new IntersectionObserver(es => es.forEach(e => { const v = e.target; if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; if (!RM) v.play().catch(() => {}); } else v.pause(); }), { rootMargin: '200px' });
   vids.forEach(v => { io.observe(v); v.addEventListener('click', () => { v.muted = !v.muted; }); });
 }
+
+/* ---------- version history: the newest shows in the details; tap it for the full list over a soft blur ---------- */
+let verEl = null;
+function verOpen(btn) {
+  if (verEl) return;
+  let list = []; try { list = JSON.parse(btn.dataset.ver); } catch (e) {} if (!list.length) return;
+  const pj = route && D.projects.find(x => 'p' + x.num === route.id), name = pj ? (pj.full || pj.t) : '';
+  const veil = document.createElement('div'); veil.className = 'verveil';
+  const box = document.createElement('div'); box.className = 'verpop'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-label', 'Version history');
+  box.innerHTML = `<div class="vh"><span>Version history${name ? ' · ' + esc(name) : ''}</span><button type="button" class="vx" aria-label="Close">×</button></div><ol>${list.map((x, i) => `<li${i ? '' : ' class="now"'}><b>${esc(x.v)}</b><span class="vd">${esc(x.d)}${i ? '' : ' · current'}</span><p>${esc(x.n)}</p></li>`).join('')}</ol>`;
+  const r = btn.getBoundingClientRect(), w = Math.min(480, innerWidth - 32);
+  box.style.width = w + 'px'; box.style.left = Math.max(16, Math.min(r.left - 14, innerWidth - w - 16)) + 'px'; box.style.top = Math.max(16, r.top - 12) + 'px'; box.style.maxHeight = `calc(100vh - ${Math.max(16, r.top - 12) + 24}px)`;
+  document.body.append(veil, box); btn.setAttribute('aria-expanded', 'true');
+  const close = () => { if (!verEl) return; verEl = null; veil.classList.remove('in'); box.classList.remove('in'); btn.setAttribute('aria-expanded', 'false'); document.removeEventListener('keydown', key, true); setTimeout(() => { veil.remove(); box.remove(); }, RM ? 0 : 1000); btn.focus({ preventScroll: true }); };
+  const key = e => { if (e.key === 'Escape') { e.stopPropagation(); close(); } };
+  veil.addEventListener('click', close); box.querySelector('.vx').addEventListener('click', close); document.addEventListener('keydown', key, true);
+  verEl = { close }; requestAnimationFrame(() => { veil.classList.add('in'); box.classList.add('in'); box.querySelector('.vx').focus({ preventScroll: true }); });
+}
+addEventListener('hashchange', () => verEl && verEl.close());
 
 /* ---------- cinematic mode: one borderless playlist across the whole screen ---------- */
 const SPAN = 300;

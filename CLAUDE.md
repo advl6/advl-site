@@ -26,6 +26,7 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 - Artifacts page: not being changed.
 - Transitions stay smooth and slow, matching the rest of the site (fades ~0.9–2.4s).
 - Cloudflare Pages limit: 25 MiB per file.
+- Version history: whenever a page with a `ver` list is updated (now project 18, advl auditory), add a new entry at the top of `ver` on its `spec` block in data.json (`{v, d: 'Mon D, YYYY', n: plain-language notes}`). The details show only the newest; the History pill opens the full list over the same soft blur as the phone nav (core.js `verOpen`, styles `.ver`/`.verpop`/`.verveil` in index.html).
 
 ## Open items (as of 2026-11-04)
 -1. advl auditory (project 18, v2 pushed 11/6 after her notes 1–10): name is temporary, ask Ariana to keep or change it. Open question: drop the Year row from its details (meta already says Soundwork · 2026). Category: Soundwork. Card wireframe `img/tread/18.webp` (3D beat grid).
