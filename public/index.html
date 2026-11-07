@@ -176,6 +176,8 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
 .process li::before{content:"L" counter(s);font:500 .68rem var(--f-mono);color:var(--acc)}.process b{font-weight:500}.process span{color:var(--soft);font-size:.92rem}
 .gal{display:grid;gap:10px;margin:0}.gal.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.gal.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .gal img{width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--glass2)}.gal.c1 img{object-fit:contain;max-height:78vh}
+.feature.pf{border:0;background:none;padding:0;display:block;aspect-ratio:auto!important;height:auto!important;max-height:none!important;overflow:visible}.feature.pf img{display:block;width:100%;height:auto;filter:drop-shadow(0 0 22px rgb(207 240 2/.12))}
+.feature.pf.rd{max-width:min(100%,360px);margin-inline:auto}.feature.pf.rd img{border-radius:50%;filter:none;box-shadow:0 0 0 1px rgb(207 240 2/.55),0 0 26px rgb(207 240 2/.18)}
 .gal.fit{align-items:start}.gal.fit img{aspect-ratio:auto!important;height:auto!important;object-fit:contain}
 .gal figcaption,.vid figcaption{grid-column:1/-1;font:400 .72rem var(--f-mono);color:var(--soft)}
 
@@ -732,7 +734,7 @@ function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;con
   L.push(['code','<span class="k">export</span> {'],['code',`&nbsp;&nbsp;<span class="k">email</span>: <span class="s mail-t">'${esc(D.email)}'</span>,<button type="button" class="pill copy-mail">Copy</button>`],['code','&nbsp;&nbsp;'+links],['code','}']);
   return `<div class="abd"><h1 class="big">About</h1><nav class="abd-tabs" aria-label="About files"><b>about.md</b><a href="#background">cv.json</a></nav>
    <div class="abd-pane"><div class="abd-ed">${L.map(([t,x],i)=>`<div class="abd-row"><span class="abd-n" aria-hidden="true">${i+1}</span>${t==='lead'||t==='t'?`<p class="abd-l ${t}">${x}</p>`:`<div class="abd-l ${t}">${x}</div>`}</div>`).join('')}</div>
-   <aside class="abd-side"><figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>
+   <aside class="abd-side">${D.portrait?`<figure class="feature abd-pic pf${D.portraitRound?' rd':''}"><img src="${D.portrait}" alt="Portrait of Ariana Dorothea Levy" decoding="async"></figure>`:`<figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>`}
    <dl class="abd-facts"><div><dt>mfa</dt><dd>Design · CCA · 2024</dd></div><div><dt>ba</dt><dd>Fine Art · Drew University · 2019</dd></div><div><dt>based</dt><dd>San Francisco</dd></div><div><dt>speaks</dt><dd>English · German <span class="cm">// native</span></dd></div></dl></aside></div></div>`}
 /* level labels: the name part (.lvn) hides wherever the page already says it (phone goto line, desktop page titles) */
 const LV={home:'L0<span class="lvn"> · Home</span>',projects:'L1<span class="lvn"> · Projects</span>',background:'L2<span class="lvn"> · Background</span>',about:'L3<span class="lvn"> · About</span>',artifacts:'L4<span class="lvn"> · Artifacts</span>',lot:'L5<span class="lvn"> · Parking Lot</span>'};
@@ -808,7 +810,7 @@ const cfg={
   v.innerHTML=`<p class="lvl">${LV.background}</p><h1 class="big">Background</h1><div class="slab">${A.blocks([{t:'timeline',...D.timeline}])}
    <h2 class="sec">Experience</h2><ol class="cvsteps">${D.exp.map(item).join('')}</ol><h2 class="sec">Education</h2><ol class="cvsteps">${D.edu.map(item).join('')}</ol>
    <h2 class="sec">Skills</h2><ul class="tags">${D.skills.map(s=>`<li>${s}</li>`).join('')}</ul><h2 class="sec">Tools</h2><ul class="tags">${D.tools.map(s=>`<li>${s}</li>`).join('')}</ul></div>${bgDesk(D)}`;bgWire(v,D)},
- about(v,D){v.innerHTML=`<p class="lvl">${LV.about}</p><h1 class="big">About</h1><div class="about"><figure class="feature" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>
+ about(v,D){v.innerHTML=`<p class="lvl">${LV.about}</p><h1 class="big">About</h1><div class="about">${D.portrait?`<figure class="feature pf${D.portraitRound?' rd':''}"><img src="${D.portrait}" alt="Portrait of Ariana Dorothea Levy" decoding="async"></figure>`:`<figure class="feature" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>`}
    <div class="slab">${D.about}<p class="langs"><b>Languages</b> ${esc(D.languages||'')}</p><p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p><p class="contact links">${(D.links||[]).map(([n,u])=>`<a class="soc" href="${u}" target="_blank" rel="noopener">${n}<span aria-hidden="true"> ↗</span></a>`).join('')}</p></div></div>${abDesk(D)}`;
   v.querySelectorAll('.copy-mail').forEach(b=>b.onclick=()=>{const m=b.parentNode.querySelector('.mail-t');try{navigator.clipboard.writeText(D.email).then(()=>b.textContent='Copied',()=>sel())}catch(e){sel()}function sel(){const r=document.createRange();r.selectNodeContents(m);getSelection().removeAllRanges();getSelection().addRange(r);b.textContent='Selected'}})},
  artifacts(v){v.innerHTML=`<p class="lvl">${LV.artifacts}</p>`;
