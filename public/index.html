@@ -617,6 +617,10 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .pjd-hero .vid.multi .vstack{aspect-ratio:auto;height:min(54vh,calc((100vw - 200px - max(64px,6vw) - 36px)*9/16));border-radius:12px}
   .pjd-hero figcaption{font:400 .7rem var(--f-mono);color:#CFF002;opacity:.75}
   .pjd-tab.wide{grid-template-columns:minmax(0,1fr) min(58vw,880px)}
+  .pjd-tab.narrow{grid-template-columns:min(24vw,340px) minmax(0,1fr)}
+  .pjd-tab.narrow .pjd-ed{padding-right:18px}
+  .pjd .abd-row:has(.dr) .abd-l{max-width:400px}
+  .pjd .dr-head b{font-size:clamp(2rem,3.4vw,3rem)}.pjd .dr{gap:8px;margin-top:12px}.pjd .dr i{width:clamp(18px,1.9vw,26px)}
   .pjd-ed{padding:20px 22px 40px 0;overflow-y:auto;scrollbar-width:thin}
   .pjd .abd-l.h{font:300 clamp(1.9rem,3vw,2.8rem)/1.05 var(--f-disp);letter-spacing:-.02em;margin:2px 0 4px}.pjd .abd-l.h b{font-weight:300;color:#CFF002;font-family:var(--f-mono);margin-right:.3em}
   .pjd .abd-l.c.sub{opacity:.45}
@@ -769,14 +773,15 @@ function pjDesk(p){let n=0;const row=(t,x)=>`<div class="abd-row"><span class="a
      else if(s.h)h=(si?row('',''):'')+row('c'+(s.lvl===4?' sub':''),'// '+esc(s.h));
      return `<div class="pjd-sec" data-s="${si}">${h}${s.text.map(b=>txt(b)+row('','')).join('')}${s.media.length?row('ref',`<button type="button" class="pjd-go" data-s="${si}">→ preview(${s.media.length} ${s.media.length>1?'items':'item'})</button>`):''}</div>`}).join('');
     const side=t.secs.map((s,si)=>s.media.length?`<div class="pjd-pv${si===0||!t.secs[0].media.length&&si===t.secs.findIndex(x=>x.media.length)?' on':''}" data-s="${si}"><p class="pjd-cap">preview('${esc((s.h||t.f.replace(/\.\w+$/,'')).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''))}')</p>${A.blocks(s.media)}</div>`:'').join('');
-    return `<section class="pjd-tab${ti?'':' on'}${t.hero?' hero':''}${t.wide?' wide':''}" data-t="${ti}" role="tabpanel" aria-label="${esc(t.f)}"${ti?' hidden':''}>${t.hero?`<div class="pjd-hero">${A.blocks([t.hero])}</div>`:''}<div class="pjd-ed">${head}</div>${side?`<aside class="pjd-side">${side}</aside>`:''}</section>`};
+    return `<section class="pjd-tab${ti?'':' on'}${t.hero?' hero':''}${t.wide?' wide':''}${t.narrow?' narrow':''}" data-t="${ti}" role="tabpanel" aria-label="${esc(t.f)}"${ti?' hidden':''}>${t.hero?`<div class="pjd-hero">${A.blocks([t.hero])}</div>`:''}<div class="pjd-ed">${head}</div>${side?`<aside class="pjd-side">${side}</aside>`:''}</section>`};
   return `<div class="pjd"><nav class="pjd-tabs" role="tablist" aria-label="${esc(p.t)} files">${p.tabs.map((t,i)=>`<button type="button" role="tab" data-t="${i}" aria-selected="${i?'false':'true'}">${esc(t.f)}</button>`).join('')}</nav><div class="pjd-pane">${p.tabs.map(tab).join('')}</div></div>`}
 function pjWire(v){const W=v.querySelector('.pjd');if(!W)return;const tabs=[...W.querySelectorAll('.pjd-tabs button')],panes=[...W.querySelectorAll('.pjd-tab')];
   const show=(tab,si)=>{const pv=[...tab.querySelectorAll('.pjd-pv')];if(!pv.length)return;let pick=pv.filter(x=>+x.dataset.s<=si).pop()||pv[0];pv.forEach(x=>x.classList.toggle('on',x===pick))};
   const track=tab=>{const ed=tab.querySelector('.pjd-ed');if(!ed||!tab.querySelector('.pjd-side'))return;let raf=0;ed.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const top=ed.getBoundingClientRect().top+ed.clientHeight*.35;let si=0;ed.querySelectorAll('.pjd-sec').forEach(s=>{if(s.getBoundingClientRect().top<top)si=+s.dataset.s});show(tab,si)})},{passive:true});
    tab.querySelectorAll('.pjd-go').forEach(b=>b.addEventListener('click',()=>show(tab,+b.dataset.s)))};
-  panes.forEach(track);
-  tabs.forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.t;tabs.forEach(x=>x.setAttribute('aria-selected',String(x===b)));panes.forEach(x=>{const on=+x.dataset.t===i;x.hidden=!on;x.classList.toggle('on',on)});const ed=panes[i].querySelector('.pjd-ed');if(ed)ed.scrollTop=0}))}
+  const align=tab=>{const ch=tab.querySelector('.pjd-ed .abd-row:has(.dr)'),pv=tab.querySelector('.pjd-pv.on');if(!ch||!pv)return;const f=pv.querySelector('figure');if(!f)return;f.style.marginTop='0px';const d=ch.getBoundingClientRect().top-f.getBoundingClientRect().top;if(d>0)f.style.marginTop=d+'px'};
+  panes.forEach(track);panes.forEach(t=>{if(!t.hidden)requestAnimationFrame(()=>align(t))});addEventListener('resize',()=>panes.forEach(t=>{if(!t.hidden)align(t)}));
+  tabs.forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.t;tabs.forEach(x=>x.setAttribute('aria-selected',String(x===b)));panes.forEach(x=>{const on=+x.dataset.t===i;x.hidden=!on;x.classList.toggle('on',on)});const ed=panes[i].querySelector('.pjd-ed');if(ed)ed.scrollTop=0;requestAnimationFrame(()=>align(panes[i]))}))}
 function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;const lead=d.querySelector('.lead')?.innerHTML||'';const rest=[...d.querySelectorAll('p:not(.lead)')].map(p=>p.innerHTML);
   const heads=['practice','roots','now'],L=[['lead',lead],['','']];
   rest.forEach((p,i)=>{L.push(['c','// '+(heads[i]||'more')],['t',p],['',''])});
