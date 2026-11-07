@@ -164,7 +164,7 @@ const R = {
   tags: b => `<ul class="tags">${b.x.map(t => `<li>${t}</li>`).join('')}</ul>`,
   items: b => `<dl class="items">${b.x.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`,
   process: b => `<ol class="process">${b.x.map(([k, v]) => `<li><b>${esc(k)}</b><span>${esc(v)}</span></li>`).join('')}</ol>`,
-  gal: b => `<figure class="gal c${b.cols}">${b.imgs.map(([k, a]) => `<img src="${img(k)}" alt="${esc(a)}" loading="lazy" decoding="async">`).join('')}${b.cap ? `<figcaption>${b.cap}</figcaption>` : ''}</figure>`,
+  gal: b => `<figure class="gal c${b.cols}${b.fit ? ' fit' : ''}">${b.imgs.map(([k, a]) => `<img src="${img(k)}" alt="${esc(a)}" loading="lazy" decoding="async">`).join('')}${b.cap ? `<figcaption>${b.cap}</figcaption>` : ''}</figure>`,
   video: b => b.parts ? `<figure class="vid multi" data-parts='${esc(JSON.stringify(b.parts))}' style="--ar:${b.ar || '16/9'}"><div class="vstack"><video class="on" muted playsinline preload="none" poster="g/${b.poster}.webp" aria-label="${esc(b.title)}"></video><video muted playsinline preload="none" aria-hidden="true"></video></div><figcaption>${esc(b.title)} · ${esc(b.dur)}</figcaption></figure>` :
            `<figure class="vid${b.portrait ? ' port' : ''}"><video muted loop playsinline preload="none" data-src="v/${b.src}.mp4" poster="g/${b.poster}.webp" aria-label="${esc(b.title)}"></video><figcaption>${esc(b.title)} · ${esc(b.dur)}</figcaption></figure>`,
   /* moving generations, tiled: wide clips run full width, square clips pair up (play muted on loop while in view) */

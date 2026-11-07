@@ -176,6 +176,7 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
 .process li::before{content:"L" counter(s);font:500 .68rem var(--f-mono);color:var(--acc)}.process b{font-weight:500}.process span{color:var(--soft);font-size:.92rem}
 .gal{display:grid;gap:10px;margin:0}.gal.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.gal.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .gal img{width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--glass2)}.gal.c1 img{object-fit:contain;max-height:78vh}
+.gal.fit{align-items:start}.gal.fit img{aspect-ratio:auto!important;height:auto!important;object-fit:contain}
 .gal figcaption,.vid figcaption{grid-column:1/-1;font:400 .72rem var(--f-mono);color:var(--soft)}
 
 
@@ -196,6 +197,36 @@ body[data-route^=p][data-tab=projects]:not([data-route=projects]) #rail{display:
 @media (max-width:720px){.lvl .lvn{display:none}}  /* the goto line already names the level */
 body:is([data-route=projects],[data-route=background],[data-route=about],[data-route=lot]) .lvl .lvn{display:none}  /* the page title already names it */
 @media (max-width:720px) and (prefers-reduced-motion:reduce){.pmore i{animation:none}.alllist{transition:none;opacity:1;transform:none}}
+/* ---- desktop navigation (approved 11/7): the phone's goto line, top left under the name; opens the levels as code over a soft blur ---- */
+@media (min-width:1024px){
+  body:not(.cine) #levels{display:none!important}
+  html body .mgl{display:block}html body .mtop{display:flex}
+  .wm{left:calc(44px + env(safe-area-inset-left,0px));right:auto}
+  body .tk{left:auto;right:calc(28px + env(safe-area-inset-right,0px));top:calc(22px + env(safe-area-inset-top,0px))}
+  .lvl .lvn{display:none}
+  .mgl{all:unset;display:block;position:fixed;z-index:23;left:calc(44px + env(safe-area-inset-left,0px));top:calc(26px + 1.32rem + 2px + env(safe-area-inset-top,0px));cursor:pointer;font:400 .72rem/1 var(--f-mono);letter-spacing:.01em;color:#CFF002;padding:4px 0;text-shadow:0 0 10px rgb(207 240 2/.3);opacity:0;transition:opacity 1.9s ease}
+  body[data-phase=ui] .mgl{opacity:.78}
+  body[data-phase=ui] .mgl:hover,.mgl[aria-expanded=true]{opacity:.95}
+  body:not([data-phase=ui]) .mgl{pointer-events:none}
+  .mgl:focus-visible{outline:1px solid #CFF002;outline-offset:3px;border-radius:3px}
+  .mtop{display:flex;flex-direction:column;position:fixed;z-index:24;left:calc(44px + env(safe-area-inset-left,0px));top:calc(26px + 1.32rem + .72rem + 20px + env(safe-area-inset-top,0px));font:400 .72rem/1 var(--f-mono);color:#CFF002;pointer-events:none}
+  .mtop .o,.mtop a{opacity:0;transform:translateY(-6px);transition:opacity .9s ease,transform .9s ease}
+  .mtop .o{padding:6px 0}
+  .mtop a{color:#CFF002;text-decoration:none;padding:9px 0;text-shadow:0 1px 6px rgb(0 0 0/.55)}
+  .mtop a .c{display:none;opacity:.5;font-style:italic}.mtop a[aria-current] .c{display:inline}
+  .mtop a[aria-current]{text-shadow:0 0 10px rgb(207 240 2/.6)}
+  .mtop a:hover{opacity:1!important}
+  .mtop.open{pointer-events:auto}
+  .mtop.open .o{opacity:.45;transform:none}
+  .mtop.open a{opacity:.8;transform:none;transition-delay:calc(var(--i) * 60ms + 60ms)}
+  .mtop.open a[aria-current]{opacity:1}
+  .mtop a:focus-visible{outline:1px solid #CFF002;border-radius:3px}
+  body::after{content:"";position:fixed;inset:0;z-index:21;pointer-events:none;opacity:0;background:rgb(14 16 26/.35);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);transition:opacity .9s ease}
+  body.mnav-open::after{opacity:1}
+  body[data-route=landing] .mgl,body[data-route=landing] .mtop,body.cine .mgl,body.cine .mtop{display:none}
+  body[data-route=lot] .mgl{transition:opacity .9s ease 1s}
+  body.lot-idle .mgl{opacity:0!important;pointer-events:none;transition:opacity 2.4s ease}
+}
 /* ---- phone navigation + home cascade (approved 11/4: H1, N5 with D1) ---- */
 .mgl,.mdial,.mcasc,.mtop{display:none}
 @media (max-width:720px){
@@ -312,6 +343,9 @@ blockquote{margin:0;font:300 clamp(1.3rem,2.8vw,1.9rem)/1.3 var(--f-disp);paddin
 .about .lead{margin-bottom:12px}
 .contact{font:400 .9rem var(--f-mono);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .contact button{all:unset;cursor:pointer;padding:5px 12px;border-radius:999px;border:1px solid var(--edge);background:var(--glass)}
+.contact .soc{color:inherit;text-decoration:none;padding:5px 12px;border-radius:999px;border:1px solid var(--edge);background:var(--glass);transition:border-color .9s ease,color .9s ease}
+.contact .soc:hover,.contact .soc:focus-visible{border-color:var(--acc);color:var(--acc)}
+.langs{font:400 .8rem var(--f-mono);color:var(--soft);margin:0 0 12px}.langs b{font-weight:500;letter-spacing:.1em;text-transform:uppercase;font-size:.66rem;margin-right:8px}
 /* model viewer (from the ADVL Model Viewer artifact) */
 .obs.mdl{right:calc(132px + env(safe-area-inset-right,0px))}
 .mv{position:fixed;inset:calc(18px + env(safe-area-inset-top,0px)) calc(18px + env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) calc(18px + env(safe-area-inset-left,0px));z-index:60;display:grid;grid-template-columns:240px minmax(0,1fr);gap:12px;padding:12px;border-radius:22px;background:rgb(246 241 232/.82);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgb(43 26 114/.14);color:#2B1A72;font-family:var(--f-text)}
@@ -565,19 +599,27 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
 @media (min-width:1024px){
   body[data-route=about] #view{position:fixed;inset:0;margin:0;max-width:none;padding:0}
   body[data-route=about] #view>.lvl,body[data-route=about] #view>h1.big,body[data-route=about] #view>.about{display:none}
-  .abd{display:block}.abd .phead{position:absolute;left:200px;top:70px}
-  .abd-col{position:absolute;left:200px;top:calc(70px + clamp(2.6rem,4.6vw,4.4rem) + 3.6rem);bottom:calc(28px + 2.5vh);width:calc((100vw - 200px - max(64px,6vw) - min(34vw,520px) - 32px) * .95);display:grid;align-content:space-between;gap:24px}
-  .abd-lead{margin:0;font:300 clamp(1.6rem,2.5vw,2.5rem)/1.25 var(--f-disp);letter-spacing:-.015em}
-  .abd-low{display:grid;gap:22px}
-  .abd-facts{margin:0;display:flex;flex-wrap:wrap;gap:20px 36px}
-  .abd-facts div{display:grid;gap:4px}.abd-facts dt{font:300 1.9rem/1 var(--f-mono);color:var(--acc);text-shadow:0 0 18px rgb(207 240 2/.35)}
-  .abd-facts dd{margin:0;font:400 .68rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
-  .abd .contact{margin:0}
-  .abd-card{position:absolute;right:max(64px,6vw);top:50%;transform:translateY(-50%);width:min(34vw,520px);max-height:calc(100% - 120px);display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;border-radius:18px;background:var(--glass);border:1px solid var(--edge);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
-  .abd-pic{aspect-ratio:auto;height:32vh;margin:14px 14px 0}
-  .abd-tx{padding:20px 24px 24px;overflow:auto}
-  .abd-tx p{margin:0 0 14px;font-size:.95rem;line-height:1.6;color:rgb(239 235 255/.88)}
-  .abd-tx h2{margin:6px 0 10px;font:500 .62rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+  /* About, desktop (approved 11/7, mockup B): the page reads as one file, about.md, with a line-number gutter */
+  .abd{display:block}
+  .abd h1.big{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .abd-tabs{position:absolute;left:200px;top:62px;display:flex;gap:18px;font:400 .66rem var(--f-mono)}
+  .abd-tabs b{font-weight:400;color:#CFF002;border-bottom:1px solid #CFF002;padding-bottom:6px}
+  .abd-tabs a{color:#CFF002;opacity:.45;text-decoration:none;transition:opacity .9s ease}.abd-tabs a:hover,.abd-tabs a:focus-visible{opacity:.85}
+  .abd-pane{position:absolute;left:200px;right:max(64px,6vw);top:92px;bottom:calc(28px + 2.5vh);display:grid;grid-template-columns:minmax(0,1fr) min(28vw,400px);overflow:hidden;border-radius:18px;background:linear-gradient(rgb(255 255 255/.07),rgb(255 255 255/.03));border:1px solid var(--edge);-webkit-backdrop-filter:blur(22px) saturate(1.2);backdrop-filter:blur(22px) saturate(1.2)}
+  .abd-ed{padding:20px 22px 20px 0;overflow-y:auto;scrollbar-width:thin}
+  .abd-row{display:flex}.abd-n{flex:0 0 52px;font:400 .62rem/1.6 var(--f-mono);color:rgb(239 235 255/.25);text-align:right;padding-right:16px;user-select:none}
+  .abd-l{flex:1;min-width:0;min-height:1.5em}
+  .abd-l.c{font:italic 400 .7rem/1.6 var(--f-mono);color:#CFF002;opacity:.6}
+  .abd-l.lead{font:300 clamp(1.3rem,1.85vw,1.85rem)/1.24 var(--f-disp);letter-spacing:-.015em;max-width:30ch;margin:0}
+  .abd-l.t{font-size:.86rem;line-height:1.55;color:rgb(239 235 255/.86);max-width:68ch;margin:0 0 4px}
+  .abd-l.code{font:400 .8rem/1.8 var(--f-mono);color:rgb(239 235 255/.5)}
+  .abd-l .k{color:#CFF002;opacity:.85}.abd-l .s{color:#e9f7a8}
+  .abd-l .pill{all:unset;cursor:pointer;display:inline-block;color:#CFF002;border:1px solid rgb(207 240 2/.45);border-radius:999px;padding:0 9px;margin:0 6px;font:400 .6rem/1.7 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;transition:background .9s ease,box-shadow .9s ease}
+  .abd-l .pill:hover,.abd-l .pill:focus-visible{background:rgb(207 240 2/.12);box-shadow:0 0 10px rgb(207 240 2/.3)}
+  .abd-side{border-left:1px solid rgb(255 255 255/.1);padding:22px;display:grid;grid-template-rows:auto 1fr;gap:16px;min-height:0}
+  .abd-pic{aspect-ratio:4/5;margin:0;max-height:52vh}
+  .abd-facts{margin:0;align-self:end;font:400 .72rem/1.9 var(--f-mono)}
+  .abd-facts div{display:flex;gap:8px}.abd-facts dt{color:#CFF002;opacity:.75}.abd-facts dd{margin:0}.abd-facts .cm{color:#CFF002;opacity:.45;font-style:italic}
 }
 
 /* Parking Lot, desktop (10/27): the physics lot */
@@ -683,12 +725,15 @@ function bgWire(v,D){const card=v.querySelector('.bgd-role');if(!card)return;con
   rws.forEach(x=>x.onclick=()=>sel(+x.dataset.i));sel(D.timeline.x.length-1)}
 
 /* desktop About (layout 2, approved 10/26 19:47): the opening line large on the left with facts and email; the card holds the image and the rest of the bio */
-function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;const lead=d.querySelector('.lead')?.innerHTML||'';const rest=[...d.querySelectorAll('p:not(.lead)')].map(p=>`<p>${p.innerHTML}</p>`).join('');
-  return `<div class="abd"><div class="phead"><p class="lvl">${LV.about}</p><h1 class="big">About</h1></div>
-   <div class="abd-col"><p class="abd-lead">${lead}</p><div class="abd-low"><dl class="abd-facts"><div><dt>MFA</dt><dd>Design · CCA · 2024</dd></div><div><dt>BA</dt><dd>Fine Art · Drew University · 2019</dd></div><div><dt>SF</dt><dd>Based in San Francisco</dd></div></dl>
-   <p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p></div></div>
-   <article class="abd-card"><figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>
-   <div class="abd-tx">${rest}<h2>Strengths</h2><ul class="tags">${D.skills.slice(0,10).map(s=>`<li>${s}</li>`).join('')}</ul></div></article></div>`}
+function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;const lead=d.querySelector('.lead')?.innerHTML||'';const rest=[...d.querySelectorAll('p:not(.lead)')].map(p=>p.innerHTML);
+  const heads=['practice','roots','now'],L=[['lead',lead],['','']];
+  rest.forEach((p,i)=>{L.push(['c','// '+(heads[i]||'more')],['t',p],['',''])});
+  const links=(D.links||[]).map(([n,u])=>`<span class="k">${n.toLowerCase()}</span><a class="pill" href="${u}" target="_blank" rel="noopener" aria-label="${n} (opens in a new tab)">↗</a>`).join(', ');
+  L.push(['code','<span class="k">export</span> {'],['code',`&nbsp;&nbsp;<span class="k">email</span>: <span class="s mail-t">'${esc(D.email)}'</span>,<button type="button" class="pill copy-mail">Copy</button>`],['code','&nbsp;&nbsp;'+links],['code','}']);
+  return `<div class="abd"><h1 class="big">About</h1><nav class="abd-tabs" aria-label="About files"><b>about.md</b><a href="#background">cv.json</a></nav>
+   <div class="abd-pane"><div class="abd-ed">${L.map(([t,x],i)=>`<div class="abd-row"><span class="abd-n" aria-hidden="true">${i+1}</span>${t==='lead'||t==='t'?`<p class="abd-l ${t}">${x}</p>`:`<div class="abd-l ${t}">${x}</div>`}</div>`).join('')}</div>
+   <aside class="abd-side"><figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>
+   <dl class="abd-facts"><div><dt>mfa</dt><dd>Design · CCA · 2024</dd></div><div><dt>ba</dt><dd>Fine Art · Drew University · 2019</dd></div><div><dt>based</dt><dd>San Francisco</dd></div><div><dt>speaks</dt><dd>English · German <span class="cm">// native</span></dd></div></dl></aside></div></div>`}
 /* level labels: the name part (.lvn) hides wherever the page already says it (phone goto line, desktop page titles) */
 const LV={home:'L0<span class="lvn"> · Home</span>',projects:'L1<span class="lvn"> · Projects</span>',background:'L2<span class="lvn"> · Background</span>',about:'L3<span class="lvn"> · About</span>',artifacts:'L4<span class="lvn"> · Artifacts</span>',lot:'L5<span class="lvn"> · Parking Lot</span>'};
 const dialKind='D';
@@ -764,7 +809,7 @@ const cfg={
    <h2 class="sec">Experience</h2><ol class="cvsteps">${D.exp.map(item).join('')}</ol><h2 class="sec">Education</h2><ol class="cvsteps">${D.edu.map(item).join('')}</ol>
    <h2 class="sec">Skills</h2><ul class="tags">${D.skills.map(s=>`<li>${s}</li>`).join('')}</ul><h2 class="sec">Tools</h2><ul class="tags">${D.tools.map(s=>`<li>${s}</li>`).join('')}</ul></div>${bgDesk(D)}`;bgWire(v,D)},
  about(v,D){v.innerHTML=`<p class="lvl">${LV.about}</p><h1 class="big">About</h1><div class="about"><figure class="feature" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>
-   <div class="slab">${D.about}<p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p></div></div>${abDesk(D)}`;
+   <div class="slab">${D.about}<p class="langs"><b>Languages</b> ${esc(D.languages||'')}</p><p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p><p class="contact links">${(D.links||[]).map(([n,u])=>`<a class="soc" href="${u}" target="_blank" rel="noopener">${n}<span aria-hidden="true"> ↗</span></a>`).join('')}</p></div></div>${abDesk(D)}`;
   v.querySelectorAll('.copy-mail').forEach(b=>b.onclick=()=>{const m=b.parentNode.querySelector('.mail-t');try{navigator.clipboard.writeText(D.email).then(()=>b.textContent='Copied',()=>sel())}catch(e){sel()}function sel(){const r=document.createRange();r.selectNodeContents(m);getSelection().removeAllRanges();getSelection().addRange(r);b.textContent='Selected'}})},
  artifacts(v){v.innerHTML=`<p class="lvl">${LV.artifacts}</p>`;
   if(!A._roomEl){A._roomEl=document.createElement('div');A._roomEl.className='roomwrap';document.body.insertBefore(A._roomEl,document.getElementById('view'));A.mountRoom(A._roomEl);A._roomEl.addEventListener('advl:artifact',e=>window.ADVL_VIEWER&&ADVL_VIEWER.show(e.detail&&e.detail.model))}
