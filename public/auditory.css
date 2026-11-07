@@ -4,7 +4,8 @@
 #view:has(.aud){max-width:none;margin-right:56px}
 #view:has(.aud) .slab{background:none;border-color:transparent;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 #view:has(.aud) .spec{background:none;border:0;border-radius:0;gap:0;max-width:980px}
-#view:has(.aud) .spec div{background:none;border:0;border-left:1px solid rgb(207 240 2/.55);padding:2px 18px 2px 14px}
+#view:has(.aud) .spec div{background:none;border:0;border-left:1px solid rgb(207 240 2/.55);padding:2px 34px 2px 14px;flex:0 1 auto}
+#view:has(.aud) .spec div:first-child{flex:0 1 340px}
 #view:has(.aud) .spec dt,#view:has(.aud) .spec dd,#view:has(.aud) .lead{text-shadow:0 1px 8px rgb(0 0 0/.35)}
 #view:has(.aud) .lead{max-width:980px}
 #view:has(.aud) .pager a{background:none;border:0;border-top:1px solid rgb(207 240 2/.55);border-radius:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;text-shadow:0 1px 8px rgb(0 0 0/.35)}
