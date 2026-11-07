@@ -19,6 +19,8 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 ## Standing rules
 - Show mockups / wireframes and get approval before changing a page's design. One page at a time.
 - Always ask Ariana for approval before taking actions (changes, pushes, anything outside the conversation).
+- Every change gets a dated entry in the Changelog of the project doc `claude/advl-project-context.md` (claude.ai Project "advl.studio website and repositories"; read it, add the line, write it back).
+- Check-ins happen inside the working chat (send_later), never as scheduled tasks that open new chats.
 - Desktop (≥1024px) is the designed format; keep mobile working but unchanged unless asked.
 - Never use files from the Physical Intelligence folder on the site. Keep cover letters off the site.
 - Never mention the skip gesture on the site.
@@ -35,7 +37,8 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 2. Link preview image (`public/img/og.jpg`, referenced as `og.jpg?v=2`): replaced 10/30 with the Chartreuse "Parking Lot" card (Ariana chose it "for now"). Blurred Green anchor background, Syne 800 name in a glowing chartreuse box with a Visit pill, bush and door with a fading ground line, advl.studio top right. Other palettes (Ultraviolet, Bloom, Ice) are in `tools/mockups/og_lot/` in case she switches; bump `?v=` when replacing.
 3. Missing media: 06 and 15 images and films, 08 source files, About featured image.
 4. Headers: 06, 12, 13, 14, 15 use their stair treads on the Projects card; 10 keeps its first gallery image (decided 10/27).
-5. Unused files: 54 files no page used (old background sets, This Land / Watermelon posters 2–4, extra Frost/Light images, `equip2/3`, 12 Learning Bodies stills) were removed 11/7 after Ariana saved a zip of them. They stay recoverable from git history (commit before the removal).
+5. Old Squarespace site (arianadorothealevy.com) compared 11/7: what's not yet on the new site is listed in the project doc (social links, CV details, 13 and 15 images, 05 weeks 1–2, 08 boards and renders, 16 early renders). Ariana decides what comes over.
+6. Unused files: 54 files no page used (old background sets, This Land / Watermelon posters 2–4, extra Frost/Light images, `equip2/3`, 12 Learning Bodies stills) were removed 11/7 after Ariana saved a zip of them. They stay recoverable from git history (commit before the removal).
 
 ## Related claude.ai pages
 - Full project context and history: the claude.ai Project "advl.studio website and repositories", doc `claude/advl-project-context.md`. It draws on three chats: "Building your own website" (the site), "Rhino 3DM installation" (3D models from `C:\Users\arian\Desktop\Portfolio\projs`, exports follow Rhino layer visibility, backups in `projs\backups`), and "DJ mixing software in C++" (advl auditory). Check those before asking Ariana about past decisions.
