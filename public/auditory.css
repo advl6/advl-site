@@ -250,6 +250,53 @@
 /* ---------- phones and tablets ---------- */
 
 /* desktop widths below the designed 1600+: keep the transport on one line, two columns for the stage */
+
+/* ---- whole piece: play from here, skim, fade frames ---- */
+.aud .vbox[data-scrub]{cursor:pointer}
+.aud .fxw{position:absolute;inset:0;pointer-events:none;z-index:2}
+.aud .fx{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 3px rgb(207 240 2/.35))}
+.aud .fr{position:absolute;top:0;bottom:0;width:22px;margin-left:-11px;z-index:4;cursor:ew-resize;touch-action:none;outline:none}
+.aud .fr::before{content:"";position:absolute;top:0;bottom:0;left:10px;border-left:1.5px dashed var(--acc)}
+.aud .fr .grip{position:absolute;top:50%;left:3px;width:16px;height:34px;margin-top:-17px;border-radius:6px;background:rgb(20 16 28/.85);border:1.5px solid var(--acc);box-shadow:0 0 10px rgb(207 240 2/.45);transition:transform .9s,box-shadow .9s}
+.aud .fr .grip::after{content:"";position:absolute;inset:9px 5px;background:radial-gradient(circle,var(--acc) 1.3px,transparent 1.6px) 0 0/4px 5px}
+.aud .fr:hover .grip,.aud .fr:focus-visible .grip{box-shadow:0 0 16px rgb(207 240 2/.8);transform:scaleY(1.08)}
+.aud .fr .tab{position:absolute;bottom:-27px;left:11px;transform:translateX(-50%);white-space:nowrap;font:500 .54rem var(--f-mono);letter-spacing:.12em;color:#14162A;background:var(--acc);padding:3px 8px;border-radius:6px;text-shadow:none}
+.aud .ghost{position:absolute;top:-6px;bottom:-6px;width:0;border-left:1.5px solid rgb(255 255 255/.75);z-index:5;pointer-events:none}
+.aud .ghost[hidden]{display:none}
+.aud .ghost>span{position:absolute;top:-32px;left:8px;white-space:nowrap;font:400 .6rem var(--f-mono);letter-spacing:.06em;color:#EEF3EC;background:rgb(20 16 28/.85);border:1px solid rgb(255 255 255/.3);padding:5px 10px;border-radius:999px}
+.aud .fades{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 40px;margin-top:34px;align-items:end}
+.aud .fade1{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:end}
+.aud .arr .fades{margin-top:18px}
+/* ---- live sessions ---- */
+.aud .rec-live{border-color:#FF5A4E;color:#FFB4A0;background:rgb(255 90 78/.08)}
+.aud .rec-live i,.aud .rec-on i{width:9px;height:9px;border-radius:50%;background:#FF5A4E;box-shadow:0 0 8px #FF5A4E}
+.aud .rec-on{background:#FF5A4E;border-color:#FF5A4E;color:#fff;text-shadow:none}
+.aud .rec-on i{background:#fff;box-shadow:none;animation:au-recb 1.8s ease-in-out infinite}
+@keyframes au-recb{50%{opacity:.25}}
+.aud .vbox.recording{box-shadow:inset 0 0 0 1px rgb(255 90 78/.7),0 0 24px rgb(255 90 78/.18)}
+.aud .recstrip{display:inline-flex;align-items:center;gap:10px;font:400 .6rem var(--f-mono);letter-spacing:.08em;color:#FFB4A0;text-transform:uppercase;margin-right:4px}
+.aud .recstrip b{font:400 1.05rem var(--f-mono);color:#fff;letter-spacing:.04em}
+.aud .vhead .rec-live,.aud .vhead .rec-on{margin-right:14px}
+.aud .sess{display:grid;gap:10px}
+.aud .sess .file{--c:#FF8A7E}
+.aud .sess .fic{color:#FF8A7E}.aud .sess .fic svg{width:16px;height:16px}
+.aud .file .add.sec{border-color:rgb(255 255 255/.3);color:var(--ink)}
+/* ---- windows: drag the handle on any box to move it (desktop) ---- */
+.aud .win{position:relative;display:grid;gap:22px;align-content:start;min-width:0}
+.aud .wgrip{display:none}
+@media (min-width:1024px){
+  .aud .wgrip{display:block;position:absolute;top:-13px;left:50%;z-index:6;width:52px;height:16px;margin-left:-26px;padding:0;border-radius:999px;border:1px solid rgb(207 240 2/.45);background:rgb(20 16 28/.72);cursor:grab;opacity:.4;transition:opacity .9s,box-shadow .9s,border-color .9s;touch-action:none}
+  .aud .wgrip i{position:absolute;inset:4px 14px;background:radial-gradient(circle,var(--acc) 1.2px,transparent 1.5px) 0 0/4px 4px}
+  .aud .win:hover>.wgrip,.aud .wgrip:focus-visible,.aud .win.lift>.wgrip{opacity:1;border-color:var(--acc);box-shadow:0 0 12px rgb(207 240 2/.5)}
+  .aud .win.lift>.wgrip{cursor:grabbing}
+  .aud .desk{position:relative;margin-top:28px;min-height:400px;transition:height .9s}
+  .aud .win.free{position:absolute;border-radius:18px;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);background:rgb(22 14 20/.32);box-shadow:0 16px 40px rgb(0 0 0/.22);transition:box-shadow .9s}
+  .aud .win.free.bare{padding:24px 22px 20px;border:1px solid rgb(255 255 255/.14)}
+  .aud .win.free.lift{box-shadow:0 30px 70px rgb(0 0 0/.4),0 0 0 1px rgb(207 240 2/.5);transition:none}
+  .aud .wsize{position:absolute;right:4px;bottom:4px;width:16px;height:16px;cursor:nwse-resize;z-index:6;opacity:.45;background:linear-gradient(135deg,transparent 50%,var(--acc) 50%,var(--acc) 58%,transparent 58%,transparent 70%,var(--acc) 70%,var(--acc) 78%,transparent 78%);transition:opacity .9s;touch-action:none}
+  .aud .win.free:hover>.wsize{opacity:1}
+  body.au-moving{user-select:none;-webkit-user-select:none}
+}
 @media (min-width:1024px) and (max-width:1599px){
   .aud .tr{flex-wrap:nowrap;gap:16px}
   .aud .big b{font-size:3.8rem}
@@ -303,6 +350,7 @@
   .aud .lname .full,.aud .lane .ms{display:none}.aud .lname .sh{display:inline}
   .aud .lane .dash{width:22px}.aud .lane .dash i{width:14px;height:5px}
   .aud .arrh>.k{display:none}
+  .aud .fades,.aud .rec-live,.aud .rec-on,.aud .recstrip,.aud .fr{display:none}
   .aud .strips{scroll-snap-type:x mandatory}.aud .strip{flex:0 0 78px;scroll-snap-align:start}
   .aud .strip>button.sn{font:500 .66rem var(--f-mono);letter-spacing:.06em}
   .aud .xp{display:inline-flex}

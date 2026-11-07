@@ -71,6 +71,7 @@ function synthLayer(v, o = {}) {
 }
 function fresh() {
   return { v: 2, mode: 'casual', bpm: 124, bass: 65, vol: 80, bars: 8, start: 0, end: 128, metro: false, room: 40, cur: null, sel: null,
+    fin: { type: 'Smooth (S-curve)', bars: 1 }, fout: { type: 'Smooth (S-curve)', bars: 1 }, win: {},
     layers: ['kick', 'snare', 'hat', 'bass'].map((v, i) => synthLayer(v, { open: i === 0 })) };
 }
 function fixLayer(L) {
@@ -101,6 +102,7 @@ function load() {
   if (!valid(s)) { try { const o = JSON.parse(localStorage.getItem('advl-aud-v1') || 'null'); if (o && o.layers) s = migrate1(o); } catch (e) {} }
   if (!valid(s)) s = fresh();
   s = Object.assign(fresh(), s); s.layers.forEach(fixLayer);
+  ['fin', 'fout'].forEach(k => { const d = fresh()[k]; s[k] = Object.assign(d, s[k]); s[k].bars = clamp(+s[k].bars || 0, 0, 16); }); if (!s.win || typeof s.win !== 'object') s.win = {};
   s.bars = clamp(+s.bars || 8, 1, 64); s.end = clamp(s.end || s.bars * 16, 1, s.bars * 16); s.start = clamp(s.start || 0, 0, s.end - 1); s.bpm = clamp(+s.bpm || 124, 60, 180);
   return s;
 }
@@ -156,11 +158,17 @@ function makeEngine(c, live) {
   const comp = c.createDynamicsCompressor(); comp.threshold.value = -10; comp.knee.value = 8; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.15;
   const master = c.createGain(), bassBus = c.createGain(), mainBus = c.createGain(), an = c.createAnalyser();
   an.fftSize = 2048;
-  bassBus.connect(master); mainBus.connect(master); master.connect(comp); comp.connect(an); an.connect(c.destination);
+  bassBus.connect(master); mainBus.connect(master); master.connect(comp);
+  // the whole piece: fade gain → tape (a delay whose time grows, so pitch falls) → filter → out; echo-out send beside it
+  const pg = c.createGain(), tape = c.createDelay(12), pf = c.createBiquadFilter(), eoIn = c.createGain(), eo = c.createDelay(2), eofb = c.createGain(), eolp = c.createBiquadFilter();
+  pf.type = 'lowpass'; pf.frequency.value = 20000; pf.Q.value = 0.7; tape.delayTime.value = 0; eoIn.gain.value = 0; eofb.gain.value = 0.58; eolp.type = 'lowpass'; eolp.frequency.value = 3000;
+  comp.connect(pg); pg.connect(tape); tape.connect(pf); pf.connect(an); an.connect(c.destination);
+  comp.connect(eoIn); eoIn.connect(eo); eo.connect(eolp); eolp.connect(eofb); eofb.connect(eo); eolp.connect(an);
   const rev = c.createConvolver(); rev.buffer = irBuffer(c, S.room); const revOut = c.createGain(); revOut.gain.value = 0.9; rev.connect(revOut); revOut.connect(master);
   const dly = c.createDelay(2), fb = c.createGain(), dlp = c.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 3500; fb.gain.value = 0.38;
   dly.connect(dlp); dlp.connect(fb); fb.connect(dly); dlp.connect(master); dly.delayTime.value = stepDur() * 3;
-  const e = { ctx: c, live, noise, master, bassBus, mainBus, an, rev, dly, ch: new Map(), loops: new Map(), last: new Map() };
+  eo.delayTime.value = stepDur() * 3;
+  const e = { ctx: c, live, noise, master, bassBus, mainBus, an, rev, dly, pg, tape, pf, eoIn, eo, ch: new Map(), loops: new Map(), last: new Map() };
   if (live) { e.metro = c.createGain(); e.metro.gain.value = 0.35; e.metro.connect(c.destination); }
   levels(e, true); return e;
 }
@@ -333,21 +341,51 @@ function trigger(e, L, idx, t, g, sd) {
 const rate = L => Math.pow(2, ((L.p.pitch || 50) - 50) * 24 / 100 / 12);
 function region(L, b) { const a = clamp(L.trim[0], 0, 1) * b.duration, z = clamp(L.trim[1], 0, 1) * b.duration; return [a, Math.max(0.02, z - a)]; }
 function oneShot(e, L, t, b, semis = 0) { if (!b) return; const s = e.ctx.createBufferSource(), [a, d] = region(L, b); s.buffer = b; s.playbackRate.value = rate(L) * Math.pow(2, semis / 12); s.connect(chain(e, L).in); s.start(t, a, d); }
-function loopStart(e, L, t, b, until) {
+function loopStart(e, L, t, b, until, off = 0) {
   if (!b) return; const s = e.ctx.createBufferSource(), [a, d] = region(L, b);
-  s.buffer = b; s.loop = true; s.loopStart = a; s.loopEnd = a + d; s.playbackRate.value = rate(L); s.connect(chain(e, L).in); s.start(t, a); if (until) s.stop(until);
+  s.buffer = b; s.loop = true; s.loopStart = a; s.loopEnd = a + d; s.playbackRate.value = rate(L); s.connect(chain(e, L).in); s.start(t, a + (off * rate(L)) % d); if (until) s.stop(until);
   const old = e.loops.get(L.id); if (old && e.live) { try { old.stop(t); } catch (x) {} }
   e.loops.set(L.id, s);
 }
 function loopStop(e, id, when) { const s = e.loops.get(id); if (!s) return; try { s.stop(when || e.ctx.currentTime + 0.02); } catch (x) {} e.loops.delete(id); }
 /* fades are per layer and follow the piece: in from START, out before END */
 function fades(e, t, span) {
+  const now = Math.max(t, e.ctx.currentTime);
   S.layers.forEach(L => {
-    const k = chain(e, L), fi = Math.min(L.fadeIn, span * 0.9), fo = Math.min(L.fadeOut, span * 0.9), gp = k.fade.gain;
-    gp.cancelScheduledValues(t); gp.setValueAtTime(fi > 0.01 ? 0.0001 : 1, t); if (fi > 0.01) gp.exponentialRampToValueAtTime(1, t + fi);
-    if (fo > 0.01) { gp.setValueAtTime(1, t + span - fo); gp.exponentialRampToValueAtTime(0.0001, t + span); }
+    const k = chain(e, L), fi = Math.min(L.fadeIn, span * 0.9), fo = Math.min(L.fadeOut, span * 0.9), gp = k.fade.gain, at = x => clamp(x, 0.0001, 1);
+    gp.cancelScheduledValues(now);
+    if (fi > 0.01 && now < t + fi) { gp.setValueAtTime(at((now - t) / fi), now); gp.exponentialRampToValueAtTime(1, t + fi); } else gp.setValueAtTime(1, now);
+    if (fo > 0.01) { const s0 = t + span - fo; if (now <= s0) { gp.setValueAtTime(1, s0); gp.exponentialRampToValueAtTime(0.0001, t + span); } else if (now < t + span) { gp.setValueAtTime(at(1 - (now - s0) / fo), now); gp.exponentialRampToValueAtTime(0.0001, t + span); } }
   });
 }
+/* whole-piece fades: in from START, out before END, each with a type */
+const sc = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, ex = t => (Math.pow(2, 10 * t) - 1) / 1023, cut = t => 120 * Math.pow(20000 / 120, t);
+const FADE = {
+  in: { 'Linear': t => ({ g: t }), 'Smooth (S-curve)': t => ({ g: sc(t) }), 'Exponential': t => ({ g: ex(t) }), 'Slow start': t => ({ g: t * t * t }),
+    'Filter open': t => ({ g: Math.min(1, t * 2.5), f: cut(t) }), 'Swell': t => ({ g: t * t, f: cut(.45 + t * .55) }) },
+  out: { 'Linear': t => ({ g: 1 - t }), 'Smooth (S-curve)': t => ({ g: 1 - sc(t) }), 'Exponential': t => ({ g: ex(1 - t) }), 'Filter close': t => ({ g: 1 - Math.pow(t, 3), f: cut(1 - t) }),
+    'Echo out': t => ({ g: Math.max(0, 1 - t * 1.4), echo: Math.min(1, t * 2.2) * (t > .97 ? 0 : 1) }), 'Tape stop': t => ({ g: t < .8 ? 1 : 1 - (t - .8) / .2, tape: true }) }
+};
+const FADE_IN = Object.keys(FADE.in), FADE_OUT = Object.keys(FADE.out);
+function fadeLens() {
+  const sd = stepDur(), end = Math.min(S.end, totalSteps()), start = Math.min(S.start, end - 1), n = end - start;
+  let a = Math.round(S.fin.bars * 16), b = Math.round(S.fout.bars * 16); if (a + b > n) { const k = n / (a + b); a = Math.floor(a * k); b = Math.floor(b * k); }
+  return { start, end, a, b, sd };
+}
+/* the shape at a position (in steps from START, fractional) */
+function shapeAt(x) {
+  const { start, end, a, b } = fadeLens(), n = end - start; let o = { g: 1, f: 20000, echo: 0, tape: 0 };
+  if (a > 0 && x < a) Object.assign(o, (FADE.in[S.fin.type] || FADE.in.Linear)(clamp(x / a, 0, 1)));
+  if (b > 0 && x > n - b) { const t = clamp((x - (n - b)) / b, 0, 1), r = (FADE.out[S.fout.type] || FADE.out.Linear)(t); o.g *= r.g; if (r.f) o.f = Math.min(o.f, r.f); if (r.echo) o.echo = r.echo; if (r.tape) { const T = b * stepDur(), tt = t * T; o.tape = tt * tt / (2 * T); } }
+  o.f = o.f || 20000; return o;
+}
+function pieceShape(e, g, t, sd, jump) {
+  const { start } = fadeLens(), x0 = g - start;
+  const P = [[e.pg.gain, 'g'], [e.pf.frequency, 'f'], [e.eoIn.gain, 'echo'], [e.tape.delayTime, 'tape']];
+  if (jump || x0 === 0) { const o = shapeAt(x0); P.forEach(([p, k]) => { p.cancelScheduledValues(t); p.setValueAtTime(Math.max(k === 'f' ? 40 : 0, o[k]), t); }); }
+  for (let i = 1; i <= 4; i++) { const o = shapeAt(x0 + i / 4); P.forEach(([p, k]) => p.linearRampToValueAtTime(Math.max(k === 'f' ? 40 : 0, o[k]), t + sd * i / 4)); }
+}
+function shapeOff(e) { const t = e.ctx.currentTime; [[e.pg.gain, 1], [e.pf.frequency, 20000], [e.eoIn.gain, 0], [e.tape.delayTime, 0]].forEach(([p, v]) => { p.cancelScheduledValues(t); p.setValueAtTime(p.value, t); p.linearRampToValueAtTime(v, t + 0.03); }); }
 function step(e, g, t, sd) {
   const bar = Math.floor(g / 16), sw = sd * 0.5;
   for (const L of S.layers) {
@@ -357,7 +395,7 @@ function step(e, g, t, sd) {
     trigger(e, L, idx, tt, g, sd);
   }
 }
-function startLoops(e, t, until) { S.layers.forEach(L => { if (L.kind === 'audio' && L.mode === 'loop' && audible(L) && BUF.get(L.file)) loopStart(e, L, t, BUF.get(L.file), until); }); }
+function startLoops(e, t, until, off) { S.layers.forEach(L => { if (L.kind === 'audio' && L.mode === 'loop' && audible(L) && BUF.get(L.file)) loopStart(e, L, t, BUF.get(L.file), until, off); }); }
 
 let ctx = null, eng = null;
 function ensure(quiet) {
@@ -374,22 +412,33 @@ function tick() {
   while (SEQ.next < ctx.currentTime + 0.12) {
     const sd = stepDur(), g = SEQ.g;
     if (g === start) { const span = (end - start) * sd; fades(eng, SEQ.next, span); startLoops(eng, SEQ.next, SEQ.next + span); }
+    pieceShape(eng, g, SEQ.next, sd, SEQ.jump); SEQ.jump = false;
     step(eng, g, SEQ.next, sd);
     if ((S.metro || SEQ.countIn) && g % 4 === 0) click(SEQ.next, g % 16 === 0);
     SEQ.queue.push({ g, t: SEQ.next }); SEQ.next += sd; SEQ.g = g + 1 >= end ? start : g + 1;
   }
 }
-async function play() {
+async function play(from) {
   ensure();
   await Promise.all(S.layers.filter(L => L.kind === 'audio' && fileById(L.file)).map(L => bufferFor(L.file).catch(() => null)));
   if (SEQ.playing) return;
-  levels(eng); applyAll(eng);
-  SEQ.playing = true; SEQ.g = Math.min(S.start, S.end - 1); SEQ.next = ctx.currentTime + 0.08; SEQ.queue.length = 0;
+  levels(eng); applyAll(eng); eng.eo.delayTime.value = stepDur() * 3;
+  SEQ.playing = true; SEQ.g = Math.min(S.start, S.end - 1); SEQ.next = ctx.currentTime + 0.08; SEQ.queue.length = 0; SEQ.jump = true;
+  if (from != null && from > SEQ.g) { seek(from, true); }
   tick(); SEQ.timer = setInterval(tick, 25); emit('play');
   requestAnimationFrame(frame);
 }
+/* jump the playhead to step g (play from here, skim) */
+function seek(g, quiet) {
+  if (!SEQ.playing || !eng) return;
+  const end = Math.min(S.end, totalSteps()), start = Math.min(S.start, end - 1); g = clamp(Math.round(g), start, end - 1);
+  const sd = stepDur(), t = ctx.currentTime + 0.03, off = (g - start) * sd, span = (end - start) * sd;
+  [...eng.loops.keys()].forEach(id => loopStop(eng, id, t));
+  fades(eng, t - off, span); startLoops(eng, t, t + span - off, off);
+  SEQ.g = g; SEQ.next = t; SEQ.queue.length = 0; SEQ.jump = true; if (!quiet) tick();
+}
 function stop() {
-  if (!SEQ.playing) return; SEQ.playing = false; clearInterval(SEQ.timer); SEQ.queue.length = 0;
+  if (!SEQ.playing) return; SEQ.playing = false; clearInterval(SEQ.timer); SEQ.queue.length = 0; if (eng) shapeOff(eng);
   if (eng) { [...eng.loops.keys()].forEach(id => loopStop(eng, id)); eng.ch.forEach(k => { k.fade.gain.cancelScheduledValues(ctx.currentTime); k.fade.gain.setTargetAtTime(1, ctx.currentTime, 0.02); }); }
   if (SEQ.rec) SEQ.rec.cancel();
   SEQ.cur = -1; emit('step', -1); emit('stop');
@@ -419,6 +468,32 @@ function nextBarTime() { // time of the next bar start while playing
   const sd = stepDur(); let g = SEQ.g, t = SEQ.next; while (g % 16 !== 0) { t += sd; g = g + 1 >= S.end ? S.start : g + 1; } return { t, g };
 }
 
+/* ---------------- live mix sessions: record everything you hear ---------------- */
+const SESS = { mr: null, t0: 0, dest: null, chunks: [] };
+async function sessionStart() {
+  if (SESS.mr) return; ensure(); if (!window.MediaRecorder) throw new Error('Recording isn’t supported in this browser.');
+  if (!LIB.ok) throw new Error('Saving sessions needs browser storage, which is turned off here.');
+  const dest = ctx.createMediaStreamDestination(); eng.an.connect(dest);
+  const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+  const mr = new MediaRecorder(dest.stream, type ? { mimeType: type, audioBitsPerSecond: 160000 } : undefined);
+  SESS.chunks = []; mr.ondataavailable = ev => ev.data && ev.data.size && SESS.chunks.push(ev.data);
+  mr.start(1000); Object.assign(SESS, { mr, dest, t0: Date.now(), bpm: S.bpm });
+  if (!SEQ.playing) await play();
+  emit('session');
+}
+function sessionStop() {
+  const { mr, dest } = SESS; if (!mr) return Promise.resolve(null);
+  return new Promise(ok => {
+    mr.onstop = async () => {
+      try { eng.an.disconnect(dest); } catch (e) {}
+      SESS.mr = null; emit('session');
+      const n = LIB.files.filter(f => f.origin === 'session').length + 1, blob = new Blob(SESS.chunks, { type: mr.mimeType || 'audio/webm' }); SESS.chunks = [];
+      try { const rec = await addBlobFile(blob, `Session ${n}`, 'session'); rec.bpm = SESS.bpm; DB.put('files', rec).catch(() => {}); ok(rec); } catch (e) { ok({ error: e.message || 'Couldn’t save the session.' }); }
+    };
+    try { mr.requestData(); mr.stop(); } catch (e) { SESS.mr = null; ok(null); }
+  });
+}
+
 /* ---------------- export ---------------- */
 /* one hit of a synth layer, rendered offline: for the selected sound's picture */
 function renderHit(L, secs = 1.2) {
@@ -437,7 +512,7 @@ async function renderPiece() {
   for (const L of S.layers) if (L.kind === 'audio' && fileById(L.file)) { try { await bufferFor(L.file); } catch (e) {} }
   const sr = 44100, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OAC(2, Math.ceil(sr * (span + 2.5)), sr), e = makeEngine(oc, false);
   S.layers.forEach(L => chain(e, L)); fades(e, 0.02, span); startLoops(e, 0.02, 0.02 + span);
-  for (let g = start; g < end; g++) step(e, g, 0.02 + (g - start) * sd, sd);
+  for (let g = start; g < end; g++) { pieceShape(e, g, 0.02 + (g - start) * sd, sd, g === start); step(e, g, 0.02 + (g - start) * sd, sd); }
   return oc.startRendering();
 }
 function wav(buf) {
@@ -480,8 +555,10 @@ async function addFile(f, msg) {
   return rec;
 }
 async function addBlobFile(blob, name, origin) {
-  const data = await blob.arrayBuffer(); ensure(true); const b = await ctx.decodeAudioData(data.slice(0));
-  const rec = { id: uid(), name, size: data.byteLength, type: origin === 'rec' ? 'REC' : 'AUD', origin, dur: b.duration, peaks: peaksOf(b), added: Date.now() };
+  const data = await blob.arrayBuffer(); ensure(true);
+  if (usedBytes() + data.byteLength > MAX_ALL) throw new Error('The library is full (200 MB). Remove a file to make room.');
+  const b = await ctx.decodeAudioData(data.slice(0));
+  const rec = { id: uid(), name, size: data.byteLength, type: origin === 'rec' ? 'REC' : origin === 'session' ? 'LIVE' : 'AUD', origin, dur: b.duration, peaks: peaksOf(b), added: Date.now() };
   await DB.put('blobs', { id: rec.id, data }); await DB.put('files', rec); LIB.files.push(rec); BUF.set(rec.id, b); return rec;
 }
 async function removeFile(id) { try { await DB.del('files', id); await DB.del('blobs', id); } catch (e) {} LIB.files = LIB.files.filter(f => f.id !== id); BUF.delete(id); }
@@ -498,7 +575,7 @@ async function saveMix(name) {
 function openMix(id) {
   const m = LIB.mixes.find(x => x.id === id); if (!m) return false;
   let st = m.state; if (!st) return false; if (!st.v) st = migrate1(st); if (!valid(st)) return false;
-  const was = SEQ.playing; stop(); S = Object.assign(fresh(), JSON.parse(JSON.stringify(st)), { cur: id }); S.layers.forEach(fixLayer);
+  const was = SEQ.playing; stop(); S = Object.assign(fresh(), JSON.parse(JSON.stringify(st)), { cur: id, win: S.win }); S.layers.forEach(fixLayer);
   if (eng) { eng.ch.forEach((k, lid) => dropChain(eng, lid)); levels(eng); }
   save(); if (was) play(); return true;
 }
@@ -603,6 +680,6 @@ window.AUDX = {
   V, VOICE_ORDER, GROUPS, BASE, SOUNDS, AUDC, get S() { return S; }, set S(v) { S = v; }, save, load, fresh, synthLayer, audioLayer, melodyLayer, fixLayer, sortLayers,
   byId, groupOf, colorOf, nameOf, shortOf, stepDur, totalSteps, LIB, BUF, fileById, loadLibrary, bufferFor, addFile, removeFile, saveMix, openMix, removeMix,
   ensure, get eng() { return eng; }, get ctx() { return ctx; }, chain, apply, applyAll, levels, setRoom, dropChain, SEQ, play, stop, restartLoop, audition, loopStop,
-  renderPiece, renderHit, previewOnce, wav, mp3, record, pathToMelody, autoAt, audible, mic, n01, clamp, uid, isVideo, usedBytes, MAX_ALL
+  renderPiece, renderHit, previewOnce, seek, shapeAt, fadeLens, FADE_IN, FADE_OUT, SESS, sessionStart, sessionStop, wav, mp3, record, pathToMelody, autoAt, audible, mic, n01, clamp, uid, isVideo, usedBytes, MAX_ALL
 };
 })();

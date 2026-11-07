@@ -31,7 +31,7 @@ const I = {
 
 /* ---------- interface state (not saved) ---------- */
 let root = null, pop = null, sheet = null, dim = null;
-const ui = { voices: false, tab: 'rec', sheet: null, rec: null, hum: null, humBars: 1, humTo: 'handpan', loopBars: 2, move: { path: [], bars: 1, to: 'theremin' }, moveRec: false, saving: false, exp: false, confirm: null, dd: null, msg: { lib: '', mx: '', rec: '' }, err: { lib: false, mx: false, rec: false } };
+const ui = { sessPlay: null, voices: false, tab: 'rec', sheet: null, rec: null, hum: null, humBars: 1, humTo: 'handpan', loopBars: 2, move: { path: [], bars: 1, to: 'theremin' }, moveRec: false, saving: false, exp: false, confirm: null, dd: null, msg: { lib: '', mx: '', rec: '' }, err: { lib: false, mx: false, rec: false } };
 
 /* ---------- small builders ---------- */
 const fmtDur = s => { s = s > 0 ? Math.max(1, Math.round(s)) : 0; return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -88,7 +88,7 @@ function transport() {
     <button type="button" class="metro" data-act="metro" aria-pressed="${!!s.metro}">${I.metro}<span><b>Metronome</b><em>${s.metro ? 'On' : 'Off'} · count-in 1 bar when recording</em></span></button>
     <div class="feel" role="group" aria-label="Pick a feel">${FEELS.map(([l, b]) => `<button type="button" data-act="feel" data-v="${b}" aria-pressed="${s.bpm === b}">${esc(l)} ${b}</button>`).join('')}</div>
     <span class="grow"></span>
-    <div class="rings">${ring('Bass', 'g.bass', s.bass)}${ring('Volume', 'g.vol', s.vol)}</div>
+    ${isFree() ? '<button type="button" class="pill sm" data-act="resetwin">Reset layout</button>' : ''}<div class="rings">${ring('Bass', 'g.bass', s.bass)}${ring('Volume', 'g.vol', s.vol)}</div>
     ${modeDial()}
   </div>`;
 }
@@ -97,14 +97,60 @@ function transport() {
 function piece() {
   const s = S(), T = X.totalSteps(), secs = (s.end - s.start) * X.stepDur();
   return `<div class="pviz">
-    <div class="vhead"><span class="blh">The whole piece</span><span class="k" data-meta>${s.bars} bars · ${fmtDur(secs)} between the markers · ${s.bpm} BPM</span><span class="grow"></span>
+    <div class="vhead"><span class="blh">The whole piece</span><span class="k" data-meta>${s.bars} bars · ${fmtDur(secs)} between the markers · ${s.bpm} BPM</span><span class="grow"></span>${sessBtn()}
       <div class="len" role="group" aria-label="Length in bars"><span class="k">Length</span>${[2, 4, 8, 16, 32].map(b => `<button type="button" data-act="bars" data-v="${b}" aria-pressed="${s.bars === b}">${b}</button>`).join('')}<span class="k">bars</span><button type="button" class="pill sm" data-act="extend">+ Extend</button></div></div>
     <div class="ruler" aria-hidden="true">${Array.from({ length: s.bars }, (_, i) => (s.bars <= 16 || i % 4 === 0) ? `<span style="left:${i / s.bars * 100}%">${i + 1}</span>` : '').join('')}</div>
-    <div class="vbox" data-vbox><canvas data-viz aria-hidden="true"></canvas>
+    <div class="vbox${X.SESS.mr ? ' recording' : ''}" data-vbox data-scrub><canvas data-viz aria-hidden="true"></canvas><div class="fxw" data-fx>${fadeSvg()}</div>
       <span class="dimL" style="width:${s.start / T * 100}%"></span><span class="dimR" style="left:${s.end / T * 100}%"></span>
       <button type="button" class="mk" data-mk="start" style="left:${s.start / T * 100}%" aria-label="Start marker, bar ${Math.floor(s.start / 16) + 1}"><b>START</b></button>
       <button type="button" class="mk end" data-mk="end" style="left:${s.end / T * 100}%" aria-label="End marker, bar ${Math.ceil(s.end / 16)}"><b>END</b></button>
-      <span class="ph" data-ph></span></div></div>`;
+      ${frames()}<span class="ghost" data-ghost hidden><span></span></span>
+      <span class="ph" data-ph></span></div>${fadesRow()}</div>`;
+}
+/* ---------- whole-piece fades, live sessions ---------- */
+const FR = { 0: '', .25: '¼', .5: '½', .75: '¾' };
+const barsLabel = b => { if (!b) return 'off'; const w = Math.floor(b), f = FR[Math.round((b - w) * 4) / 4] || ''; return `${w || ''}${f} bar${b > 1 ? 's' : ''}`; };
+function fadeSvg() {
+  const T = X.totalSteps(), { start, end, a, b } = X.fadeLens(), sh = 'fill="rgb(24 16 20/.7)"', ln = `fill="none" stroke="${ACC}" stroke-width="1.6" vector-effect="non-scaling-stroke"`;
+  const part = (x0, x1) => { if (x1 - x0 < 0.01) return ''; let top = '', bot = '', et = '', eb = ''; const N = 48;
+    for (let i = 0; i <= N; i++) { const x = x0 + (x1 - x0) * i / N, g = Math.min(1, X.shapeAt(x).g), px = ((start + x) / T * 1000).toFixed(1); top += `L${px} ${(50 - 50 * g).toFixed(1)}`; bot += `L${px} ${(50 + 50 * g).toFixed(1)}`; et += (i ? 'L' : 'M') + `${px} ${(50 - 48 * g).toFixed(1)}`; eb += (i ? 'L' : 'M') + `${px} ${(50 + 48 * g).toFixed(1)}`; }
+    const p0 = ((start + x0) / T * 1000).toFixed(1), p1 = ((start + x1) / T * 1000).toFixed(1);
+    return `<path d="M${p0} 0${top}L${p1} 0Z" ${sh}/><path d="M${p0} 100${bot}L${p1} 100Z" ${sh}/><path d="${et}" ${ln}/><path d="${eb}" ${ln}/>`; };
+  return `<svg class="fx" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">${part(0, a)}${part(end - start - b, end - start)}</svg>`;
+}
+function framePos(which) { const T = X.totalSteps(), { start, end, a, b } = X.fadeLens(); return which === 'in' ? [(start + a) / T * 100, a ? 0 : 14] : [(end - b) / T * 100, b ? 0 : -14]; }
+function frames() {
+  const S_ = S();
+  return ['in', 'out'].map(w => { const [l, off] = framePos(w), f = w === 'in' ? S_.fin : S_.fout;
+    return `<div class="fr" data-fr="${w}" style="left:calc(${l}% + ${off}px)" role="slider" tabindex="0" aria-label="Fade ${w} length" aria-valuetext="${barsLabel(f.bars)}"><span class="grip" aria-hidden="true"></span><span class="tab">FADE ${w.toUpperCase()} · ${barsLabel(f.bars).toUpperCase()}</span></div>`; }).join('');
+}
+function maxFade() { const s = S(); return Math.max(0.25, Math.min(8, Math.floor((s.end - s.start) / 16 * 4) / 4)); }
+const fadeVal = f => `${barsLabel(f.bars)}${f.bars ? ` · ${(f.bars * 16 * X.stepDur()).toFixed(1)} s` : ''}`;
+function fadeSlider(w) { const f = w === 'in' ? S().fin : S().fout, mx = maxFade(), v = Math.min(f.bars, mx);
+  return `<label class="sl"><span><em>Fade ${w} length</em><b>${fadeVal(f)}</b></span><input type="range" min="0" max="${mx}" step="0.25" value="${v}" data-in="f.${w}" style="--c:${ACC};--fill:${v / mx * 100}%"></label>`; }
+function fadesRow() {
+  const s = S();
+  return `<div class="fades"><div class="fade1">${dd('fi:x', 'Fade in · type', s.fin.type, X.FADE_IN, ACC)}${fadeSlider('in')}</div>
+    <div class="fade1">${dd('fo:x', 'Fade out · type', s.fout.type, X.FADE_OUT, ACC)}${fadeSlider('out')}</div></div>`;
+}
+function updateFades() {
+  [root].forEach(r => { if (!r) return;
+    r.querySelectorAll('[data-fx]').forEach(el => { el.innerHTML = fadeSvg(); });
+    r.querySelectorAll('[data-fr]').forEach(el => { const w = el.dataset.fr, [l, off] = framePos(w), f = w === 'in' ? S().fin : S().fout; el.style.left = `calc(${l}% + ${off}px)`; el.querySelector('.tab').textContent = `FADE ${w.toUpperCase()} · ${barsLabel(f.bars).toUpperCase()}`; el.setAttribute('aria-valuetext', barsLabel(f.bars)); });
+    ['in', 'out'].forEach(w => r.querySelectorAll(`[data-in="f.${w}"]`).forEach(o => { const f = w === 'in' ? S().fin : S().fout; if (document.activeElement !== o) o.value = f.bars; o.style.setProperty('--fill', f.bars / +o.max * 100 + '%'); const b = o.closest('label').querySelector('span b'); if (b) b.textContent = fadeVal(f); })); });
+}
+const sessTime = () => fmtDur((Date.now() - X.SESS.t0) / 1000);
+function sessBtn() {
+  return X.SESS.mr ? `<span class="recstrip">REC <b data-rectime>${sessTime()}</b> · recording everything you hear</span><button type="button" class="pill sm rec-on" data-act="sess"><i></i>Stop &amp; save session</button>`
+    : `<button type="button" class="pill sm rec-live" data-act="sess"><i></i>Start recording live mix session</button>`;
+}
+function sessions() {
+  const ss = X.LIB.files.filter(f => f.origin === 'session').slice().reverse(), used = new Set(S().layers.filter(L => L.kind === 'audio').map(L => L.file));
+  const live = X.SESS.mr ? `<div class="file live"><span class="fic">${I.rec}</span><div><b>Session ${ss.length + 1}</b><span class="k"><span data-rectime>${sessTime()}</span> so far · ${X.SESS.bpm} BPM</span></div><span class="acts"><span class="k" style="color:#FF8A7E">Recording…</span></span></div>` : '';
+  return `<div class="sess"><div class="row" style="margin-top:14px"><span class="blh">Live sessions</span><span class="grow"></span><span class="k">Saved in this browser</span></div>${live}
+    ${ss.map(f => `<div class="file"><span class="fic">${I.rec}</span><div><b title="${esc(f.name)}">${esc(f.name)}</b><span class="k">${fmtDur(f.dur)}${f.bpm ? ` · ${f.bpm} BPM` : ''} · ${fmtMB(f.size)}</span></div>
+      <span class="acts"><button type="button" class="add sec" data-act="sessplay" data-v="${f.id}">${ui.sessPlay && ui.sessPlay.id === f.id ? '■ Stop' : '▶ Play'}</button><button type="button" class="add sec" data-act="sesswav" data-v="${f.id}">WAV</button>${used.has(f.id) ? '<span class="k" style="color:var(--acc)">In mix</span>' : `<button type="button" class="add" data-act="addfile" data-v="${f.id}">+ Layer</button>`}${ui.confirm === f.id ? `<button type="button" class="add" data-act="delfile" data-v="${f.id}">Remove</button>` : `<button type="button" class="x" data-act="askdel" data-v="${f.id}" aria-label="Remove ${esc(f.name)}">×</button>`}</span></div>`).join('')}
+    ${!ss.length && !live ? '<p class="k">Press “Start recording live mix session” on the whole piece to record what you play.</p>' : ''}</div>`;
 }
 
 /* ---------- layers ---------- */
@@ -262,9 +308,10 @@ function library() {
     <label class="drop" data-drop>${I.up}<b>Drop audio or video</b><span class="k">MP3 · WAV · M4A · MP4 · MOV · WEBM — sound is pulled from videos</span><span class="k dk">or click to choose files</span>
       <input type="file" multiple accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.mp4,.mov,.m4v,.webm" data-in="files"></label>
     <p class="msg${ui.err.lib ? ' err' : ''}" aria-live="polite">${esc(ui.msg.lib)}</p>
-    ${X.LIB.files.map(f => { const u = used.has(f.id), c = fc(f.id); return `<div class="file" style="--c:${c}">${f.from ? `<span class="fic">${I.film}</span>` : f.origin === 'rec' ? `<span class="fic">${I.mic}</span>` : ''}<div><b title="${esc(f.name)}">${esc(f.name)}</b><span class="k">${fmtDur(f.dur)} · ${fmtMB(f.size)} · ${f.from ? `video → ${esc(f.type)}` : esc(f.type)}</span></div>
+    ${X.LIB.files.filter(f => f.origin !== 'session').map(f => { const u = used.has(f.id), c = fc(f.id); return `<div class="file" style="--c:${c}">${f.from ? `<span class="fic">${I.film}</span>` : f.origin === 'rec' ? `<span class="fic">${I.mic}</span>` : ''}<div><b title="${esc(f.name)}">${esc(f.name)}</b><span class="k">${fmtDur(f.dur)} · ${fmtMB(f.size)} · ${f.from ? `video → ${esc(f.type)}` : esc(f.type)}</span></div>
       <span class="acts">${u ? '<span class="k" style="color:var(--acc)">In mix</span>' : `<button type="button" class="add" data-act="addfile" data-v="${f.id}">+ Add layer</button>`}${ui.confirm === f.id ? `<button type="button" class="add" data-act="delfile" data-v="${f.id}">Remove</button>` : `<button type="button" class="x" data-act="askdel" data-v="${f.id}" aria-label="Remove ${esc(f.name)}">×</button>`}</span></div>`; }).join('')}
     <div class="store"><i style="--u:${Math.min(100, X.usedBytes() / X.MAX_ALL * 100)}%"></i></div>
+    ${sessions()}
     <div class="row" style="margin-top:14px"><span class="blh">Mixes</span><span class="grow"></span><button type="button" class="pill solid sm" data-act="savebox">Save mix</button><button type="button" class="pill acc sm" data-act="exp" aria-expanded="${ui.exp}">Export ▾</button></div>
     ${ui.saving ? `<form class="savebox" data-form="save"><input name="n" maxlength="40" aria-label="Mix name" value="${esc(cur ? cur.name : `Mix ${X.LIB.mixes.length + 1}`)}"><button type="submit" class="pill solid sm">Save</button></form>` : ''}
     ${ui.exp ? `<div class="row"><span class="k">Between the markers</span><button type="button" class="pill sm" data-act="export" data-v="wav">WAV</button><button type="button" class="pill sm" data-act="export" data-v="mp3">MP3</button></div>` : ''}
@@ -296,11 +343,11 @@ function arrangement() {
     ${L.auto ? `<div class="lane auto" style="--c:${col(L)}"><div class="lname"><span class="k">↳ <span class="full">Pitch</span><span class="sh">PIT</span></span></div><div class="ltrack" style="display:block"><svg viewBox="0 0 600 36" preserveAspectRatio="none"><path d="${autoPath(L, 600, 36)}" fill="none" stroke="${col(L)}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div></div>` : ''}`).join('');
   return `<div class="arr"><div class="arrh"><span class="blh">Arrangement · ${s.bars} bars</span><span class="k">Tap a bar to drop it out · drag START / END</span><span class="grow"></span>
       <div class="len"><span class="k">Length</span>${[4, 8, 16, 32].map(b => `<button type="button" data-act="bars" data-v="${b}" aria-pressed="${s.bars === b}">${b}</button>`).join('')}<button type="button" class="pill sm" data-act="extend">+ Extend</button></div>
-      <button type="button" class="pill acc sm" data-act="voices" aria-expanded="${ui.voices}">+ Add layer</button></div>${voicesMenu()}
+      ${sessBtn()}<button type="button" class="pill acc sm" data-act="voices" aria-expanded="${ui.voices}">+ Add layer</button></div>${voicesMenu()}
     <div class="arrin" data-arr>
-      <div class="lane rul"><div class="lname"></div><div class="ltrack" data-vbox>${Array.from({ length: s.bars }, (_, i) => (s.bars <= 16 || i % 4 === 0) ? `<span style="left:${i / s.bars * 100}%">${i + 1}</span>` : '').join('')}
+      <div class="lane rul"><div class="lname"></div><div class="ltrack" data-vbox data-scrub>${Array.from({ length: s.bars }, (_, i) => (s.bars <= 16 || i % 4 === 0) ? `<span style="left:${i / s.bars * 100}%">${i + 1}</span>` : '').join('')}
         <button type="button" class="mk" data-mk="start" style="left:${s.start / T * 100}%" aria-label="Start marker"><b>START</b></button><button type="button" class="mk end" data-mk="end" style="left:${s.end / T * 100}%" aria-label="End marker"><b>END</b></button></div></div>
-      ${lanes}<span class="ph" data-aph></span></div></div>`;
+      ${lanes}<span class="ph" data-aph></span></div>${fadesRow()}</div>`;
 }
 function strips() {
   const s = S();
@@ -349,17 +396,68 @@ function soundCard() {
     <div class="bars" data-bars="${L.id}" role="img" aria-label="${ui.stepMode === 'notes' && mel ? 'Notes' : 'Strength'} for each step">${bars}</div>` : ''}</div>`;
 }
 
-/* ---------- page ---------- */
-function html() {
-  const s = S(), cx = s.mode === 'complex';
-  if (!cx) return `${transport()}${piece()}${mk3()}
-    <div class="cols3"><div class="colA">${layersHead()}<div class="layers">${layerList()}</div></div>
-      <div class="colB">${createPanel()}</div>
-      <div class="colC">${selCard()}${library()}</div></div>`;
+/* ---------- page, and windows you can move around (desktop) ---------- */
+const BARE = new Set(['piece', 'layers', 'lib', 'arr', 'strips', 'sound']);
+const WNAME = { piece: 'the whole piece', layers: 'layers', create: 'voice and hands', sel: 'selected layer', lib: 'library', arr: 'arrangement', strips: 'mixer', engine: 'sound engine', sound: 'movement and sound' };
+function winBody(id) {
   const L = sel();
-  return `${transport()}<div class="cx">${arrangement()}
-    <div class="cxmore"><div>${L ? movePad(L, 150, `${X.shortOf(L)} · pitch from movement`) : ''}${soundCard()}</div><div>${createPanel()}</div><div>${library()}</div></div>
-    <div class="cxlow">${strips()}<div class="insp">${engine()}</div></div></div>`;
+  switch (id) {
+    case 'piece': return piece(); case 'layers': return `${layersHead()}<div class="layers">${layerList()}</div>`; case 'create': return createPanel();
+    case 'sel': return selCard(); case 'lib': return library(); case 'arr': return arrangement(); case 'strips': return strips(); case 'engine': return engine();
+    case 'sound': return `${L ? movePad(L, 150, `${X.shortOf(L)} · pitch from movement`) : ''}${soundCard()}`;
+  }
+  return '';
+}
+const grip = id => `<button type="button" class="wgrip" data-wgrip="${id}" aria-label="Move the ${WNAME[id]} window. Drag, or use the arrow keys." title="Drag to move"><i></i></button>`;
+const winIds = () => S().mode === 'complex' ? ['arr', 'strips', 'engine', 'sound', 'create', 'lib'] : ['piece', 'layers', 'create', 'sel', 'lib'];
+const freeMap = () => (S().win || {})[S().mode];
+const isFree = () => !phone() && !!freeMap() && winIds().every(id => freeMap()[id]);
+function html() {
+  const s = S(), cx = s.mode === 'complex', w = (id, cls = '') => `<div class="win${cls ? ' ' + cls : ''}" data-win="${id}">${grip(id)}${winBody(id)}</div>`;
+  if (isFree()) {
+    const m = freeMap();
+    return `${transport()}${cx ? '' : mk3()}<div class="desk" data-desk>${winIds().map(id => { const p = m[id];
+      return `<div class="win free${BARE.has(id) ? ' bare' : ''}" data-win="${id}" style="left:${(p.x * 100).toFixed(3)}%;top:${Math.round(p.y)}px;width:${(p.w * 100).toFixed(3)}%;z-index:${p.z || 1}">${grip(id)}${winBody(id)}<span class="wsize" data-wsize="${id}" title="Drag to resize" aria-hidden="true"></span></div>`; }).join('')}</div>`;
+  }
+  if (!cx) return `${transport()}${w('piece')}${mk3()}
+    <div class="cols3">${w('layers', 'colA')}${w('create', 'colB')}<div class="colC">${w('sel')}${w('lib')}</div></div>`;
+  return `${transport()}<div class="cx">${w('arr')}
+    <div class="cxmore">${w('sound')}${w('create')}${w('lib')}</div>
+    <div class="cxlow">${w('strips')}${w('engine', 'insp')}</div></div>`;
+}
+/* the first move freezes every window where it sits now; after that each one moves on its own */
+function freeze() {
+  const tr = root.querySelector('.tr'), rr = root.getBoundingClientRect(), W = root.clientWidth, top0 = tr.getBoundingClientRect().bottom + 28, m = {};
+  winIds().forEach((id, i) => { const el = root.querySelector(`[data-win="${id}"]`); if (!el) return; const r = el.getBoundingClientRect(); m[id] = { x: Math.max(0, (r.left - rr.left) / W), y: Math.max(0, Math.round(r.top - top0)), w: Math.min(1, r.width / W), z: i + 1 }; });
+  S().win = S().win || {}; S().win[S().mode] = m; X.save(); paint(); settle();
+}
+/* after freezing, windows grow a little (their glass padding): push any that now overlap down below the one above */
+function settle() {
+  const m = freeMap(), d = root && root.querySelector('[data-desk]'); if (!m || !d) return; const W = d.clientWidth, placed = [];
+  winIds().slice().sort((a, b) => m[a].y - m[b].y || m[a].x - m[b].x).forEach(id => {
+    const el = d.querySelector(`.win[data-win="${id}"]`); if (!el) return; const p = m[id], x0 = p.x * W, x1 = x0 + p.w * W, h = el.offsetHeight; let y = p.y, moved = true;
+    while (moved) { moved = false; for (const q of placed) if (x0 < q.x1 - 1 && x1 > q.x0 + 1 && y < q.y + q.h + 28 && y + h > q.y - 28) { y = q.y + q.h + 28; moved = true; } }
+    p.y = Math.round(y); el.style.top = p.y + 'px'; placed.push({ x0, x1, y: p.y, h });
+  });
+  X.save(); deskHeight();
+}
+let ro = null;
+function deskHeight() {
+  const d = root && root.querySelector('[data-desk]'); if (!d) return;
+  let h = 0; d.querySelectorAll(':scope > .win').forEach(w => { h = Math.max(h, w.offsetTop + w.offsetHeight); }); d.style.height = h + 60 + 'px';
+}
+function watchDesk() {
+  if (ro) ro.disconnect(); const d = root.querySelector('[data-desk]'); if (!d || !window.ResizeObserver) return deskHeight();
+  ro = new ResizeObserver(() => deskHeight()); d.querySelectorAll(':scope > .win').forEach(w => ro.observe(w)); deskHeight();
+}
+function front(id) { const m = freeMap(); if (!m) return; const z = Math.max(...Object.values(m).map(p => p.z || 1)); if ((m[id].z || 1) < z) { m[id].z = z + 1; const el = root.querySelector(`.win[data-win="${id}"]`); if (el) el.style.zIndex = z + 1; } }
+function winDown(e, kind, id) {
+  if (!isFree()) freeze();
+  const el = root.querySelector(`.win[data-win="${id}"]`); if (!el) return;
+  front(id); const d = root.querySelector('[data-desk]'), W = d.clientWidth, p = freeMap()[id];
+  drag = { type: kind, id, el, W, sx: e.clientX, sy: e.clientY, x0: p.x * W, y0: p.y, w0: p.w * W };
+  el.classList.add('lift'); document.body.classList.add('au-moving');
+  addEventListener('pointermove', onMove); addEventListener('pointerup', onUp); addEventListener('pointercancel', onUp);
 }
 function paint() {
   if (!root || !root.isConnected) return;
@@ -369,7 +467,7 @@ function paint() {
   if (fk) { const el = root.querySelector(fk); el && el.focus({ preventScroll: true }); }
   if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
   root.querySelectorAll('canvas[data-kw]').forEach(kick);
-  drawViz(); if (X.SEQ.cur >= 0) head(X.SEQ.cur);
+  drawViz(); if (X.SEQ.cur >= 0) head(X.SEQ.cur); if (root.querySelector('[data-desk]')) watchDesk();
   if (pop) popPaint(); if (sheet) sheetPaint();
 }
 function msg(k, t, err) { ui.msg[k] = t; ui.err[k] = !!err; paintMsgs(); }
@@ -531,7 +629,16 @@ function act(b, e) {
     case 'preset': if (L) setPreset(L, v); break;
     case 'osc': if (L) { L.p.osc = v.toLowerCase(); X.save(); paint(); X.audition(L); } break;
     case 'dd': ui.dd = ui.dd === v ? null : v; paint(); break;
-    case 'ddpick': { const [, id] = v.split(':'), T = X.byId(id); ui.dd = null; if (T) setStyle(T, b.dataset.o); break; }
+    case 'ddpick': { const [kind, id] = v.split(':'); ui.dd = null;
+      if (kind === 'fi' || kind === 'fo') { (kind === 'fi' ? s.fin : s.fout).type = b.dataset.o; X.save(); paint(); break; }
+      const T = X.byId(id); if (T) setStyle(T, b.dataset.o); break; }
+    case 'resetwin': if (s.win) delete s.win[s.mode]; X.save(); paint(); break;
+    case 'sess':
+      if (X.SESS.mr) { msg('mx', 'Saving your session…'); X.sessionStop().then(r => { if (r && r.error) msg('mx', r.error, true); else if (r) msg('mx', `${r.name} saved · ${fmtDur(r.dur)}.`); paint(); }); }
+      else X.sessionStart().then(() => { msg('mx', 'Recording. Play, change and mute things — everything you hear is kept.'); paint(); }).catch(err => msg('mx', err.message || 'Couldn’t start recording.', true));
+      break;
+    case 'sessplay': sessPlay(v); break;
+    case 'sesswav': { const f = X.fileById(v); if (!f) break; msg('mx', `Making ${f.name}.wav…`); X.bufferFor(v).then(buf => { const a = document.createElement('a'); a.href = URL.createObjectURL(X.wav(buf)); a.download = `advl-auditory-${f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.wav`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); msg('mx', `Downloaded ${a.download}`); }).catch(() => msg('mx', 'That session couldn’t be read.', true)); break; }
     case 'amode': if (!L) return; L.mode = v; X.save(); paint(); X.restartLoop(L); break;
     case 'hear': if (L) { X.ensure(); X.audition(L); } break;
     case 'remove': if (!L) return; if (X.eng) { X.loopStop(X.eng, L.id); X.dropChain(X.eng, L.id); } s.layers = s.layers.filter(x => x !== L); if (s.sel === L.id) s.sel = s.layers[0] ? s.layers[0].id : null; X.save(); paint(); break;
@@ -568,6 +675,12 @@ function act(b, e) {
     case 'quicksave': X.saveMix((X.LIB.mixes.find(m => m.id === s.cur) || {}).name || `Mix ${X.LIB.mixes.length + 1}`).then(() => { const k = pop && pop.querySelector('.foot .k'); if (k) k.textContent = 'Saved'; paint(); }); break;
   }
 }
+function sessPlay(id) {
+  const cur = ui.sessPlay; if (cur) { try { cur.src.stop(); } catch (e) {} ui.sessPlay = null; }
+  if (cur && cur.id === id) { paint(); return; }
+  if (X.SEQ.playing) X.stop(); X.ensure();
+  X.bufferFor(id).then(buf => { const src = X.ctx.createBufferSource(); src.buffer = buf; src.connect(X.ctx.destination); src.start(); ui.sessPlay = { id, src }; src.onended = () => { if (ui.sessPlay && ui.sessPlay.src === src) { ui.sessPlay = null; paint(); } }; paint(); }).catch(() => msg('mx', 'That session couldn’t be read.', true));
+}
 /* play a not-yet-added layer once through, for "Hear it" */
 function previewLayer(T) { X.previewOnce(T); }
 
@@ -592,6 +705,7 @@ function knobShow(kn, v) { const arc = kn.querySelector('[data-arc]'), r = +arc.
 function onInput(e) {
   const t = e.target, key = t.dataset.in; if (!key || key === 'files') return;
   if (key === 'feel') { if (t.value) setBpm(+t.value); return; }
+  if (key === 'f.in' || key === 'f.out') { (key === 'f.in' ? S().fin : S().fout).bars = +t.value; X.save(); updateFades(); return; }
   const v = +t.value, L = t.dataset.l ? X.byId(t.dataset.l) : null; t.style.setProperty('--fill', (v / +t.max) * 100 + '%');
   const b = t.closest('label') && t.closest('label').querySelector('span b'); if (b) b.textContent = pct(key, v);
   if (key === 'g.bass' || key === 'g.vol') { const lab = t.closest('.ring'); if (lab) { const arc = lab.querySelector('[data-arc]'), C = 2 * Math.PI * 26; arc.setAttribute('stroke-dasharray', `${C * .75 * v / 100} ${C}`); lab.querySelector('text').textContent = v; } }
@@ -606,11 +720,24 @@ function onChange(e) {
 }
 let drag = null;
 function svgPt(svg, e) { const r = svg.getBoundingClientRect(), vb = svg.viewBox.baseVal; return { x: (e.clientX - r.left) / r.width * vb.width, y: (e.clientY - r.top) / r.height * vb.height, fx: clamp((e.clientX - r.left) / r.width, 0, 1), fy: clamp((e.clientY - r.top) / r.height, 0, 1) }; }
+function stepAt(box, e) { const r = box.getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width, 0, 1) * X.totalSteps(); }
+function scrubTo(g) { const s = S(); g = clamp(g, s.start, s.end - 1); if (!X.SEQ.playing) { if (ui.sessPlay) sessPlay(ui.sessPlay.id); X.play(g); } else X.seek(g); }
+function ghost(e) {
+  const box = e.target.closest && e.target.closest('[data-scrub]'), gh = root && root.querySelector('[data-ghost]');
+  if (!gh) return; if (!box || !box.querySelector('[data-ghost]') || e.target.closest('[data-mk],[data-fr]')) { gh.hidden = true; return; }
+  const r = box.getBoundingClientRect(), f = clamp((e.clientX - r.left) / r.width, 0, 1), s = S(), g = clamp(f * X.totalSteps(), s.start, s.end - 1);
+  gh.hidden = false; gh.style.left = g / X.totalSteps() * 100 + '%'; const sp = gh.firstElementChild; sp.textContent = `▶ Click to play from bar ${(g / 16 + 1).toFixed(1)} · drag to skim`;
+  sp.style.left = f > .7 ? 'auto' : '8px'; sp.style.right = f > .7 ? '8px' : 'auto';
+}
 function onDown(e) {
   const t = e.target;
+  const wg = t.closest('[data-wgrip]'); if (wg && !phone()) { e.preventDefault(); winDown(e, 'win', wg.dataset.wgrip); return; }
+  const ws = t.closest('[data-wsize]'); if (ws) { e.preventDefault(); winDown(e, 'wsize', ws.dataset.wsize); return; }
+  const fr = t.closest('[data-fr]'); if (fr) { drag = { type: 'fr', which: fr.dataset.fr, box: fr.parentElement }; fr.setPointerCapture(e.pointerId); e.preventDefault(); return; }
   const kn = t.closest('[data-kn]'); if (kn) { const L = kn.dataset.l ? X.byId(kn.dataset.l) : null, key = kn.dataset.kn; drag = { type: 'kn', kn, L, key, y: e.clientY, v: key.startsWith('g.') ? S()[key.slice(2)] : key.startsWith('p.') ? L.p[key.slice(2)] : L[key.slice(2)] }; kn.setPointerCapture(e.pointerId); e.preventDefault(); return; }
   const dash = t.closest('[data-dash]'); if (dash) { drag = { type: 'dash', el: dash, L: X.byId(dash.dataset.dash), y: e.clientY, moved: false }; dash.setPointerCapture(e.pointerId); e.preventDefault(); return; }
   const mk = t.closest('[data-mk]'); if (mk) { drag = { type: 'mk', which: mk.dataset.mk, box: mk.parentElement }; mk.setPointerCapture(e.pointerId); e.preventDefault(); return; }
+  const sb = t.closest('[data-scrub]'); if (sb && !t.closest('[data-mk]')) { drag = { type: 'scrub', box: sb, last: 0, g: -1 }; sb.setPointerCapture(e.pointerId); e.preventDefault(); const g = Math.floor(stepAt(sb, e)); drag.g = g; drag.last = performance.now(); scrubTo(g); return; }
   const trim = t.closest('.trim'); if (trim) { const c = trim.closest('[data-clip]'); drag = { type: 'trim', c, L: X.byId(c.dataset.clip), side: +trim.dataset.trim }; trim.setPointerCapture(e.pointerId); e.preventDefault(); return; }
   const pad = t.closest('[data-pad]'); if (pad) { const L = X.byId(pad.dataset.pad); drag = { type: 'pad', pad, L, svg: pad.querySelector('svg') }; pad.setPointerCapture(e.pointerId); e.preventDefault(); onMove(e); return; }
   const md = t.closest('[data-movedraw]'); if (md) { ui.move.path = []; drag = { type: 'movedraw', box: md, svg: md.querySelector('svg') }; md.setPointerCapture(e.pointerId); e.preventDefault(); onMove(e); return; }
@@ -619,7 +746,12 @@ function onDown(e) {
   const bars = t.closest('[data-bars]'); if (bars) { drag = { type: 'bars', el: bars, L: X.byId(bars.dataset.bars) }; bars.setPointerCapture(e.pointerId); e.preventDefault(); onMove(e); return; }
 }
 function onMove(e) {
-  if (!drag) return; const d = drag, s = S();
+  if (!drag) { ghost(e); return; } const d = drag, s = S();
+  if (d.type === 'win') { const x = clamp(d.x0 + e.clientX - d.sx, 0, d.W - d.el.offsetWidth), y = Math.max(0, d.y0 + e.clientY - d.sy); d.el.style.left = x / d.W * 100 + '%'; d.el.style.top = y + 'px'; d.x = x; d.y = y; deskHeight(); return; }
+  if (d.type === 'wsize') { const x = d.x0, w = clamp(d.w0 + e.clientX - d.sx, Math.min(300, d.W - x), d.W - x); d.el.style.width = w / d.W * 100 + '%'; d.w = w; if (d.id === 'piece') drawViz(); return; }
+  if (d.type === 'fr') { const g = stepAt(d.box, e), { start, end } = X.fadeLens(), mx = maxFade(); let bars = (d.which === 'in' ? g - start : end - g) / 16; bars = clamp(Math.round(bars * 4) / 4, 0, mx);
+    const f = d.which === 'in' ? s.fin : s.fout; if (f.bars !== bars) { f.bars = bars; updateFades(); } return; }
+  if (d.type === 'scrub') { const g = Math.floor(stepAt(d.box, e)), now = performance.now(); ghost(e); if (g !== d.g && now - d.last > 70) { d.g = g; d.last = now; scrubTo(g); } return; }
   if (d.type === 'kn') { const v = clamp(d.v + (d.y - e.clientY) * 0.6, 0, 100); setVal(d.key, d.L, v); knobShow(d.kn, v); syncInputs(d.key, d.L, v); }
   else if (d.type === 'dash') {
     if (Math.abs(e.clientY - d.y) > 6) d.moved = true; if (!d.moved) return;
@@ -656,6 +788,15 @@ function onMove(e) {
 }
 function onUp(e) {
   if (!drag) return; const d = drag; drag = null; const s = S();
+  if (d.type === 'win' || d.type === 'wsize') {
+    removeEventListener('pointermove', onMove); removeEventListener('pointerup', onUp); removeEventListener('pointercancel', onUp);
+    d.el.classList.remove('lift'); document.body.classList.remove('au-moving'); const p = freeMap()[d.id], snap = v => Math.round(v / 8) * 8;
+    if (d.type === 'win' && d.x != null) { p.x = clamp(snap(d.x), 0, d.W - d.el.offsetWidth) / d.W; p.y = snap(d.y); d.el.style.left = p.x * 100 + '%'; d.el.style.top = p.y + 'px'; }
+    if (d.type === 'wsize' && d.w != null) { p.w = snap(d.w) / d.W; d.el.style.width = p.w * 100 + '%'; drawViz(); }
+    X.save(); deskHeight(); return;
+  }
+  if (d.type === 'fr') { X.save(); return; }
+  if (d.type === 'scrub') { const gh = root && root.querySelector('[data-ghost]'); if (gh && e.type === 'pointercancel') gh.hidden = true; return; }
   if (d.type === 'dash') {
     const row = d.el.closest('[data-ly]');
     if (!d.moved) { const L = d.L; L.hidden = !L.hidden; X.eng && X.apply(X.eng, L); X.restartLoop(L); X.save(); paint(); return; }
@@ -685,6 +826,12 @@ function onKey(e) {
   const mk = e.target.closest && e.target.closest('[data-mk]');
   if (mk && ['ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); const s = S(), dl = e.key === 'ArrowLeft' ? -16 : 16;
     if (mk.dataset.mk === 'start') s.start = clamp(s.start + dl, 0, s.end - 1); else s.end = clamp(s.end + dl, s.start + 1, X.totalSteps()); X.save(); paint(); root.querySelector(`[data-mk="${mk.dataset.mk}"]`).focus(); }
+  const frk = e.target.closest && e.target.closest('[data-fr]');
+  if (frk && ['ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); const f = frk.dataset.fr === 'in' ? S().fin : S().fout, dir = (e.key === 'ArrowRight') === (frk.dataset.fr === 'in') ? 1 : -1; f.bars = clamp(f.bars + dir * .25, 0, maxFade()); X.save(); updateFades(); return; }
+  const wgk = e.target.closest && e.target.closest('[data-wgrip]');
+  if (wgk && /^Arrow/.test(e.key) && !phone()) { e.preventDefault(); const id = wgk.dataset.wgrip; if (!isFree()) freeze(); const p = freeMap()[id], d = root.querySelector('[data-desk]'), W = d.clientWidth, n = e.shiftKey ? 80 : 16;
+    if (e.key === 'ArrowLeft') p.x = Math.max(0, p.x - n / W); if (e.key === 'ArrowRight') p.x = Math.min(1 - p.w, p.x + n / W); if (e.key === 'ArrowUp') p.y = Math.max(0, p.y - n); if (e.key === 'ArrowDown') p.y += n;
+    front(id); X.save(); paint(); const g = root.querySelector(`[data-wgrip="${id}"]`); g && g.focus({ preventScroll: true }); return; }
   const dash = e.target.closest && e.target.closest('[data-dash]');
   if (dash && ['ArrowUp', 'ArrowDown'].includes(e.key) && e.altKey) { e.preventDefault(); const s = S(), L = X.byId(dash.dataset.dash), g = X.groupOf(L), same = s.layers.filter(x => X.groupOf(x) === g), i = same.indexOf(L), j = i + (e.key === 'ArrowUp' ? -1 : 1);
     if (j >= 0 && j < same.length) { const a = s.layers.indexOf(L), b = s.layers.indexOf(same[j]); [s.layers[a], s.layers[b]] = [s.layers[b], s.layers[a]]; X.save(); paint(); root.querySelector(`[data-dash="${L.id}"]`).focus(); } }
@@ -696,6 +843,7 @@ function bind(el) {
   el.addEventListener('submit', e => { if (e.target.dataset.form === 'save') { e.preventDefault(); ui.saving = false; X.saveMix(e.target.n.value.trim()).then(r => { msg('mx', `Saved “${r.name}”.`); paint(); }).catch(() => msg('mx', 'Saving needs browser storage, which is off here.', true)); } });
   el.addEventListener('pointerdown', onDown); el.addEventListener('pointermove', onMove); el.addEventListener('pointerup', onUp); el.addEventListener('pointercancel', onUp);
   el.addEventListener('keydown', onKey);
+  el.addEventListener('pointerleave', () => { const gh = root && root.querySelector('[data-ghost]'); if (gh) gh.hidden = true; });
   el.addEventListener('dragover', e => { const d = e.target.closest('[data-drop]'); if (d) { e.preventDefault(); d.classList.add('over'); } });
   el.addEventListener('dragleave', e => { const d = e.target.closest('[data-drop]'); if (d) d.classList.remove('over'); });
   el.addEventListener('drop', e => { const d = e.target.closest('[data-drop]'); if (!d) return; e.preventDefault(); d.classList.remove('over'); upload([...e.dataTransfer.files].filter(f => /^(audio|video)\//.test(f.type) || /\.(mp3|wav|m4a|aac|ogg|mp4|mov|m4v|webm)$/i.test(f.name))); });
@@ -742,12 +890,13 @@ window.ADVL_AUD = {
     if (root === el) return; css();
     X = await loadCore(); root = el; ui.dd = null; ui.voices = false;
     if (!X.S.sel && X.S.layers[0]) X.S.sel = X.S.layers[0].id;
-    if (!bound) { bound = true; X.SEQ.listeners.add((type, g) => { if (type === 'step') { head(g); if (g >= 0 && g % 4 === 0) drawViz(); } else if (type === 'frame') frame(); else if (type === 'play' || type === 'stop') { [root, pop].forEach(r => r && r.querySelectorAll('[data-act="play"]').forEach(b => { b.innerHTML = X.SEQ.playing ? I.stop : I.play; b.classList.toggle('on', X.SEQ.playing); b.setAttribute('aria-label', X.SEQ.playing ? 'Stop' : 'Play'); })); if (type === 'stop') { ui.moveRec = false; head(-1); } } });
-      addEventListener('resize', () => { drawViz(); if (pop && !phone()) closePop(); if (sheet && !phone()) closeSheet(); });
+    if (!bound) { bound = true; X.SEQ.listeners.add((type, g) => { if (type === 'step') { head(g); if (g >= 0 && g % 4 === 0) drawViz(); } else if (type === 'frame') frame(); else if (type === 'session') paint(); else if (type === 'play' || type === 'stop') { [root, pop].forEach(r => r && r.querySelectorAll('[data-act="play"]').forEach(b => { b.innerHTML = X.SEQ.playing ? I.stop : I.play; b.classList.toggle('on', X.SEQ.playing); b.setAttribute('aria-label', X.SEQ.playing ? 'Stop' : 'Play'); })); if (type === 'stop') { ui.moveRec = false; head(-1); } } });
+      let wasPhone = phone(); setInterval(() => { if (X.SESS.mr && root) root.querySelectorAll('[data-rectime]').forEach(t => { t.textContent = sessTime(); }); }, 500);
+      addEventListener('resize', () => { if (phone() !== wasPhone) { wasPhone = phone(); paint(); } drawViz(); if (pop && !phone()) closePop(); if (sheet && !phone()) closeSheet(); });
       document.addEventListener('visibilitychange', () => { if (document.hidden) X.stop(); }); }
     bind(el); paint(); await X.loadLibrary(); paint();
   },
-  unmount() { if (X) X.stop(); closePop(); closeSheet(); root = null; },
+  unmount() { if (X) { if (X.SESS.mr) X.sessionStop(); if (ui.sessPlay) { try { ui.sessPlay.src.stop(); } catch (e) {} ui.sessPlay = null; } X.stop(); } if (ro) ro.disconnect(); closePop(); closeSheet(); root = null; },
   get X() { return X; }
 };
 })();
