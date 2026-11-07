@@ -25,16 +25,17 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 - Charts: blue schema (sky gradient #8DB6E6 → #7DAAE0 → #6B97D3), white marks, chartreuse corner marks; chartreuse allowed for the selected item.
 - Artifacts page: not being changed.
 - Transitions stay smooth and slow, matching the rest of the site (fades ~0.9–2.4s).
-- Cloudflare Pages limit: 25 MiB per file.
+- Cloudflare static assets limit: 25 MiB per file.
 - Version history: whenever a page with a `ver` list is updated (now project 18, advl auditory), add a new entry at the top of `ver` on its `spec` block in data.json (`{v, d: 'Mon D, YYYY', n: plain-language notes}`). The details show only the newest; the History pill opens the full list over the same soft blur as the phone nav (core.js `verOpen`, styles `.ver`/`.verpop`/`.verveil` in index.html).
 
-## Open items (as of 2026-11-04)
+## Open items (as of 2026-11-07)
 -1. advl auditory (project 18, v2 pushed 11/6 after her notes 1–10): name is temporary, ask Ariana to keep or change it. Open question: drop the Year row from its details (meta already says Soundwork · 2026). Category: Soundwork. Card wireframe `img/tread/18.webp` (3D beat grid).
 0. Project pages, in order, each through mockups → approval. 01 Learning Bodies: phone layout live 10/29 (mosaic of the 8 motion studies at top, This Land This Water film right under the project details, Generative AI and CAD section with side-by-side callouts, new order). Desktop for 01 not yet approved: Ariana said push mobile only. Stardrum / cybernetic images could become callouts once she says which are generated vs modeled.
 1. Mobile: bring the Parking Lot and About pages in line with the new desktop versions (Ariana reviewed mobile on 10/27), plus general mobile tweaks. Show mockups first.
 2. Link preview image (`public/img/og.jpg`, referenced as `og.jpg?v=2`): replaced 10/30 with the Chartreuse "Parking Lot" card (Ariana chose it "for now"). Blurred Green anchor background, Syne 800 name in a glowing chartreuse box with a Visit pill, bush and door with a fading ground line, advl.studio top right. Other palettes (Ultraviolet, Bloom, Ice) are in `tools/mockups/og_lot/` in case she switches; bump `?v=` when replacing.
 3. Missing media: 06 and 15 images and films, 08 source files, About featured image.
 4. Headers: 06, 12, 13, 14, 15 use their stair treads on the Projects card; 10 keeps its first gallery image (decided 10/27).
+5. Unused files (audit 11/7): 54 files in `public/` (~3.5 MB) are referenced nowhere on the site, Artifacts room included: older background sets (`frost/lot_*`, `p_*`, `spI_/spII_*` except the ones the background sets use, `bg_flcast`), This Land / Watermelon posters 2–4, Frost/Light `mirror_4,5,6,9,10`, `sq_3,5,7`, `fl_room`, `fl_square`, `equip2/3`, and 12 Learning Bodies stills in `img/lb/`. Ariana approved offloading them once she confirms she has copies on her computer. Don't remove before that.
 
 ## Related claude.ai pages
 - Original site preview (private): https://claude.ai/artifact/QRuZkZSmwXp2eQUnHmweLe
