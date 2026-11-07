@@ -23,6 +23,7 @@ Supabase table `lot_messages` (id, created_at, name, body, author_token). Visito
 ## Standing rules
 - Show mockups / wireframes and get approval before changing a page's design. One page at a time.
 - Always ask Ariana for approval before taking actions (changes, pushes, anything outside the conversation).
+- For every project page we work on: first compile all of its written text into a claude.ai doc ("<NN> <Project>: page text", grouped by the page's tabs, wording we wrote marked [from Claude]) for Ariana to edit, then build the page from her edited doc. Template: the 01 doc.
 - Every change gets a dated entry in the Changelog of the project doc `claude/advl-project-context.md` (claude.ai Project "advl.studio website and repositories"; read it, add the line, write it back).
 - Check-ins happen inside the working chat (send_later), never as scheduled tasks that open new chats.
 - Desktop (≥1024px) is the designed format; keep mobile working but unchanged unless asked.
