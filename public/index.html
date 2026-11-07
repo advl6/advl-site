@@ -597,10 +597,34 @@ body.cine #levels,body.cine #view,body.cine .wm{display:none}
 }
 
 mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)}
-.abd{display:none}
+.abd,.pjd{display:none}
 @media (min-width:1024px){
   body[data-route=about] #view{position:fixed;inset:0;margin:0;max-width:none;padding:0}
   body[data-route=about] #view>.lvl,body[data-route=about] #view>h1.big,body[data-route=about] #view>.about{display:none}
+  /* Project pages, desktop (tabbed file pane, 01 first): the About pane with one tab per section; text runs as one editor column, the media of the section in view sits beside it */
+  #view:has(.pjd){position:fixed;inset:0;margin:0;max-width:none;padding:0}
+  #view:has(.pjd)>:not(.pjd){display:none!important}
+  .pjd{display:block}
+  .pjd-tabs{position:absolute;left:200px;right:max(64px,6vw);top:62px;display:flex;gap:20px;font:400 .66rem var(--f-mono);white-space:nowrap;overflow-x:auto;scrollbar-width:none}
+  .pjd-tabs button{all:unset;cursor:pointer;color:#CFF002;opacity:.45;padding-bottom:6px;border-bottom:1px solid transparent;transition:opacity .9s ease,border-color .9s ease}
+  .pjd-tabs button:hover,.pjd-tabs button:focus-visible{opacity:.85}.pjd-tabs button[aria-selected=true]{opacity:1;border-bottom-color:#CFF002}
+  .pjd-pane{position:absolute;left:200px;right:max(64px,6vw);top:92px;bottom:calc(28px + 2.5vh);overflow:hidden;border-radius:18px;background:linear-gradient(rgb(255 255 255/.07),rgb(255 255 255/.03));border:1px solid var(--edge);-webkit-backdrop-filter:blur(22px) saturate(1.2);backdrop-filter:blur(22px) saturate(1.2)}
+  .pjd-tab{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr) min(42vw,640px);animation:pjdIn 1.2s ease}
+  .pjd-tab:not(:has(.pjd-side)){grid-template-columns:minmax(0,1fr)}
+  @keyframes pjdIn{from{opacity:0}to{opacity:1}}
+  .pjd-ed{padding:20px 22px 40px 0;overflow-y:auto;scrollbar-width:thin}
+  .pjd .abd-l.h{font:300 clamp(1.9rem,3vw,2.8rem)/1.05 var(--f-disp);letter-spacing:-.02em;margin:2px 0 4px}.pjd .abd-l.h b{font-weight:300;color:#CFF002;font-family:var(--f-mono);margin-right:.3em}
+  .pjd .abd-l.c.sub{opacity:.45}
+  .pjd .abd-l.q{font:italic 300 1rem/1.5 var(--f-disp);color:rgb(239 235 255/.82);max-width:62ch;border-left:1px solid rgb(207 240 2/.5);padding-left:12px}
+  .pjd .abd-l.verse{font:400 .82rem/1.75 var(--f-mono);color:rgb(239 235 255/.82)}
+  .pjd .abd-l.wide{max-width:none;padding-right:4px}
+  .pjd .pjd-k{font-weight:500;color:#efeaff}
+  .pjd-go{all:unset;cursor:pointer;font:400 .72rem/1.7 var(--f-mono);color:#CFF002;opacity:.8;transition:opacity .9s ease}.pjd-go:hover,.pjd-go:focus-visible{opacity:1}
+  .pjd-side{position:relative;border-left:1px solid rgb(255 255 255/.1);min-height:0}
+  .pjd-pv{position:absolute;inset:0;padding:18px;overflow-y:auto;scrollbar-width:thin;display:grid;align-content:start;gap:14px;opacity:0;visibility:hidden;transition:opacity 1.2s ease,visibility 0s linear 1.2s}
+  .pjd-pv.on{opacity:1;visibility:visible;transition:opacity 1.2s ease}
+  .pjd-cap{margin:0;font:400 .66rem var(--f-mono);color:#CFF002;opacity:.7}
+  .pjd-pv .pair{max-width:none}.pjd-pv figure{margin:0}
   /* About, desktop (approved 11/7, mockup B): the page reads as one file, about.md, with a line-number gutter */
   .abd{display:block}
   .abd h1.big{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -727,6 +751,27 @@ function bgWire(v,D){const card=v.querySelector('.bgd-role');if(!card)return;con
   rws.forEach(x=>x.onclick=()=>sel(+x.dataset.i));sel(D.timeline.x.length-1)}
 
 /* desktop About (layout 2, approved 10/26 19:47): the opening line large on the left with facts and email; the card holds the image and the rest of the bio */
+function pjDesk(p){let n=0;const row=(t,x)=>`<div class="abd-row"><span class="abd-n" aria-hidden="true">${++n}</span>${t==='lead'||t==='t'?`<p class="abd-l ${t}">${x}</p>`:`<div class="abd-l ${t}">${x}</div>`}</div>`;
+  const txt=b=>{switch(b.t){
+   case 'spec':return [row('code','<span class="k">const</span> project = {'),...b.x.map(([k,v])=>row('code',`&nbsp;&nbsp;<span class="k">${esc(k.toLowerCase())}</span>: <span class="s">'${esc(v)}'</span>,`)),row('code','}')].join('');
+   case 'lead':return row('lead',b.x);case 'p':return row('t',b.x);case 'quote':return row('q',b.x);
+   case 'items':return b.x.map(([k,v])=>row('t',`<b class="pjd-k">${k}</b> · ${v}`)).join('');
+   case 'tags':return [row('code','['),...b.x.map((x,i)=>row('code',`&nbsp;&nbsp;<span class="s">'${esc(x)}'</span>${i<b.x.length-1?',':''}`)),row('code',']')].join('');
+   case 'poem':return b.x.map(x=>row('verse',x?esc(x):'')).join('');
+   default:return `<div class="abd-row"><span class="abd-n" aria-hidden="true">${++n}</span><div class="abd-l wide">${A.blocks([b])}</div></div>`}};
+  const tab=(t,ti)=>{n=0;const head=t.secs.map((s,si)=>{let h='';
+     if(s.title)h=row('h',`<b>${p.num}</b>${p.full||p.t}`)+row('c','// '+esc(A.strip(p.meta)))+row('','');
+     else if(s.h)h=(si?row('',''):'')+row('c'+(s.lvl===4?' sub':''),'// '+esc(s.h));
+     return `<div class="pjd-sec" data-s="${si}">${h}${s.text.map(b=>txt(b)+row('','')).join('')}${s.media.length?row('ref',`<button type="button" class="pjd-go" data-s="${si}">→ preview(${s.media.length} ${s.media.length>1?'items':'item'})</button>`):''}</div>`}).join('');
+    const side=t.secs.map((s,si)=>s.media.length?`<div class="pjd-pv${si===0||!t.secs[0].media.length&&si===t.secs.findIndex(x=>x.media.length)?' on':''}" data-s="${si}"><p class="pjd-cap">preview('${esc((s.h||t.f.replace(/\.\w+$/,'')).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''))}')</p>${A.blocks(s.media)}</div>`:'').join('');
+    return `<section class="pjd-tab${ti?'':' on'}" data-t="${ti}" role="tabpanel" aria-label="${esc(t.f)}"${ti?' hidden':''}><div class="pjd-ed">${head}</div>${side?`<aside class="pjd-side">${side}</aside>`:''}</section>`};
+  return `<div class="pjd"><nav class="pjd-tabs" role="tablist" aria-label="${esc(p.t)} files">${p.tabs.map((t,i)=>`<button type="button" role="tab" data-t="${i}" aria-selected="${i?'false':'true'}">${esc(t.f)}</button>`).join('')}</nav><div class="pjd-pane">${p.tabs.map(tab).join('')}</div></div>`}
+function pjWire(v){const W=v.querySelector('.pjd');if(!W)return;const tabs=[...W.querySelectorAll('.pjd-tabs button')],panes=[...W.querySelectorAll('.pjd-tab')];
+  const show=(tab,si)=>{const pv=[...tab.querySelectorAll('.pjd-pv')];if(!pv.length)return;let pick=pv.filter(x=>+x.dataset.s<=si).pop()||pv[0];pv.forEach(x=>x.classList.toggle('on',x===pick))};
+  const track=tab=>{const ed=tab.querySelector('.pjd-ed');if(!ed||!tab.querySelector('.pjd-side'))return;let raf=0;ed.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const top=ed.getBoundingClientRect().top+ed.clientHeight*.35;let si=0;ed.querySelectorAll('.pjd-sec').forEach(s=>{if(s.getBoundingClientRect().top<top)si=+s.dataset.s});show(tab,si)})},{passive:true});
+   tab.querySelectorAll('.pjd-go').forEach(b=>b.addEventListener('click',()=>show(tab,+b.dataset.s)))};
+  panes.forEach(track);
+  tabs.forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.t;tabs.forEach(x=>x.setAttribute('aria-selected',String(x===b)));panes.forEach(x=>{const on=+x.dataset.t===i;x.hidden=!on;x.classList.toggle('on',on)});const ed=panes[i].querySelector('.pjd-ed');if(ed)ed.scrollTop=0}))}
 function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;const lead=d.querySelector('.lead')?.innerHTML||'';const rest=[...d.querySelectorAll('p:not(.lead)')].map(p=>p.innerHTML);
   const heads=['practice','roots','now'],L=[['lead',lead],['','']];
   rest.forEach((p,i)=>{L.push(['c','// '+(heads[i]||'more')],['t',p],['',''])});
@@ -804,7 +849,7 @@ const cfg={
  project(v,p,D){const N=D.projects.length,i=D.projects.indexOf(p),pr=D.projects[(i+N-1)%N],nx=D.projects[(i+1)%N];
   v.innerHTML=`<p class="lvl">${LV.projects}</p><header class="steps"><span class="num">${p.num}</span><h1 class="big">${p.full||p.t}</h1>${p.sub?`<p class="sub">${esc(p.sub)}</p>`:''}</header><p class="meta">${esc(A.strip(p.meta))}</p>
    <div class="slab blocks">${(()=>{const bl=(p.mblocks&&matchMedia('(max-width:1023px)').matches)?p.mblocks:p.blocks;return bl.length?A.blocks(bl):'<p class="soft">Images and a write-up for this project are on their way.</p>'})()}</div>
-   <nav class="pager" aria-label="More projects"><a href="#p${pr.num}"><small>Up a step · ${pr.num}</small><span>${pr.t}</span></a><a href="#p${nx.num}"><small>Down a step · ${nx.num}</small><span>${nx.t}</span></a></nav>`},
+   <nav class="pager" aria-label="More projects"><a href="#p${pr.num}"><small>Up a step · ${pr.num}</small><span>${pr.t}</span></a><a href="#p${nx.num}"><small>Down a step · ${nx.num}</small><span>${nx.t}</span></a></nav>${p.tabs?pjDesk(p):''}`;p.tabs&&pjWire(v)},
  background(v,D){const item=h=>{const d=document.createElement('div');d.innerHTML=h;const w=d.querySelector('.when')?.textContent||'',t=d.querySelector('h3')?.innerHTML||'',r=d.querySelector('.role')?.innerHTML||'',p=d.querySelector('article>p:last-child')?.innerHTML||'';
    return `<li><span class="when">${w}</span><div><h3>${t}</h3><p class="role">${r}</p><p>${p}</p></div></li>`};
   v.innerHTML=`<p class="lvl">${LV.background}</p><h1 class="big">Background</h1><div class="slab">${A.blocks([{t:'timeline',...D.timeline}])}
