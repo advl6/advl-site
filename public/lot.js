@@ -76,7 +76,7 @@ function sheet() { let s = '';
 function draw() { const { x0, y0, x1, gy, R, door, bush, cloud } = G; let s = '';
   const k = R * .45;
   if (G.ph) { if (bodies.length) s += `<path class="ln" d="M${x0} ${gy} V${y0 + R} C${x0} ${y0 + k} ${x0 + k} ${y0} ${x0 + R} ${y0} H${x1 - R} C${x1 - k} ${y0} ${x1} ${y0 + k} ${x1} ${y0 + R} V${gy} Z"/>`;
-    else { const cx = (x0 + x1) / 2, cy = (y0 + gy) / 2, sc = Math.min(1.25, (x1 - x0 - 40) / 270); s += `<g transform="translate(${cx} ${cy}) scale(${sc})">${sheet()}</g>`; }
+    else { const cx = (x0 + x1) / 2, cy = (y0 + gy) / 2, sc = Math.min(1.25, (x1 - x0 - 40) / 270) * .85; s += `<g transform="translate(${cx} ${cy}) scale(${sc})">${sheet()}</g>`; }
     const sv = q('.ld-scene'); sv.setAttribute('viewBox', `0 0 ${W} ${H}`); sv.innerHTML = s; return; }
   s += `<path class="ln" d="M${x0} ${gy} V${y0 + R} C${x0} ${y0 + k} ${x0 + k} ${y0} ${x0 + R} ${y0} H${x1 - R} C${x1 - k} ${y0} ${x1} ${y0 + k} ${x1} ${y0 + R} V${gy}"/>`;
   s += cumulus(cloud.cx, cloud.w, y0 + 18);
