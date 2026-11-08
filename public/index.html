@@ -745,9 +745,9 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .abd-facts{font-size:.62rem;line-height:1.7}
   .abd-facts div{flex-direction:column;gap:0;margin-bottom:4px}
 }
-/* Parking Lot, desktop (10/27): the physics lot */
+/* Parking Lot, desktop (10/27): the physics lot; phones use it too (11/8 mockup) */
 .lotd{display:none}
-@media (min-width:1024px){
+@media (min-width:1024px), (max-width:720px){
   body[data-route=lot] #view{position:fixed;inset:0;margin:0;max-width:none;padding:0}
   body[data-route=lot] #view>.lvl,body[data-route=lot] #view>h1.big,body[data-route=lot] #view>.lot,body[data-route=lot] #view>.saver{display:none}
   body[data-route=lot] #saver{opacity:0!important}
@@ -784,6 +784,23 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .ld-pal button{all:unset;cursor:pointer;display:flex;gap:2px;padding:5px 7px;border-radius:999px}.ld-pal button[aria-pressed=true]{background:rgb(255 255 255/.12);box-shadow:inset 0 0 0 1px rgb(255 255 255/.3)}
   .ld-pal button:focus-visible{outline:2px solid var(--acc)}
   .ld-pal i{width:10px;height:10px;border-radius:50%}
+}
+@media (max-width:720px){
+  .ld-head{left:20px;top:84px}
+  .ld-head .lvl{margin-bottom:4px}
+  .ld-head h1.big{font-size:2.3rem}
+  .ld-count{margin-top:6px;font-size:.62rem}
+  .ld-compose{left:14px;right:14px;top:184px;width:auto;padding:12px 14px;border-radius:18px;gap:8px}
+  .ld-note{max-width:180px;padding:3px 5px}.ld-note p{font-size:.9rem;line-height:1.32}.ld-note small{font-size:.56rem}
+  .ld-del{opacity:.7}
+  .ld-tools{right:auto;left:14px;bottom:24px}
+  .ld-pal{padding:3px 5px}.ld-pal button{padding:4px 5px}.ld-pal i{width:8px;height:8px}
+  .ld-park{display:none}
+  /* B: the writing box folds behind a pill; the lot gets the height */
+  html[data-mlot=B] .ld-compose{opacity:0;pointer-events:none;transform:translateY(-8px);transition:opacity .9s ease,transform .9s ease;z-index:5;background:rgb(var(--tint)/.86);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+  html[data-mlot=B] .composing .ld-compose{opacity:1;pointer-events:auto;transform:none}
+  html[data-mlot=B] .ld-park{all:unset;display:block;position:fixed;right:16px;top:132px;z-index:6;cursor:pointer;font:400 .66rem var(--f-mono);letter-spacing:.06em;color:var(--line);border:1.4px solid var(--line);border-radius:999px;padding:6px 14px;box-shadow:0 0 6px color-mix(in srgb,var(--line) 40%,transparent)}
+  html[data-mlot=B] .composing .ld-park{top:auto;bottom:24px;right:96px}
 }
 </style>
 </head>
@@ -1025,7 +1042,7 @@ const cfg={
    <div class="lot-who"><label for="lot-name">Name</label><input type="text" id="lot-name" maxlength="40" placeholder="Your name"><label><input type="checkbox" id="lot-anon"> Post anonymously</label></div>
    <form class="lot-form"><textarea id="lot-text" rows="1" maxlength="600" placeholder="Leave a message in the lot" aria-label="Message"></textarea><button type="submit">Send</button></form><p class="lot-status" role="status"></p></section>
    <div class="saver"><details><summary>Change screen saver</summary><div class="opts"><button type="button" id="sv-rand">Random from the site</button><label for="sv-file">Upload an image</label><input type="file" id="sv-file" accept="image/*"></div></details></div>`;
-  if(matchMedia('(min-width:1024px)').matches&&window.ADVL_LOT){v._desk=true;ADVL_LOT.mount(v,[v.querySelector('.lot-who'),v.querySelector('.lot-form'),v.querySelector('.lot-status')])}
+  if(matchMedia('(min-width:1024px), (max-width:720px)').matches&&window.ADVL_LOT){v._desk=true;ADVL_LOT.mount(v,[v.querySelector('.lot-who'),v.querySelector('.lot-form'),v.querySelector('.lot-status')])}
   A.mountLot(v);A.screensaver($('#saver'),$('#sv-rand'),$('#sv-file'))},
 };
 /* desktop keeps the nav during cinematic: choosing a level leaves cinematic and goes there */

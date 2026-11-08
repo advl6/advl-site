@@ -35,7 +35,15 @@ function resolve(A,B,c){const {n,d,p}=c,ra=[p[0]-A.x,p[1]-A.y],rb=[p[0]-B.x,p[1]
   const corr=Math.max(d-.3,0)/(A.im+B.im)*.85;A.x-=n[0]*corr*A.im;A.y-=n[1]*corr*A.im;B.x+=n[0]*corr*B.im;B.y+=n[1]*corr*B.im}
 
 const q = s => root.querySelector(s);
+const PH = () => innerWidth <= 720;
 function layout() { W = innerWidth; H = innerHeight;
+  if (PH()) { /* phones (11/8 mockup): the same lot, narrower, under the title and the writing box */
+    const top = Math.max(...['.ld-head', '.ld-compose', '.ld-park'].map(s => { const e = q(s); if (!e) return 0; if (getComputedStyle(e).pointerEvents === 'none') return 0; const r = e.getBoundingClientRect(); return r.height ? r.bottom : 0; }));
+    const x0 = 14, y0 = Math.round(top + 62), x1 = W - 14, gy = Math.round(H - 128), R = 40;
+    const door = { w: 58, h: Math.min(120, (gy - y0) * .3) }; door.x = x1 - 22 - door.w; door.y = gy - door.h;
+    const bush = { cx: door.x - 52, cy: gy - 22, r: 26 };
+    const stall = 54, cloud = { cx: x0 + (x1 - x0) * .42, w: Math.min(170, (x1 - x0) * .44) };
+    G = { x0, y0, x1, gy, R, door, bush, cloud, stall, ph: true }; draw(); statics_(); return; }
   const x0 = 196, y0 = 92, x1 = W - 44, gy = Math.round(H * .84), R = 64;
   const door = { w: 92, h: Math.min(210, (gy - y0) * .36) }; door.x = x1 - 46 - door.w; door.y = gy - door.h;
   const bush = { cx: door.x - 104, cy: gy - 36, r: 44 };
@@ -70,9 +78,9 @@ function draw() { const { x0, y0, x1, gy, R, door, bush, cloud } = G; let s = ''
   s += `<path class="ln" d="M${x0} ${gy} V${y0 + R} C${x0} ${y0 + k} ${x0 + k} ${y0} ${x0 + R} ${y0} H${x1 - R} C${x1 - k} ${y0} ${x1} ${y0 + k} ${x1} ${y0 + R} V${gy}"/>`;
   s += cumulus(cloud.cx, cloud.w, y0 + 18);
   s += `<path class="ln" d="M${x0} ${gy} H${x1}"/>`;
-  const dd = G.stall * Math.SQRT1_2; for (let i = 0; i < 4; i++) { const x = x0 + 60 + i * 110; s += `<path class="ln dash" d="M${x} ${gy + 10} l${-dd} ${dd}"/>`; }
+  const dd = G.stall * Math.SQRT1_2, sp = G.ph ? (x1 - x0 - 60) / 3 : 110; for (let i = 0; i < 4; i++) { const x = x0 + (G.ph ? 50 : 60) + i * sp; s += `<path class="ln dash" d="M${x} ${gy + 10} l${-dd} ${dd}"/>`; }
   const tuft = (x, h) => `<path class="ln soft" d="M${x} ${gy} q-3 ${-h * .6} -7 ${-h} M${x} ${gy} q0 ${-h * .7} 1 ${-h * 1.15} M${x} ${gy} q4 ${-h * .55} 8 ${-h * .9}"/>`;
-  [x0 + 18, x0 + 64, x0 + (x1 - x0) * .3, x0 + (x1 - x0) * .46, bush.cx - 78, bush.cx - 56, bush.cx + 50, door.x - 22, door.x + door.w + 12, x1 - 14].forEach((x, i) => s += tuft(x, 9 + (i % 3) * 5));
+  (G.ph ? [x0 + 14, x0 + 48, x0 + (x1 - x0) * .32, bush.cx - 44, door.x + door.w + 8] : [x0 + 18, x0 + 64, x0 + (x1 - x0) * .3, x0 + (x1 - x0) * .46, bush.cx - 78, bush.cx - 56, bush.cx + 50, door.x - 22, door.x + door.w + 12, x1 - 14]).forEach((x, i) => s += tuft(x, 9 + (i % 3) * 5));
   const b = bush, bp = []; for (let o = 0; o <= 9; o++) { const a = Math.PI * (1 + o / 9); bp.push([b.cx + Math.cos(a) * b.r * 1.25, b.cy + Math.sin(a) * b.r * .95]); }
   let d = `M${b.cx - b.r * 1.25} ${gy}`; bp.forEach((p, o) => { if (!o) return; const m = bp[o - 1], mx = (p[0] + m[0]) / 2, my = (p[1] + m[1]) / 2, nx = mx - b.cx, ny = my - b.cy, l = Math.hypot(nx, ny); d += ` Q${mx + nx / l * 15} ${my + ny / l * 15} ${p[0]} ${p[1]}`; }); d += ` L${b.cx + b.r * 1.25} ${gy}`;
   s += `<path class="fill" d="${d}Z"/><path class="ln" d="${d}"/><path class="ln soft" d="M${b.cx - 20} ${gy - 28} q10 -10 22 -4 M${b.cx + 8} ${gy - 50} q8 -6 16 0"/>`;
@@ -85,7 +93,7 @@ function draw() { const { x0, y0, x1, gy, R, door, bush, cloud } = G; let s = ''
 function statics_() { const { x0, y0, x1, gy, door, bush } = G, T = 60, cw = Math.min(W * .3, 420);
   statics = [box(x0 - T / 2, H / 2, T, H * 2, 0, false), box(x1 + T / 2, H / 2, T, H * 2, 0, false), box(W / 2, y0 - T / 2, W * 2, T, 0, false), box(W / 2, gy + T / 2, W * 2, T, 0, false),
     box(door.x + door.w / 2, door.y + door.h / 2 + 10, door.w * 1.5, door.h - 20, 0, false), box(bush.cx, bush.cy + 8, bush.r * 2.3, bush.r * 1.3, 0, false), box(bush.cx, bush.cy - 16, bush.r * 1.4, bush.r * 1.1, 0, false),
-    box(236 + 170, 112 + 62, 360, 128, 0, false), box(W - Math.max(64, W * .06) - 6 - cw / 2, 112 + 56, cw + 10, 120, 0, false)]; }
+    ...(G.ph ? [] : [box(236 + 170, 112 + 62, 360, 128, 0, false), box(W - Math.max(64, W * .06) - 6 - cw / 2, 112 + 56, cw + 10, 120, 0, false)])]; }
 /* the accent reads the background under each note */
 const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true }); cv.width = 48; cv.height = 30;
 function lumMap(img) { const s = Math.max(W / img.naturalWidth, H / img.naturalHeight) * 1.05, dw = img.naturalWidth * s, dh = img.naturalHeight * s;
@@ -128,6 +136,7 @@ function sync(msgs) { if (!root) return; const had = bodies.length, ids = new Se
   msgs.forEach((m, i) => { if (have.has(m.id)) return;
     const fresh = had > 0 || (root._first === false); m.fresh = fresh && i === msgs.length - 1;
     if (m.fresh) { root.querySelectorAll('.ld-note.new').forEach(e => e.classList.remove('new')); const b = addNote(m, door.x - 150, door.y + door.h * .5); b.vx = -260; b.vy = -60; b.w = -.4; }
+    else if (G.ph) addNote(m, x0 + 70 + ((i * 97) % Math.max(60, x1 - x0 - 160)), y0 + 50 + ((i * 89) % Math.max(80, gy - y0 - 180)));
     else addNote(m, x0 + 90 + ((i * 197) % Math.max(200, x1 - x0 - 320)), y0 + 190 + ((i * 113) % Math.max(120, gy - y0 - 280))); });
   root._first = false; q('.ld-n').textContent = bodies.length; if (!had !== !bodies.length) draw(); tone(true); }
 let last = 0, t = 0, tt = 0;
@@ -159,6 +168,8 @@ window.ADVL_LOT = {
       <div class="ld-world" aria-label="Messages" aria-live="polite"></div><div class="ld-compose"></div>
       <div class="ld-tools"><div class="ld-pal" role="group" aria-label="Palette">${PALETTES.map((p, i) => `<button type="button" title="${p.name}" aria-label="${p.name} palette">${p.sw.map(c => `<i style="background:${c}"></i>`).join('')}</button>`).join('')}</div></div>`;
     view.appendChild(root); compose.forEach(n => n && q('.ld-compose').appendChild(n));
+    if (PH()) { const pk = document.createElement('button'); pk.type = 'button'; pk.className = 'ld-park'; pk.textContent = 'park a message'; root.appendChild(pk);
+      pk.onclick = () => { root.classList.toggle('composing'); pk.textContent = root.classList.contains('composing') ? 'close' : 'park a message'; if (root.classList.contains('composing')) { const t = q('#lot-text'); t && t.focus(); } }; }
     q('.ld-pal').onclick = e => { const b = e.target.closest('button'); if (!b) return; pal = PALETTES[[...q('.ld-pal').children].indexOf(b)]; try { localStorage.setItem('advl-lot-pal', PALETTES.indexOf(pal)); } catch (e) {} applyPal(); };
     layout(); applyPal(); showBg(Math.floor(Math.random() * BGS.length)); if (!RM) timer = setInterval(() => showBg(bi + 1), 60000);
     addEventListener('resize', onResize); idleOn(); last = performance.now(); raf = requestAnimationFrame(frame); },
