@@ -406,7 +406,6 @@ A.boot = async cfg => {
   CFG = cfg;
   try { [D, ART] = await Promise.all([fetch('data.json', { cache: 'no-cache' }).then(r => r.json()), fetch('artifacts.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => null)]); }
   catch (e) { document.body.dataset.phase = 'ui'; $('#view').innerHTML = '<p class="soft">The site content didn’t load. Reload the page to try again.</p>'; return; }
-  D.offProjects = D.projects.filter(p => p.off);
   D.projects = D.projects.filter(p => !p.off);  // projects taken off the site (kept in data.json for the Works gallery)
   A.D = D; cfg.init && cfg.init(D);
   go();

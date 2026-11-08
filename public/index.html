@@ -772,10 +772,11 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
 <nav aria-label="Levels"><ol id="levels">
   <li><a data-nav="home" href="#home" style="--c:var(--ch-home)"><i></i><span><b>L0</b><br>Home</span></a></li>
   <li><a data-nav="projects" href="#projects" style="--c:var(--ch-projects)"><i></i><span><b>L1</b><br>Projects</span></a></li>
-  <li><a data-nav="background" href="#background" style="--c:var(--ch-background)"><i></i><span><b>L2</b><br>Background</span></a></li>
-  <li><a data-nav="about" href="#about" style="--c:var(--ch-about)"><i></i><span><b>L3</b><br>About</span></a></li>
-  <li><a data-nav="artifacts" href="#artifacts" style="--c:var(--ch-artifacts)"><i></i><span><b>L4</b><br>Artifacts</span></a></li>
-  <li><a data-nav="lot" href="#lot" style="--c:var(--ch-lot)"><i></i><span><b>L5</b><br>Parking Lot</span></a></li>
+  <li><a data-nav="works" href="#works" style="--c:var(--ch-projects)"><i></i><span><b>L2</b><br>Works Gallery</span></a></li>
+  <li><a data-nav="background" href="#background" style="--c:var(--ch-background)"><i></i><span><b>L3</b><br>Background</span></a></li>
+  <li><a data-nav="about" href="#about" style="--c:var(--ch-about)"><i></i><span><b>L4</b><br>About</span></a></li>
+  <li><a data-nav="artifacts" href="#artifacts" style="--c:var(--ch-artifacts)"><i></i><span><b>L5</b><br>Artifacts</span></a></li>
+  <li><a data-nav="lot" href="#lot" style="--c:var(--ch-lot)"><i></i><span><b>L6</b><br>Parking Lot</span></a></li>
 </ol></nav>
 <main id="view"></main>
 <div id="cine" aria-label="Cinematic mode"><div class="cine-stage"><video playsinline preload="auto"></video><video playsinline preload="auto"></video></div><div class="cine-cap" aria-live="polite"><div><p class="cc-t"></p><p class="cc-f"></p></div><p class="cc-parts"></p></div>
@@ -855,7 +856,7 @@ const glImg=k=>k.includes('/')?k:`g/${k}.webp`;
 function pjGal(p){let n=0;const row=(t,x)=>`<div class="abd-row"><span class="abd-n" aria-hidden="true">${++n}</span>${t==='lead'?`<p class="abd-l lead">${x}</p>`:`<div class="abd-l ${t}">${x}</div>`}</div>`;
   const G=[];let head=null;p.tabs.forEach(t=>t.secs.forEach(s=>{if(s.title){head=s;return}const g=s.media.find(m=>m.t==='gal');if(g)G.push({h:s.h,line:(s.text.find(b=>b.t==='p')||{}).x||'',imgs:g.imgs,f:t.f.replace(/\.\w+$/,'')})}));
   const slug=x=>x.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
-  let L=row('h',`<b>${p.num}</b>${p.full||p.t}`)+row('c','// '+esc(A.strip(p.meta)))+row('','');
+  let L=row('h',`<b>${p.num}</b>${p.full||p.t}`)+(p.meta?row('c','// '+esc(A.strip(p.meta))):'')+row('','');
   (head?head.text:[]).forEach(b=>{if(b.t==='lead')L+=row('lead',b.x)+row('','')});
   let last='';G.forEach((g,i)=>{if(g.f!==last){L+=(last?row('',''):'')+row('c','// '+g.f);last=g.f}
     L+=`<div class="abd-row gl-ix${i?'':' on'}" data-g="${i}"><span class="abd-n" aria-hidden="true">${++n}</span><button type="button" class="abd-l gl-go" data-g="${i}"><span class="pjd-n">${String(i+1).padStart(2,'0')}</span> ${slug(g.h)}<span class="gl-ct">[${g.imgs.length}]</span></button></div>`});
@@ -910,7 +911,7 @@ function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;con
    <aside class="abd-side">${D.portrait?`<figure class="feature abd-pic pf${D.portraitRound?' rd':''}"><img src="${D.portrait}" alt="Portrait of Ariana Dorothea Levy" decoding="async"></figure>`:`<figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>`}
    <dl class="abd-facts"><div><dt>mfa</dt><dd>Design · California College of the Arts · 2024</dd></div><div><dt>ba</dt><dd>Fine Art · Drew University · 2019</dd></div><div><dt>based</dt><dd>San Francisco</dd></div><div><dt>speaks</dt><dd>English · German <span class="cm">// native</span></dd></div></dl></aside></div></div>`}
 /* level labels: the name part (.lvn) hides wherever the page already says it (phone goto line, desktop page titles) */
-const LV={home:'L0<span class="lvn"> · Home</span>',projects:'L1<span class="lvn"> · Projects</span>',works:'L2<span class="lvn"> · Works</span>',background:'L3<span class="lvn"> · Background</span>',about:'L4<span class="lvn"> · About</span>',artifacts:'L5<span class="lvn"> · Artifacts</span>',lot:'L6<span class="lvn"> · Parking Lot</span>'};
+const LV={home:'L0<span class="lvn"> · Home</span>',projects:'L1<span class="lvn"> · Projects</span>',works:'L2<span class="lvn"> · Works Gallery</span>',background:'L3<span class="lvn"> · Background</span>',about:'L4<span class="lvn"> · About</span>',artifacts:'L5<span class="lvn"> · Artifacts</span>',lot:'L6<span class="lvn"> · Parking Lot</span>'};
 const dialKind='D';
 const drawDial=()=>A.dial($('#dialwrap'),dialKind);
 /* progress rail on project pages */
@@ -983,12 +984,10 @@ const cfg={
   v.innerHTML=`<p class="lvl">${LV.background}</p><h1 class="big">Background</h1><div class="slab">${A.blocks([{t:'timeline',...D.timeline}])}
    <h2 class="sec">Experience</h2><ol class="cvsteps">${D.exp.map(item).join('')}</ol><h2 class="sec">Education</h2><ol class="cvsteps">${D.edu.map(item).join('')}</ol>
    <h2 class="sec">Skills</h2><ul class="tags">${D.skills.map(s=>`<li>${s}</li>`).join('')}</ul><h2 class="sec">Tools</h2><ul class="tags">${D.tools.map(s=>`<li>${s}</li>`).join('')}</ul></div>${bgDesk(D)}`;bgWire(v,D)},
- works(v,D){const W=(D.offProjects||[]).map(p=>{const imgs=[];(p.blocks||[]).forEach(b=>b.t==='gal'&&imgs.push(...b.imgs));return {p,imgs}});
-  let mode='viewer';try{mode=localStorage.getItem('advl-works-mode')||'viewer'}catch(e){}
-  const desk=matchMedia('(min-width:1024px)').matches;
-  const fake={num:'',full:'Works',meta:'Images from projects no longer on the site',tabs:[{f:'works.md',secs:W.map(({p,imgs})=>({h:p.t,text:[{t:'p',x:esc(A.strip(p.meta||''))}],media:imgs.length?[{t:'gal',imgs}]:[]})).filter(s=>s.media.length)}],gallery:mode==='grid'?'viewer':mode};
-  if(desk&&mode!=='grid'){v.innerHTML=`<p class="lvl">${LV.works}</p>${pjGal(fake)}`;glWire(v);return}
-  v.innerHTML=`<p class="lvl">${LV.works}</p><h1 class="big">Works</h1><div class="wk">${W.map(({p,imgs})=>`<section class="wk-g"><p class="wk-h"><span>// ${esc(p.t)}</span><small>${esc(A.strip(p.meta||''))} · ${imgs.length} ${imgs.length===1?'image':'images'}</small></p>${imgs.length?`<div class="wk-m">${imgs.map(([k,a])=>`<figure><img src="${k}" alt="${esc(a)}" loading="lazy" decoding="async"><figcaption>${esc(a)}</figcaption></figure>`).join('')}</div>`:'<p class="soft">Images for this project are not on the site yet.</p>'}</section>`).join('')}</div>`},
+ works(v,D){const W=D.works||[];
+  if(matchMedia('(min-width:1024px)').matches){const fake={num:'',full:'Works Gallery',meta:'',tabs:[{f:'works.md',secs:W.map(g=>({h:g.h,text:[{t:'p',x:esc(A.strip(g.line||''))}],media:[{t:'gal',imgs:g.imgs}]}))}],gallery:'viewer'};
+   v.innerHTML=`<p class="lvl">${LV.works}</p>${pjGal(fake)}`;glWire(v);return}
+  v.innerHTML=`<p class="lvl">${LV.works}</p><h1 class="big">Works Gallery</h1><div class="wk">${W.map(g=>`<section class="wk-g"><p class="wk-h"><span>// ${esc(g.h)}</span><small>${esc(A.strip(g.line||''))}</small></p><div class="wk-m">${g.imgs.map(([k,a])=>`<figure><img src="${k}" alt="${esc(a)}" loading="lazy" decoding="async"></figure>`).join('')}</div></section>`).join('')}</div>`},
  about(v,D){v.innerHTML=`<p class="lvl">${LV.about}</p><h1 class="big">About</h1><div class="about">${D.portrait?`<figure class="feature pf${D.portraitRound?' rd':''}"><img src="${D.portrait}" alt="Portrait of Ariana Dorothea Levy" decoding="async"></figure>`:`<figure class="feature" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>`}
    <div class="slab">${D.about}<p class="langs"><b>Languages</b> ${esc(D.languages||'')}</p><p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p><p class="contact links">${(D.links||[]).map(([n,u])=>`<a class="soc" href="${u}" target="_blank" rel="noopener">${n}<span aria-hidden="true"> ↗</span></a>`).join('')}</p></div></div>${abDesk(D)}`;
   v.querySelectorAll('.copy-mail').forEach(b=>b.onclick=()=>{const m=b.parentNode.querySelector('.mail-t');try{navigator.clipboard.writeText(D.email).then(()=>b.textContent='Copied',()=>sel())}catch(e){sel()}function sel(){const r=document.createRange();r.selectNodeContents(m);getSelection().removeAllRanges();getSelection().addRange(r);b.textContent='Selected'}})},

@@ -3,7 +3,7 @@
    - a thumb circle bottom right that slowly cycles the curated backgrounds
    Either one opens the six levels, fanned up above the circle as chartreuse code. */
 (function () {
-  const LV = [['home', 'Home'], ['projects', 'Projects'], ['works', 'Works'], ['background', 'Background'], ['about', 'About'], ['artifacts', 'Artifacts'], ['lot', 'Parking Lot']];
+  const LV = [['home', 'Home'], ['projects', 'Projects'], ['works', 'Works Gallery'], ['background', 'Background'], ['about', 'About'], ['artifacts', 'Artifacts'], ['lot', 'Parking Lot']];
   const PICS = ['04', '06', '07', '08', '09', '10', '12', '13', '14', '16', '24', '25', '28', '29', '30', '32'];
   const HOLD = 20000;  // each image stays ~20 s; the crossfade itself is 6 s (CSS)
   const mq = matchMedia('(max-width:720px)');
