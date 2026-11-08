@@ -623,10 +623,14 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .pjd-tab.narrow{grid-template-columns:min(24vw,340px) minmax(0,1fr)}
   .pjd-tab.hero:not(:has(.pjd-ed .abd-row)){grid-template-rows:1fr}.pjd-tab.hero:not(:has(.pjd-ed .abd-row)) .pjd-ed{display:none}.pjd-tab.hero:not(:has(.pjd-ed .abd-row)) .pjd-hero{border:0;display:grid;align-content:center}.pjd-tab.hero:not(:has(.pjd-ed .abd-row)) .pjd-hero .vid.multi .vstack{height:min(70vh,calc((100vw - 200px - max(64px,6vw) - 36px) / (var(--arn,16 / 9))))}
   .pjd-tab.narrow .pjd-ed{padding-right:18px}
+  .pjd-tab.narrow .abd-l.h{font-size:clamp(1.55rem,2.2vw,2.2rem);overflow-wrap:break-word;hyphens:auto}
   .pjd .abd-row:has(.dr) .abd-l{max-width:400px}
   .pjd .dr-head b{font-size:clamp(2rem,3.4vw,3rem)}.pjd .dr{gap:8px;margin-top:12px}.pjd .dr i{width:clamp(18px,1.9vw,26px)}
+  .pjd .pjd-n{font:400 .7rem var(--f-mono);color:#CFF002;opacity:.7;margin-right:4px}
+  .pjd.compact .abd-l.lead{font:300 clamp(1.05rem,1.3vw,1.25rem)/1.4 var(--f-disp);max-width:none}
+  .pjd.compact .abd-l.code{font-size:.74rem}
   .pjd-ed{padding:20px 22px 40px 0;overflow-y:auto;scrollbar-width:thin}
-  .pjd .abd-l.h{font:300 clamp(1.9rem,3vw,2.8rem)/1.05 var(--f-disp);letter-spacing:-.02em;margin:2px 0 4px}.pjd .abd-l.h b{font-weight:300;color:#CFF002;font-family:var(--f-mono);margin-right:.3em}
+  .pjd .abd-l.h{font:300 clamp(1.9rem,3vw,2.8rem)/1.05 var(--f-disp);letter-spacing:-.02em;margin:2px 0 16px}.pjd .abd-l.h b{font-weight:300;color:#CFF002;font-family:var(--f-mono);margin-right:.3em}
   .pjd .abd-l.c.sub{opacity:.45}
   .pjd .abd-l.q{font:italic 300 1rem/1.5 var(--f-disp);color:rgb(239 235 255/.82);max-width:62ch;border-left:1px solid rgb(207 240 2/.5);padding-left:12px}
   .pjd .abd-l.verse{font:400 .82rem/1.75 var(--f-mono);color:rgb(239 235 255/.82)}
@@ -638,6 +642,7 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .pjd-pv.on{opacity:1;visibility:visible;transition:opacity 1.2s ease}
   .pjd-cap{margin:0;font:400 .66rem var(--f-mono);color:#CFF002;opacity:.7}
   .pjd-pv .pair{max-width:none}.pjd-pv figure{margin:0}
+  .pjd-pv .gal.c1 img{width:auto;max-width:100%;max-height:72vh;margin:0 auto;background:none;justify-self:center}
   /* About, desktop (approved 11/7, mockup B): the page reads as one file, about.md, with a line-number gutter */
   .abd{display:block}
   .abd h1.big{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -769,19 +774,21 @@ function pjDesk(p){let n=0;const row=(t,x)=>`<div class="abd-row"><span class="a
    case 'spec':return [row('code','<span class="k">const</span> project = {'),...b.x.map(([k,v])=>row('code',`&nbsp;&nbsp;<span class="k">${esc(k.toLowerCase())}</span>: <span class="s">'${esc(v)}'</span>,`)),row('code','}')].join('');
    case 'lead':return row('lead',b.x);case 'p':return row('t',b.x);case 'quote':return row('q',b.x);
    case 'items':return b.x.map(([k,v])=>row('t',`<b class="pjd-k">${k}</b> · ${v}`)).join('');
+   case 'process':return b.x.map(([k,v],i)=>row('t',`<span class="pjd-n">${String(i+1).padStart(2,'0')}</span> <b class="pjd-k">${k}</b> · ${v}`)).join('');
+   case 'responses':return b.x.map(([k,v])=>row('t',`<b class="pjd-k">${k}</b> · ${v.join(', ')}`)).join('');
    case 'tags':return [row('code','['),...b.x.map((x,i)=>row('code',`&nbsp;&nbsp;<span class="s">'${esc(x)}'</span>${i<b.x.length-1?',':''}`)),row('code',']')].join('');
    case 'poem':return b.x.map(x=>row('verse',x?esc(x):'')).join('');
    default:return `<div class="abd-row"><span class="abd-n" aria-hidden="true">${++n}</span><div class="abd-l wide">${A.blocks([b])}</div></div>`}};
   const tab=(t,ti)=>{n=0;const head=t.secs.map((s,si)=>{let h='';
      if(s.title)h=row('h',`<b>${p.num}</b>${p.full||p.t}`)+row('c','// '+esc(A.strip(p.meta)))+row('','');
      else if(s.h)h=(si?row('',''):'')+row('c'+(s.lvl===4?' sub':''),'// '+esc(s.h));
-     return `<div class="pjd-sec" data-s="${si}">${h}${s.text.map(b=>txt(b)+row('','')).join('')}${s.media.length?row('ref',`<button type="button" class="pjd-go" data-s="${si}">→ preview(${s.media.length} ${s.media.length>1?'items':'item'})</button>`):''}</div>`}).join('');
-    const side=t.secs.map((s,si)=>s.media.length?`<div class="pjd-pv${si===0||!t.secs[0].media.length&&si===t.secs.findIndex(x=>x.media.length)?' on':''}" data-s="${si}"><p class="pjd-cap">preview('${esc((s.h||t.f.replace(/\.\w+$/,'')).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''))}')</p>${A.blocks(s.media)}</div>`:'').join('');
+     return `<div class="pjd-sec" data-s="${si}">${h}${s.text.map(b=>txt(b)+row('','')).join('')}${s.media.length?row('ref',`<button type="button" class="pjd-go" data-s="${si}">→ see ${(()=>{let im=0,fl=0;s.media.forEach(b=>b.t==='video'?fl++:im+=(b.imgs||b.x||[1]).length);const w=(n,a)=>n+' '+a+(n>1?'s':'');return im&&fl?w(im+fl,'item'):fl?w(fl,'film'):w(im,'image')})()}</button>`):''}</div>`}).join('');
+    const side=t.secs.map((s,si)=>s.media.length?`<div class="pjd-pv${si===0||!t.secs[0].media.length&&si===t.secs.findIndex(x=>x.media.length)?' on':''}" data-s="${si}"><p class="pjd-cap">see('${esc((s.h||t.f.replace(/\.\w+$/,'')).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''))}')</p>${A.blocks(s.media)}</div>`:'').join('');
     return `<section class="pjd-tab${ti?'':' on'}${t.hero?' hero':''}${t.wide?' wide':''}${t.narrow?' narrow':''}${t.center?' center':''}" data-t="${ti}" role="tabpanel" aria-label="${esc(t.f)}"${ti?' hidden':''}>${t.hero?`<div class="pjd-hero">${A.blocks([t.hero])}</div>`:''}<div class="pjd-ed">${head}</div>${side?`<aside class="pjd-side">${side}</aside>`:''}</section>`};
-  return `<div class="pjd"><nav class="pjd-tabs" role="tablist" aria-label="${esc(p.t)} files">${p.tabs.map((t,i)=>`<button type="button" role="tab" data-t="${i}" aria-selected="${i?'false':'true'}">${esc(t.f)}</button>`).join('')}</nav><div class="pjd-pane">${p.tabs.map(tab).join('')}</div></div>`}
+  return `<div class="pjd${p.compact?' compact':''}"><nav class="pjd-tabs" role="tablist" aria-label="${esc(p.t)} files">${p.tabs.map((t,i)=>`<button type="button" role="tab" data-t="${i}" aria-selected="${i?'false':'true'}">${esc(t.f)}</button>`).join('')}</nav><div class="pjd-pane">${p.tabs.map(tab).join('')}</div></div>`}
 function pjWire(v){const W=v.querySelector('.pjd');if(!W)return;const tabs=[...W.querySelectorAll('.pjd-tabs button')],panes=[...W.querySelectorAll('.pjd-tab')];
   const show=(tab,si)=>{const pv=[...tab.querySelectorAll('.pjd-pv')];if(!pv.length)return;let pick=pv.filter(x=>+x.dataset.s<=si).pop()||pv[0];pv.forEach(x=>x.classList.toggle('on',x===pick))};
-  const track=tab=>{const ed=tab.querySelector('.pjd-ed');if(!ed||!tab.querySelector('.pjd-side'))return;let raf=0;ed.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const top=ed.getBoundingClientRect().top+ed.clientHeight*.35;let si=0;ed.querySelectorAll('.pjd-sec').forEach(s=>{if(s.getBoundingClientRect().top<top)si=+s.dataset.s});show(tab,si)})},{passive:true});
+  const track=tab=>{const ed=tab.querySelector('.pjd-ed');if(!ed||!tab.querySelector('.pjd-side'))return;let raf=0;ed.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const top=ed.getBoundingClientRect().top+ed.clientHeight*.35;let si=0;ed.querySelectorAll('.pjd-sec').forEach(s=>{if(s.getBoundingClientRect().top<top)si=+s.dataset.s});if(ed.scrollTop+ed.clientHeight>=ed.scrollHeight-4){const l=[...tab.querySelectorAll('.pjd-pv')].pop();if(l)si=Math.max(si,+l.dataset.s)}show(tab,si)})},{passive:true});
    tab.querySelectorAll('.pjd-go').forEach(b=>b.addEventListener('click',()=>show(tab,+b.dataset.s)))};
   const align=tab=>{const ch=tab.querySelector('.pjd-ed .abd-row:has(.dr)'),pv=tab.querySelector('.pjd-pv.on');if(!ch||!pv)return;const f=pv.querySelector('figure');if(!f)return;f.style.marginTop='0px';const d=ch.getBoundingClientRect().top-f.getBoundingClientRect().top;if(d>0)f.style.marginTop=d+'px'};
   panes.forEach(track);panes.forEach(t=>{if(!t.hidden)requestAnimationFrame(()=>align(t))});addEventListener('resize',()=>panes.forEach(t=>{if(!t.hidden)align(t)}));
