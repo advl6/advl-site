@@ -877,7 +877,7 @@ function pjDesk(p){if(p.gallery)return pjGal(p);let n=0;const row=(t,x)=>`<div c
    case 'process':return b.x.map(([k,v],i)=>row('t',`<span class="pjd-n">${String(i+1).padStart(2,'0')}</span> <b class="pjd-k">${k}</b> · ${v}`)).join('');
    case 'responses':return b.x.map(([k,v])=>row('t',`<b class="pjd-k">${k}</b> · ${v.join(', ')}`)).join('');
    case 'tags':return [row('code','['),...b.x.map((x,i)=>row('code',`&nbsp;&nbsp;<span class="s">'${esc(x)}'</span>${i<b.x.length-1?',':''}`)),row('code',']')].join('');
-   case 'model':return row('ref',`<button type="button" class="pjd-go pjd-3d" data-m="${esc(b.id)}">→ open('${esc(b.id)}.glb') · view in 3D</button>`);
+   case 'model':return row('ref',`<button type="button" class="pjd-go pjd-3d" data-m="${esc(b.id)}">→ open('${esc(b.label||b.id)}.glb') · view in 3D</button>`);
    case 'poem':return b.x.map(x=>row('verse',x?esc(x):'')).join('');
    default:return `<div class="abd-row"><span class="abd-n" aria-hidden="true">${++n}</span><div class="abd-l wide">${A.blocks([b])}</div></div>`}};
   const tab=(t,ti)=>{n=0;const head=t.secs.map((s,si)=>{let h='';
