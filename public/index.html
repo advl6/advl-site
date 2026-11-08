@@ -34,6 +34,7 @@
 .verpop .vd{font:400 .62rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--soft)}
 .verpop li p{margin:2px 0 0;font-size:.9rem;line-height:1.5}
 @media (prefers-reduced-motion:reduce){.verveil,.verpop{transition:none}}
+.wk{display:grid;gap:44px;margin-top:28px;max-width:min(100%,1400px)}.wk-h{display:flex;gap:16px;align-items:baseline;font:400 13px/1.4 var(--f-mono,monospace);color:var(--chart,#d2f000);margin:0 0 14px}.wk-h small{color:rgba(255,255,255,.6);font-size:12px}.wk-m{columns:3 260px;column-gap:14px}.wk-m figure{break-inside:avoid;margin:0 0 14px}.wk-m img{width:100%;display:block;border-radius:10px}.wk-m figcaption{font:400 11px/1.4 var(--f-mono,monospace);color:rgba(255,255,255,.62);margin-top:6px}
 </style>
 <script src="config.js"></script>
 <title>Ariana Dorothea Levy</title>
@@ -909,7 +910,7 @@ function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;con
    <aside class="abd-side">${D.portrait?`<figure class="feature abd-pic pf${D.portraitRound?' rd':''}"><img src="${D.portrait}" alt="Portrait of Ariana Dorothea Levy" decoding="async"></figure>`:`<figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>`}
    <dl class="abd-facts"><div><dt>mfa</dt><dd>Design · California College of the Arts · 2024</dd></div><div><dt>ba</dt><dd>Fine Art · Drew University · 2019</dd></div><div><dt>based</dt><dd>San Francisco</dd></div><div><dt>speaks</dt><dd>English · German <span class="cm">// native</span></dd></div></dl></aside></div></div>`}
 /* level labels: the name part (.lvn) hides wherever the page already says it (phone goto line, desktop page titles) */
-const LV={home:'L0<span class="lvn"> · Home</span>',projects:'L1<span class="lvn"> · Projects</span>',background:'L2<span class="lvn"> · Background</span>',about:'L3<span class="lvn"> · About</span>',artifacts:'L4<span class="lvn"> · Artifacts</span>',lot:'L5<span class="lvn"> · Parking Lot</span>'};
+const LV={home:'L0<span class="lvn"> · Home</span>',projects:'L1<span class="lvn"> · Projects</span>',works:'L2<span class="lvn"> · Works</span>',background:'L3<span class="lvn"> · Background</span>',about:'L4<span class="lvn"> · About</span>',artifacts:'L5<span class="lvn"> · Artifacts</span>',lot:'L6<span class="lvn"> · Parking Lot</span>'};
 const dialKind='D';
 const drawDial=()=>A.dial($('#dialwrap'),dialKind);
 /* progress rail on project pages */
@@ -962,7 +963,7 @@ function spiral(host,D,onFront){
 
 const cfg={
  init(){drawDial()},
- bgFor:k=>{const set=window.ADVL_BG.sets.find(x=>x.key===(document.documentElement.dataset.bg||''))||window.ADVL_BG.sets[0];return set.map[k]||({background:'frost/collage.webp',about:'frost/collage_alt.webp',artifacts:'frost/mural_bg.webp',lot:'frost/lot.webp'})[k]},
+ bgFor:k=>{const set=window.ADVL_BG.sets.find(x=>x.key===(document.documentElement.dataset.bg||''))||window.ADVL_BG.sets[0];return set.map[k]||(k==='works'&&(set.map.background))||({works:'frost/collage.webp',background:'frost/collage.webp',about:'frost/collage_alt.webp',artifacts:'frost/mural_bg.webp',lot:'frost/lot.webp'})[k]},
  onRoute(r){if(r.tab!=='artifacts'&&window.ADVL_VIEWER)ADVL_VIEWER.close();if(A._roomEl&&r.tab!=='artifacts')A._roomEl.style.display='none';if(r.tab==='artifacts'&&A.room)A.room.start()},
  landing(v){A.door(v,'arch')},
  home(v,D){v.innerHTML=`<section class="home"><p class="lvl">L0<span class="lvn"> · Home</span></p><h1 class="name"><span>Ariana</span><span>Dorothea</span><span>Levy</span></h1><p class="role">${esc(D.title)}</p><p class="hint">San Francisco</p></section><nav class="mcasc" aria-label="Featured projects">${[2,6,8,9,7,3].map((n,k)=>{const p=D.projects.find(x=>+x.num===n);return p?`<a href="#p${p.num}" style="--k:${k}" aria-label="Open ${esc(A.strip(p.t))}" class="${k?'':'on'}"><span>${p.num}</span><img src="img/tread/${p.num}.webp" alt=""></a>`:''}).join('')}</nav><div class="h3-arc" aria-hidden="true"></div><div class="h3" role="group" aria-label="3D models, drag to turn"></div>`;
@@ -982,6 +983,12 @@ const cfg={
   v.innerHTML=`<p class="lvl">${LV.background}</p><h1 class="big">Background</h1><div class="slab">${A.blocks([{t:'timeline',...D.timeline}])}
    <h2 class="sec">Experience</h2><ol class="cvsteps">${D.exp.map(item).join('')}</ol><h2 class="sec">Education</h2><ol class="cvsteps">${D.edu.map(item).join('')}</ol>
    <h2 class="sec">Skills</h2><ul class="tags">${D.skills.map(s=>`<li>${s}</li>`).join('')}</ul><h2 class="sec">Tools</h2><ul class="tags">${D.tools.map(s=>`<li>${s}</li>`).join('')}</ul></div>${bgDesk(D)}`;bgWire(v,D)},
+ works(v,D){const W=(D.offProjects||[]).map(p=>{const imgs=[];(p.blocks||[]).forEach(b=>b.t==='gal'&&imgs.push(...b.imgs));return {p,imgs}});
+  let mode='viewer';try{mode=localStorage.getItem('advl-works-mode')||'viewer'}catch(e){}
+  const desk=matchMedia('(min-width:1024px)').matches;
+  const fake={num:'',full:'Works',meta:'Images from projects no longer on the site',tabs:[{f:'works.md',secs:W.map(({p,imgs})=>({h:p.t,text:[{t:'p',x:esc(A.strip(p.meta||''))}],media:imgs.length?[{t:'gal',imgs}]:[]})).filter(s=>s.media.length)}],gallery:mode==='grid'?'viewer':mode};
+  if(desk&&mode!=='grid'){v.innerHTML=`<p class="lvl">${LV.works}</p>${pjGal(fake)}`;glWire(v);return}
+  v.innerHTML=`<p class="lvl">${LV.works}</p><h1 class="big">Works</h1><div class="wk">${W.map(({p,imgs})=>`<section class="wk-g"><p class="wk-h"><span>// ${esc(p.t)}</span><small>${esc(A.strip(p.meta||''))} · ${imgs.length} ${imgs.length===1?'image':'images'}</small></p>${imgs.length?`<div class="wk-m">${imgs.map(([k,a])=>`<figure><img src="${k}" alt="${esc(a)}" loading="lazy" decoding="async"><figcaption>${esc(a)}</figcaption></figure>`).join('')}</div>`:'<p class="soft">Images for this project are not on the site yet.</p>'}</section>`).join('')}</div>`},
  about(v,D){v.innerHTML=`<p class="lvl">${LV.about}</p><h1 class="big">About</h1><div class="about">${D.portrait?`<figure class="feature pf${D.portraitRound?' rd':''}"><img src="${D.portrait}" alt="Portrait of Ariana Dorothea Levy" decoding="async"></figure>`:`<figure class="feature" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>`}
    <div class="slab">${D.about}<p class="langs"><b>Languages</b> ${esc(D.languages||'')}</p><p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p><p class="contact links">${(D.links||[]).map(([n,u])=>`<a class="soc" href="${u}" target="_blank" rel="noopener">${n}<span aria-hidden="true"> ↗</span></a>`).join('')}</p></div></div>${abDesk(D)}`;
   v.querySelectorAll('.copy-mail').forEach(b=>b.onclick=()=>{const m=b.parentNode.querySelector('.mail-t');try{navigator.clipboard.writeText(D.email).then(()=>b.textContent='Copied',()=>sel())}catch(e){sel()}function sel(){const r=document.createRange();r.selectNodeContents(m);getSelection().removeAllRanges();getSelection().addRange(r);b.textContent='Selected'}})},
