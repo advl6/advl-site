@@ -718,6 +718,39 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .abd-facts div{display:flex;gap:8px}.abd-facts dt{color:#CFF002;opacity:.75}.abd-facts dd{margin:0}.abd-facts .cm{color:#CFF002;opacity:.45;font-style:italic}
 }
 
+/* About, phone mockups (11/8): the desktop about.md pane on phones */
+@media (max-width:720px){
+  html[data-mab] .about{display:none}
+  html[data-mab] .abd{display:block;margin-top:6px}
+  html[data-mab] .abd h1.big{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  html[data-mab] .abd-tabs{display:flex;gap:18px;font:400 .68rem var(--f-mono);margin:0 0 10px 2px}
+  html[data-mab] .abd-tabs b{font-weight:400;color:#CFF002;border-bottom:1px solid #CFF002;padding-bottom:5px}
+  html[data-mab] .abd-tabs a{color:#CFF002;opacity:.5;text-decoration:none}
+  html[data-mab] .abd-pane{display:flex;flex-direction:column;border-radius:16px;background:linear-gradient(rgb(255 255 255/.07),rgb(255 255 255/.03));border:1px solid var(--edge);-webkit-backdrop-filter:blur(22px) saturate(1.2);backdrop-filter:blur(22px) saturate(1.2);overflow:hidden}
+  html[data-mab] .abd-ed{padding:16px 16px 16px 0}
+  html[data-mab] .abd-row{display:flex}
+  html[data-mab] .abd-n{flex:0 0 30px;font:400 .58rem/1.7 var(--f-mono);color:rgb(239 235 255/.25);text-align:right;padding-right:10px;user-select:none}
+  html[data-mab] .abd-l{flex:1;min-width:0;min-height:1.4em}
+  html[data-mab] .abd-l.c{font:italic 400 .66rem/1.6 var(--f-mono);color:#CFF002;opacity:.6}
+  html[data-mab] .abd-l.lead{font:300 1.32rem/1.26 var(--f-disp);letter-spacing:-.015em;margin:0}
+  html[data-mab] .abd-l.t{font-size:.9rem;line-height:1.55;color:rgb(239 235 255/.86);margin:0 0 4px}
+  html[data-mab] .abd-l.code{font:400 .74rem/1.9 var(--f-mono);color:rgb(239 235 255/.5);overflow-wrap:anywhere}
+  html[data-mab] .abd-l .k{color:#CFF002;opacity:.85}
+  html[data-mab] .abd-l .pill{all:unset;cursor:pointer;display:inline-block;color:#CFF002;border:1px solid rgb(207 240 2/.45);border-radius:999px;padding:0 9px;margin:0 4px;font:400 .58rem/1.8 var(--f-mono);letter-spacing:.08em;text-transform:uppercase}
+  html[data-mab] .abd-facts{margin:0;font:400 .7rem/1.85 var(--f-mono)}
+  html[data-mab] .abd-facts div{display:flex;gap:8px}html[data-mab] .abd-facts dt{color:#CFF002;opacity:.75}html[data-mab] .abd-facts dd{margin:0}html[data-mab] .abd-facts .cm{color:#CFF002;opacity:.45;font-style:italic}
+  /* A: one file, the portrait and facts inside the pane at the top */
+  html[data-mab=A] .abd-side{order:-1;display:grid;grid-template-columns:118px 1fr;gap:16px;align-items:center;padding:18px 16px 14px;border-bottom:1px solid rgb(255 255 255/.1)}
+  html[data-mab=A] .abd-pic{margin:0;width:118px}
+  html[data-mab=A] .abd-pic.pf.rd{max-width:118px}
+  html[data-mab=A] .abd-facts{font-size:.62rem;line-height:1.7}
+  html[data-mab=A] .abd-facts div{flex-direction:column;gap:0;margin-bottom:4px}
+  /* B: the portrait sits large above the pane, facts close the pane */
+  html[data-mab=B] .abd-side{display:contents}
+  html[data-mab=B] .abd-pic{position:absolute;visibility:hidden}
+  html[data-mab=B] .abd-facts{padding:12px 16px 18px 40px;border-top:1px solid rgb(255 255 255/.1)}
+  html[data-mab=B] .about{display:block}html[data-mab=B] .about .slab{display:none}
+}
 /* Parking Lot, desktop (10/27): the physics lot */
 .lotd{display:none}
 @media (min-width:1024px){
