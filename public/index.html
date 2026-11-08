@@ -660,6 +660,12 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .gl-strip button{all:unset;cursor:pointer;flex:0 0 auto;opacity:.45;transition:opacity .9s ease;border-bottom:1px solid transparent;padding-bottom:4px}
   .gl-strip button:hover,.gl-strip button[aria-current=true]{opacity:1}.gl-strip button[aria-current=true]{border-bottom-color:#CFF002}
   .gl-strip img{display:block;height:54px;width:auto;border-radius:5px}
+  .pjd-tab.narrow.slim{grid-template-columns:min(19.2vw,272px) minmax(0,1fr)}
+  .pjd-side .play{position:absolute;inset:0;width:100%;height:100%;padding:12px}
+  .play .dd{fill:none;stroke:#CFF002;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 4px rgb(207 240 2/.7))}.play .dd.thin{stroke-width:1.4}.play .dd.pin{fill:rgb(207 240 2/.25)}
+  .play .fr image{filter:drop-shadow(0 24px 30px rgb(0 0 0/.45))}
+  .play .bob{animation:playBob 4.8s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}@keyframes playBob{50%{transform:translateY(-10px) rotate(-1.5deg)}}
+  @media (prefers-reduced-motion:reduce){.play .bob{animation:none}}
   .pjd-side{position:relative;border-left:1px solid rgb(255 255 255/.1);min-height:0}
   .pjd-pv{position:absolute;inset:0;padding:18px;overflow-y:auto;scrollbar-width:thin;display:grid;align-content:start;gap:14px;opacity:0;visibility:hidden;transition:opacity 1.2s ease,visibility 0s linear 1.2s}
   .pjd-pv.on{opacity:1;visibility:visible;transition:opacity 1.2s ease}
@@ -793,6 +799,17 @@ function bgWire(v,D){const card=v.querySelector('.bgd-role');if(!card)return;con
 
 /* desktop About (layout 2, approved 10/26 19:47): the opening line large on the left with facts and email; the card holds the image and the rest of the bio */
 /* gallery project pages (05 first): photography is the point. Left: the editor column as an index of studies; right: the work, as a wall (mode 'wall') or one image at a time (mode 'viewer') */
+/* playful scene for a project side (07 first, Ariana's pick A 11/7): the Parking Lot doodles (ground, grass, bush, door) drawn in the line colour,
+   the cut-out work standing on the ground and a second image pinned up like the Lot's drying sheet. No overlaps. */
+function playLot(t){const f=t.play,tuft=(x,y,s)=>`<path class="dd thin" d="M${x-s*.6} ${y} L${x-s*.2} ${y-s} M${x} ${y} L${x} ${y-s*1.3} M${x+s*.6} ${y} L${x+s*.25} ${y-s*.9}"/>`;
+  const bush=(cx,y,r)=>{let d=`M${cx-r*1.25} ${y}`;for(let i=0;i<=8;i++){const a=Math.PI*(1+i/8),x=cx+Math.cos(a)*r*1.25,yy=y-r*.15+Math.sin(a)*r*.95;d+=` Q${(x+Math.cos(a+.2)*12).toFixed(1)} ${(yy+Math.sin(a+.2)*12).toFixed(1)} ${x.toFixed(1)} ${yy.toFixed(1)}`}return `<path class="dd" d="${d} L${cx+r*1.25} ${y}"/><path class="dd thin" d="M${cx-r*.4} ${y-r*.55} q${r*.2} -${r*.2} ${r*.4} 0"/>`};
+  const gy=640,dw=88,dh=200,dx=885,s=f.sheet,fh=f.h,fw=fh*f.ar,fx=f.x;
+  const pin=(a,b,i)=>`<line class="dd thin" x1="${a}" y1="${b}" x2="${a+(i%2?14:-14)}" y2="${b+(i<2?-14:14)}"/><circle class="dd pin" cx="${a+(i%2?14:-14)}" cy="${b+(i<2?-14:14)}" r="7"/>`;
+  return `<svg class="play" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${esc(f.alt)}">
+   <g transform="rotate(-5 ${s.x+s.w/2} ${s.y+s.h/2})"><image href="${s.src}" x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" preserveAspectRatio="xMidYMid slice"/><rect class="dd" x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="6"/>${[[s.x,s.y],[s.x+s.w,s.y],[s.x,s.y+s.h],[s.x+s.w,s.y+s.h]].map(([a,b],i)=>pin(a,b,i)).join('')}</g>
+   <path class="dd" d="M20 ${gy} H980"/>${[60,140,300,770,850,955].map((x,i)=>tuft(x,gy,12+(i%3)*5)).join('')}${bush(780,gy,46)}
+   <path class="dd" d="M${dx} ${gy} V${gy-dh+dw/2} A${dw/2} ${dw/2} 0 0 1 ${dx+dw} ${gy-dh+dw/2} V${gy}"/><circle class="dd" cx="${dx+dw*.83}" cy="${gy-dh*.45}" r="4"/>
+   <g class="fr bob"><image href="${f.src}" x="${fx-fw/2}" y="${gy-fh}" width="${fw}" height="${fh}"/></g></svg>`}
 const glImg=k=>k.includes('/')?k:`g/${k}.webp`;
 function pjGal(p){let n=0;const row=(t,x)=>`<div class="abd-row"><span class="abd-n" aria-hidden="true">${++n}</span>${t==='lead'?`<p class="abd-l lead">${x}</p>`:`<div class="abd-l ${t}">${x}</div>`}</div>`;
   const G=[];let head=null;p.tabs.forEach(t=>t.secs.forEach(s=>{if(s.title){head=s;return}const g=s.media.find(m=>m.t==='gal');if(g)G.push({h:s.h,line:(s.text.find(b=>b.t==='p')||{}).x||'',imgs:g.imgs,f:t.f.replace(/\.\w+$/,'')})}));
@@ -832,7 +849,7 @@ function pjDesk(p){if(p.gallery)return pjGal(p);let n=0;const row=(t,x)=>`<div c
      else if(s.h)h=(si?row('',''):'')+row('c'+(s.lvl===4?' sub':''),'// '+esc(s.h));
      return `<div class="pjd-sec" data-s="${si}">${h}${s.text.map(b=>txt(b)+row('','')).join('')}${s.media.length?row('ref',`<button type="button" class="pjd-go" data-s="${si}">→ see ${(()=>{let im=0,fl=0;s.media.forEach(b=>b.t==='video'?fl++:im+=(b.imgs||b.x||[1]).length);const w=(n,a)=>n+' '+a+(n>1?'s':'');return im&&fl?w(im+fl,'item'):fl?w(fl,'film'):w(im,'image')})()}</button>`):''}</div>`}).join('');
     const side=t.secs.map((s,si)=>s.media.length?`<div class="pjd-pv${si===0||!t.secs[0].media.length&&si===t.secs.findIndex(x=>x.media.length)?' on':''}" data-s="${si}"><p class="pjd-cap">see('${esc((s.h||t.f.replace(/\.\w+$/,'')).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''))}')</p>${A.blocks(s.media)}</div>`:'').join('');
-    return `<section class="pjd-tab${ti?'':' on'}${t.hero?' hero':''}${t.wide?' wide':''}${t.narrow?' narrow':''}${t.center?' center':''}" data-t="${ti}" role="tabpanel" aria-label="${esc(t.f)}"${ti?' hidden':''}>${t.hero?`<div class="pjd-hero">${A.blocks([t.hero])}</div>`:''}<div class="pjd-ed">${head}</div>${side?`<aside class="pjd-side">${side}</aside>`:''}</section>`};
+    return `<section class="pjd-tab${ti?'':' on'}${t.hero?' hero':''}${t.wide?' wide':''}${t.narrow?' narrow':''}${t.center?' center':''}${t.slim?' slim':''}" data-t="${ti}" role="tabpanel" aria-label="${esc(t.f)}"${ti?' hidden':''}>${t.hero?`<div class="pjd-hero">${A.blocks([t.hero])}</div>`:''}<div class="pjd-ed">${head}</div>${t.play?`<aside class="pjd-side">${playLot(t)}</aside>`:side?`<aside class="pjd-side">${side}</aside>`:''}</section>`};
   return `<div class="pjd${p.compact?' compact':''}"><nav class="pjd-tabs" role="tablist" aria-label="${esc(p.t)} files">${p.tabs.map((t,i)=>`<button type="button" role="tab" data-t="${i}" aria-selected="${i?'false':'true'}">${esc(t.f)}</button>`).join('')}</nav><div class="pjd-pane">${p.tabs.map(tab).join('')}</div></div>`}
 function pjWire(v){if(v.querySelector('.pjd.gl'))return glWire(v);const W=v.querySelector('.pjd');if(!W)return;const tabs=[...W.querySelectorAll('.pjd-tabs button')],panes=[...W.querySelectorAll('.pjd-tab')];
   const show=(tab,si)=>{const pv=[...tab.querySelectorAll('.pjd-pv')];if(!pv.length)return;let pick=pv.filter(x=>+x.dataset.s<=si).pop()||pv[0];pv.forEach(x=>x.classList.toggle('on',x===pick))};
