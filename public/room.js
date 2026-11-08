@@ -9,7 +9,7 @@ window.ROOM=function(el,DATA){const M=M4,RM=matchMedia('(prefers-reduced-motion:
  ob.onclick=()=>{still=!still;ob.setAttribute('aria-pressed',String(still));ob.textContent=still?'Observing':'Observe';held=null};el.appendChild(ob);const mb=document.createElement('button');mb.type='button';mb.className='obs mdl';mb.textContent='3D models';mb.onclick=()=>el.dispatchEvent(new CustomEvent('advl:artifact',{bubbles:true,detail:null}));el.appendChild(mb);
  const gp=[];for(let i=-6;i<=6;i++)gp.push(i,.002,-6,i,.002,6,-6,.002,i,6,.002,i);const grid=G.rawLines(gp,'#DCDCD5');
  const B=this.B=DATA.map(o=>{const s=Math.max(.6,Math.min(2.6,o.mm/700));
-  return {o,mesh:G.lines(o.lines,o.col),s,h:o.ext[1]*s,r:Math.max(.25,Math.hypot(o.ext[0],o.ext[2])*s*.4),roll:['04','13','14'].includes(o.num),flt:o.float,
+  return {o,mesh:G.lines(o.lines,o.col),s,h:o.ext[1]*s,r:Math.max(.25,Math.hypot(o.ext[0],o.ext[2])*s*.4),roll:['04','14','12'].includes(o.num),flt:o.float,
    p:[(Math.random()-.5)*8,o.float?2.2+Math.random():2.5+Math.random()*4,(Math.random()-.5)*8],v:[0,0,0],R:[1,0,0,0,1,0,0,0,1],yaw:Math.random()*6}});
  const orb={a:.6,e:.32,d:13.5};let t=0,VP=null,held=null,drag=null;
  const scr=p=>{const q=M.xf(VP,p);return [(q[0]+1)/2*cv.clientWidth,(1-q[1])/2*cv.clientHeight,q[2]]};
