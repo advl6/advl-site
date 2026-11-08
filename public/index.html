@@ -141,6 +141,7 @@ body[data-route=home] #dialwrap,body.cine #dialwrap{display:block}
 .tread .n{position:absolute;left:10px;top:8px;font:500 .64rem var(--f-mono);color:var(--soft)}
 .tread img.wire{width:132px;height:110px;filter:drop-shadow(0 0 6px rgb(207 240 2/.45))}
 .tread.front{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc),0 0 30px rgb(207 240 2/.25)}
+@media (max-width:720px){.tread.front{background:linear-gradient(rgb(30 44 40/.92),rgb(16 26 28/.9));-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}.spiral-wrap{perspective:none}.spiral{transform-style:flat;perspective:1100px;transform:none!important}.tread{transform-style:flat;left:-72px;top:-56px;width:144px;height:112px}.tread img{width:90px;height:78px}.tread img.wire{width:110px;height:90px}}
 .spiral-col{position:absolute;left:50%;top:-40%;bottom:-40%;width:2px;margin-left:-1px;background:linear-gradient(transparent,rgb(207 240 2/.6),transparent);box-shadow:var(--glow);opacity:.5}
 .front-card{position:absolute;left:0;right:0;bottom:0;display:grid;justify-items:center;gap:4px;text-align:center;pointer-events:none}
 .front-card .t{font:300 clamp(1.4rem,3.4vw,2.2rem)/1.1 var(--f-disp);letter-spacing:-.015em}
@@ -796,6 +797,12 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .ld-tools{right:auto;left:14px;bottom:24px}
   .ld-pal{padding:3px 5px}.ld-pal button{padding:4px 5px}.ld-pal i{width:8px;height:8px}
 }
+/* phones (11/8): pages scroll inside the frame, never past its line; the background reaches under the status bar and toolbar */
+@media (max-width:720px){
+  #bg{top:calc(-80px - env(safe-area-inset-top,0px));bottom:calc(-120px - env(safe-area-inset-bottom,0px))}
+  body:not([data-route=lot]):not([data-route=artifacts]):not([data-route=landing]):not(.cine) #view{position:fixed;top:calc(13px + env(safe-area-inset-top,0px));bottom:calc(13px + env(safe-area-inset-bottom,0px));left:calc(13px + env(safe-area-inset-left,0px));right:calc(13px + env(safe-area-inset-right,0px));margin:0;max-width:none;padding:71px 14px 112px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border-radius:19px;
+    -webkit-mask-image:linear-gradient(transparent 0,#000 66px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(transparent 0,#000 66px,#000 calc(100% - 28px),transparent)}
+}
 </style>
 </head>
 <body>
@@ -957,7 +964,7 @@ addEventListener('scroll',()=>{const h=document.documentElement;const p=h.scroll
 
 /* the spiral of treads: a polar array that steps down as it turns */
 function spiral(host,D,onFront){
- const P=D.projects,N=P.length,STEP=28,RISE=44,DESK=matchMedia('(min-width:1024px)'),R=()=>DESK.matches?Math.min(300,host.clientWidth*.34):Math.min(320,innerWidth*.36);
+ const P=D.projects,N=P.length,STEP=28,RISE=44,DESK=matchMedia('(min-width:1024px)'),R=()=>DESK.matches?Math.min(300,host.clientWidth*.34):Math.min(320,innerWidth*.5);
  host.innerHTML=`<div class="spiral-wrap" tabindex="0" role="listbox" aria-label="Projects, turn with arrow keys"><span class="spiral-col"></span><div class="spiral">${P.map((p,i)=>`<a class="tread" href="#p${p.num}" role="option" data-i="${i}" aria-label="${p.num} ${esc(A.strip(p.t))}"><span class="n">${p.num}</span><img src="${p.tread||`orb/${p.img}.webp`}"${p.tread?' class="wire"':''} alt="" draggable="false"></a>`).join('')}</div>
   <div class="front-card" aria-live="polite"><span class="t"></span><span class="f"></span></div></div>
   <div class="spin-ctl"><button type="button" data-d="-1">Up a step</button><button type="button" data-d="1">Down a step</button></div>
@@ -971,7 +978,8 @@ function spiral(host,D,onFront){
  try{pos=+sessionStorage.getItem('advl-c2-tread')||0}catch(e){}
  const idx=()=>((Math.round(pos)%N)+N)%N;
  const draw=()=>{const f=idx();tr.forEach((t,i)=>{let d=((i-pos)%N+N)%N;if(d>N/2)d-=N;const a=d*STEP,ad=Math.abs(d);
-   t.style.transform=`rotateY(${a.toFixed(3)}deg) translateZ(${rr}px) translateY(${(d*RISE).toFixed(2)}px)`;
+   const lift=DESK.matches?0:Math.max(0,1-ad)*70;  /* phones: the lit tread steps forward so its neighbours never cut through it */
+   t.style.transform=`${DESK.matches?'':`translateZ(${-rr}px) `}rotateY(${a.toFixed(3)}deg) translateZ(${(rr+lift).toFixed(1)}px) translateY(${(d*RISE).toFixed(2)}px)`;
    const vis=ad<=5.5;t.style.opacity=vis?String(Math.max(0,1-ad*.15)):'0';t.style.zIndex=String(20-Math.round(ad));t.style.pointerEvents=(DESK.matches?vis:ad<.5)?'auto':'none';  /* phones: only the lit front tread takes a tap; turn the stair to reach the next */
    const fr=i===f;t.classList.toggle('front',fr);t.setAttribute('aria-selected',String(fr));t.tabIndex=fr?0:-1});
   if(f!==shown){shown=f;const p=P[f];ft.textContent=A.strip(p.t);ff.textContent=`${p.num} · ${p.f}`;onFront&&onFront(p);try{sessionStorage.setItem('advl-c2-tread',f)}catch(e){}}};
@@ -1005,7 +1013,7 @@ const cfg={
  bgFor:k=>{const set=window.ADVL_BG.sets.find(x=>x.key===(document.documentElement.dataset.bg||''))||window.ADVL_BG.sets[0];return set.map[k]||(k==='works'&&(set.map.background))||({works:'frost/collage.webp',background:'frost/collage.webp',about:'frost/collage_alt.webp',artifacts:'frost/mural_bg.webp',lot:'frost/lot.webp'})[k]},
  onRoute(r){if(r.tab!=='artifacts'&&window.ADVL_VIEWER)ADVL_VIEWER.close();if(A._roomEl&&r.tab!=='artifacts')A._roomEl.style.display='none';if(r.tab==='artifacts'&&A.room)A.room.start()},
  landing(v){A.door(v,'arch')},
- home(v,D){v.innerHTML=`<section class="home"><p class="lvl">L0<span class="lvn"> · Home</span></p><h1 class="name"><span>Ariana</span><span>Dorothea</span><span>Levy</span></h1><p class="role">${esc(D.title)}</p><p class="hint">San Francisco</p></section><nav class="mcasc" aria-label="Featured projects">${[2,6,8,9,7,3].map((n,k)=>{const p=D.projects.find(x=>+x.num===n);return p?`<a href="#p${p.num}" style="--k:${k}" aria-label="Open ${esc(A.strip(p.t))}" class="${k?'':'on'}"><span>${p.num}</span><img src="img/tread/${p.num}.webp" alt=""></a>`:''}).join('')}</nav><div class="h3-arc" aria-hidden="true"></div><div class="h3" role="group" aria-label="3D models, drag to turn"></div>`;
+ home(v,D){v.innerHTML=`<section class="home"><p class="lvl">L0<span class="lvn"> · Home</span></p><h1 class="name"><span>Ariana</span><span>Dorothea</span><span>Levy</span></h1><p class="role">${esc(D.title)}</p><p class="hint">San Francisco</p></section><nav class="mcasc" aria-label="Featured projects">${[2,6,8,9,7,3].map((n,k)=>{const p=D.projects.find(x=>+x.num===n);return p?`<a href="#p${p.num}" style="--k:${k}" aria-label="Open ${esc(A.strip(p.t))}" class="${k?'':'on'}"><span>${p.num}</span><img src="img/tread/${p.num}.webp?v=3" alt=""></a>`:''}).join('')}</nav><div class="h3-arc" aria-hidden="true"></div><div class="h3" role="group" aria-label="3D models, drag to turn"></div>`;
   {const ps=[...v.querySelectorAll('.mcasc a')];let k=0;const t=setInterval(()=>{if(!ps[0]||!ps[0].isConnected)return clearInterval(t);if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;ps[k].classList.remove('on');k=(k+1)%ps.length;ps[k].classList.add('on')},4200)}
   const h=v.querySelector('.h3'),mq=matchMedia('(min-width:1024px)');
   if(mq.matches)ADVL_HOME3D.mount(h);else mq.addEventListener('change',function f(e){if(e.matches&&h.isConnected){mq.removeEventListener('change',f);ADVL_HOME3D.mount(h)}})},

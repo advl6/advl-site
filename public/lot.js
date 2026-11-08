@@ -173,6 +173,7 @@ window.ADVL_LOT = {
     view.appendChild(root); compose.forEach(n => n && q('.ld-compose').appendChild(n));
     q('.ld-pal').onclick = e => { const b = e.target.closest('button'); if (!b) return; pal = PALETTES[[...q('.ld-pal').children].indexOf(b)]; try { localStorage.setItem('advl-lot-pal', PALETTES.indexOf(pal)); } catch (e) {} applyPal(); };
     layout(); applyPal(); showBg(Math.floor(Math.random() * BGS.length)); if (!RM) timer = setInterval(() => showBg(bi + 1), 60000);
+    if (PH()) { const re = () => { if (root) onResize(); }; [300, 900, 2400].forEach(ms => setTimeout(re, ms)); document.fonts && document.fonts.ready.then(re); if (window.ResizeObserver) new ResizeObserver(re).observe(q('.ld-compose')); }
     addEventListener('resize', onResize); idleOn(); last = performance.now(); raf = requestAnimationFrame(frame); },
   sync, setDelete(fn) { delFn = fn; }, next() { showBg(bi + 1); }, _idle(ms) { IDLE = ms; wake(); }
 };
