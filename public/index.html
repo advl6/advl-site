@@ -824,6 +824,7 @@ function pjDesk(p){if(p.gallery)return pjGal(p);let n=0;const row=(t,x)=>`<div c
    case 'process':return b.x.map(([k,v],i)=>row('t',`<span class="pjd-n">${String(i+1).padStart(2,'0')}</span> <b class="pjd-k">${k}</b> · ${v}`)).join('');
    case 'responses':return b.x.map(([k,v])=>row('t',`<b class="pjd-k">${k}</b> · ${v.join(', ')}`)).join('');
    case 'tags':return [row('code','['),...b.x.map((x,i)=>row('code',`&nbsp;&nbsp;<span class="s">'${esc(x)}'</span>${i<b.x.length-1?',':''}`)),row('code',']')].join('');
+   case 'model':return row('ref',`<button type="button" class="pjd-go pjd-3d" data-m="${esc(b.id)}">→ open('${esc(b.id)}.glb') · view in 3D</button>`);
    case 'poem':return b.x.map(x=>row('verse',x?esc(x):'')).join('');
    default:return `<div class="abd-row"><span class="abd-n" aria-hidden="true">${++n}</span><div class="abd-l wide">${A.blocks([b])}</div></div>`}};
   const tab=(t,ti)=>{n=0;const head=t.secs.map((s,si)=>{let h='';
@@ -838,6 +839,7 @@ function pjWire(v){if(v.querySelector('.pjd.gl'))return glWire(v);const W=v.quer
   const track=tab=>{const ed=tab.querySelector('.pjd-ed');if(!ed||!tab.querySelector('.pjd-side'))return;let raf=0;ed.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const top=ed.getBoundingClientRect().top+ed.clientHeight*.35;let si=0;ed.querySelectorAll('.pjd-sec').forEach(s=>{if(s.getBoundingClientRect().top<top)si=+s.dataset.s});if(ed.scrollTop+ed.clientHeight>=ed.scrollHeight-4){const l=[...tab.querySelectorAll('.pjd-pv')].pop();if(l)si=Math.max(si,+l.dataset.s)}show(tab,si)})},{passive:true});
    tab.querySelectorAll('.pjd-go').forEach(b=>b.addEventListener('click',()=>show(tab,+b.dataset.s)))};
   const align=tab=>{const ch=tab.querySelector('.pjd-ed .abd-row:has(.dr)'),pv=tab.querySelector('.pjd-pv.on');if(!ch||!pv)return;const f=pv.querySelector('figure');if(!f)return;f.style.marginTop='0px';const d=ch.getBoundingClientRect().top-f.getBoundingClientRect().top;if(d>0)f.style.marginTop=d+'px'};
+  W.querySelectorAll('.pjd-3d').forEach(x=>x.addEventListener('click',()=>window.ADVL_VIEWER&&ADVL_VIEWER.show(x.dataset.m)));
   panes.forEach(track);panes.forEach(t=>{if(!t.hidden)requestAnimationFrame(()=>align(t))});addEventListener('resize',()=>panes.forEach(t=>{if(!t.hidden)align(t)}));
   tabs.forEach(b=>b.addEventListener('click',()=>{const i=+b.dataset.t;tabs.forEach(x=>x.setAttribute('aria-selected',String(x===b)));panes.forEach(x=>{const on=+x.dataset.t===i;x.hidden=!on;x.classList.toggle('on',on)});const ed=panes[i].querySelector('.pjd-ed');if(ed)ed.scrollTop=0;requestAnimationFrame(()=>align(panes[i]))}))}
 function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;const lead=d.querySelector('.lead')?.innerHTML||'';const rest=[...d.querySelectorAll('p:not(.lead)')].map(p=>p.innerHTML);
