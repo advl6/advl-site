@@ -37,9 +37,9 @@ function resolve(A,B,c){const {n,d,p}=c,ra=[p[0]-A.x,p[1]-A.y],rb=[p[0]-B.x,p[1]
 const q = s => root.querySelector(s);
 const PH = () => innerWidth <= 720;
 function layout() { W = innerWidth; H = innerHeight;
-  if (PH()) { /* phones (11/8 mockup): the same lot, narrower, under the title and the writing box */
-    const top = Math.max(...['.ld-head', '.ld-compose', '.ld-park'].map(s => { const e = q(s); if (!e) return 0; if (getComputedStyle(e).pointerEvents === 'none') return 0; const r = e.getBoundingClientRect(); return r.height ? r.bottom : 0; }));
-    const x0 = 14, y0 = Math.round(top + 62), x1 = W - 14, gy = Math.round(H - 128), R = 40;
+  if (PH()) { /* phones (11/8, Ariana): just the rounded frame under the writing box when there are messages, just the pinned sheet when there are none */
+    const top = Math.max(...['.ld-head', '.ld-compose'].map(s => { const e = q(s); if (!e) return 0; if (getComputedStyle(e).pointerEvents === 'none') return 0; const r = e.getBoundingClientRect(); return r.height ? r.bottom : 0; }));
+    const x0 = 14, y0 = Math.round(top + 22), x1 = W - 14, gy = Math.round(H - 100), R = 40;
     const door = { w: 58, h: Math.min(120, (gy - y0) * .3) }; door.x = x1 - 22 - door.w; door.y = gy - door.h;
     const bush = { cx: door.x - 52, cy: gy - 22, r: 26 };
     const stall = 54, cloud = { cx: x0 + (x1 - x0) * .42, w: Math.min(170, (x1 - x0) * .44) };
@@ -75,6 +75,9 @@ function sheet() { let s = '';
   return s; }
 function draw() { const { x0, y0, x1, gy, R, door, bush, cloud } = G; let s = '';
   const k = R * .45;
+  if (G.ph) { if (bodies.length) s += `<path class="ln" d="M${x0} ${gy} V${y0 + R} C${x0} ${y0 + k} ${x0 + k} ${y0} ${x0 + R} ${y0} H${x1 - R} C${x1 - k} ${y0} ${x1} ${y0 + k} ${x1} ${y0 + R} V${gy} Z"/>`;
+    else { const cx = (x0 + x1) / 2, cy = (y0 + gy) / 2, sc = Math.min(1.25, (x1 - x0 - 40) / 270); s += `<g transform="translate(${cx} ${cy}) scale(${sc})">${sheet()}</g>`; }
+    const sv = q('.ld-scene'); sv.setAttribute('viewBox', `0 0 ${W} ${H}`); sv.innerHTML = s; return; }
   s += `<path class="ln" d="M${x0} ${gy} V${y0 + R} C${x0} ${y0 + k} ${x0 + k} ${y0} ${x0 + R} ${y0} H${x1 - R} C${x1 - k} ${y0} ${x1} ${y0 + k} ${x1} ${y0 + R} V${gy}"/>`;
   s += cumulus(cloud.cx, cloud.w, y0 + 18);
   s += `<path class="ln" d="M${x0} ${gy} H${x1}"/>`;
@@ -92,7 +95,7 @@ function draw() { const { x0, y0, x1, gy, R, door, bush, cloud } = G; let s = ''
   const sv = q('.ld-scene'); sv.setAttribute('viewBox', `0 0 ${W} ${H}`); sv.innerHTML = s; }
 function statics_() { const { x0, y0, x1, gy, door, bush } = G, T = 60, cw = Math.min(W * .3, 420);
   statics = [box(x0 - T / 2, H / 2, T, H * 2, 0, false), box(x1 + T / 2, H / 2, T, H * 2, 0, false), box(W / 2, y0 - T / 2, W * 2, T, 0, false), box(W / 2, gy + T / 2, W * 2, T, 0, false),
-    box(door.x + door.w / 2, door.y + door.h / 2 + 10, door.w * 1.5, door.h - 20, 0, false), box(bush.cx, bush.cy + 8, bush.r * 2.3, bush.r * 1.3, 0, false), box(bush.cx, bush.cy - 16, bush.r * 1.4, bush.r * 1.1, 0, false),
+    ...(G.ph ? [] : [box(door.x + door.w / 2, door.y + door.h / 2 + 10, door.w * 1.5, door.h - 20, 0, false), box(bush.cx, bush.cy + 8, bush.r * 2.3, bush.r * 1.3, 0, false), box(bush.cx, bush.cy - 16, bush.r * 1.4, bush.r * 1.1, 0, false)]),
     ...(G.ph ? [] : [box(236 + 170, 112 + 62, 360, 128, 0, false), box(W - Math.max(64, W * .06) - 6 - cw / 2, 112 + 56, cw + 10, 120, 0, false)])]; }
 /* the accent reads the background under each note */
 const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true }); cv.width = 48; cv.height = 30;
@@ -135,7 +138,7 @@ function sync(msgs) { if (!root) return; const had = bodies.length, ids = new Se
   const have = new Set(bodies.map(b => b.m.id)), { x0, x1, y0, gy, door } = G;
   msgs.forEach((m, i) => { if (have.has(m.id)) return;
     const fresh = had > 0 || (root._first === false); m.fresh = fresh && i === msgs.length - 1;
-    if (m.fresh) { root.querySelectorAll('.ld-note.new').forEach(e => e.classList.remove('new')); const b = addNote(m, door.x - 150, door.y + door.h * .5); b.vx = -260; b.vy = -60; b.w = -.4; }
+    if (m.fresh) { root.querySelectorAll('.ld-note.new').forEach(e => e.classList.remove('new')); const b = G.ph ? addNote(m, (x0 + x1) / 2, y0 + 60) : addNote(m, door.x - 150, door.y + door.h * .5); if (G.ph) { b.vy = 140; b.w = .2; } else { b.vx = -260; b.vy = -60; b.w = -.4; } }
     else if (G.ph) addNote(m, x0 + 70 + ((i * 97) % Math.max(60, x1 - x0 - 160)), y0 + 50 + ((i * 89) % Math.max(80, gy - y0 - 180)));
     else addNote(m, x0 + 90 + ((i * 197) % Math.max(200, x1 - x0 - 320)), y0 + 190 + ((i * 113) % Math.max(120, gy - y0 - 280))); });
   root._first = false; q('.ld-n').textContent = bodies.length; if (!had !== !bodies.length) draw(); tone(true); }
@@ -168,8 +171,6 @@ window.ADVL_LOT = {
       <div class="ld-world" aria-label="Messages" aria-live="polite"></div><div class="ld-compose"></div>
       <div class="ld-tools"><div class="ld-pal" role="group" aria-label="Palette">${PALETTES.map((p, i) => `<button type="button" title="${p.name}" aria-label="${p.name} palette">${p.sw.map(c => `<i style="background:${c}"></i>`).join('')}</button>`).join('')}</div></div>`;
     view.appendChild(root); compose.forEach(n => n && q('.ld-compose').appendChild(n));
-    if (PH()) { const pk = document.createElement('button'); pk.type = 'button'; pk.className = 'ld-park'; pk.textContent = 'park a message'; root.appendChild(pk);
-      pk.onclick = () => { root.classList.toggle('composing'); pk.textContent = root.classList.contains('composing') ? 'close' : 'park a message'; if (root.classList.contains('composing')) { const t = q('#lot-text'); t && t.focus(); } }; }
     q('.ld-pal').onclick = e => { const b = e.target.closest('button'); if (!b) return; pal = PALETTES[[...q('.ld-pal').children].indexOf(b)]; try { localStorage.setItem('advl-lot-pal', PALETTES.indexOf(pal)); } catch (e) {} applyPal(); };
     layout(); applyPal(); showBg(Math.floor(Math.random() * BGS.length)); if (!RM) timer = setInterval(() => showBg(bi + 1), 60000);
     addEventListener('resize', onResize); idleOn(); last = performance.now(); raf = requestAnimationFrame(frame); },
