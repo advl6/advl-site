@@ -676,8 +676,8 @@ mark.hl{background:none;color:var(--acc);text-shadow:0 0 12px rgb(207 240 2/.45)
   .play .bob{animation:playBob 6s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}@keyframes playBob{50%{transform:translateY(-14px)}}
   @media (prefers-reduced-motion:reduce){.play .bob,.play-wire.hov{animation:none}}
   .pjd-tab[style] .abd-l{hyphens:manual}.pjd-tab[style] .abd-l.h{font-size:clamp(1.35rem,1.8vw,1.8rem);overflow-wrap:normal}
-  .pjd-hero .gal.strip{display:flex;gap:10px;height:min(46vh,calc((100vw - 200px - max(64px,6vw)) * .3));grid-template-columns:none;margin:0}
-  .pjd-hero .gal.strip img{height:100%;width:auto;flex:1 1 auto;min-width:0;object-fit:cover;border-radius:10px;aspect-ratio:auto}
+  .pjd-hero .gal.strip{display:flex;gap:10px;height:min(44vh,calc((100vw - 200px - max(64px,6vw)) * .28));grid-template-columns:none;margin:0;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgb(207 240 2/.5) transparent;padding-bottom:6px}
+  .pjd-hero .gal.strip img{height:100%;width:auto;flex:0 0 auto;object-fit:contain;border-radius:10px;aspect-ratio:auto;scroll-snap-align:start}
   .pjd-side{position:relative;border-left:1px solid rgb(255 255 255/.1);min-height:0}
   .pjd-pv{position:absolute;inset:0;padding:18px;overflow-y:auto;scrollbar-width:thin;display:grid;align-content:start;gap:14px;opacity:0;visibility:hidden;transition:opacity 1.2s ease,visibility 0s linear 1.2s}
   .pjd-pv.on{opacity:1;visibility:visible;transition:opacity 1.2s ease}
