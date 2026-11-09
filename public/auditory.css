@@ -351,7 +351,8 @@
   .aud .lname .full,.aud .lane .ms{display:none}.aud .lname .sh{display:inline}
   .aud .lane .dash{width:22px}.aud .lane .dash i{width:14px;height:5px}
   .aud .arrh>.k{display:none}
-  .aud .fades,.aud .rec-live,.aud .rec-on,.aud .recstrip,.aud .fr{display:none}
+  .aud .fades,.aud .fr{display:none}
+  .aud .vhead{flex-wrap:wrap}.aud .vhead .rec-live,.aud .vhead .rec-on{order:-1;flex:1 1 100%;justify-content:center;margin:0 0 10px}.aud .vhead .recstrip{order:-1;flex:1 1 100%;margin:0 0 6px}
   .aud .strips{scroll-snap-type:x mandatory}.aud .strip{flex:0 0 78px;scroll-snap-align:start}
   .aud .strip>button.sn{font:500 .66rem var(--f-mono);letter-spacing:.06em}
   .aud .xp{display:inline-flex}
@@ -386,3 +387,9 @@
 .au-pop .foot{display:flex;gap:8px;align-items:center;border-top:1px solid rgb(255 255 255/.14);padding-top:10px}
 .au-pop .foot .k{margin-right:auto}
 @media (prefers-reduced-motion:reduce){.aud *,.au-pop,.au-sheet,.au-dim{transition:none!important}}
+
+/* isolate / speed / space effect, clear all (11/9) */
+.aud .xtr{display:grid;gap:8px;margin-top:6px}
+.aud .iso[aria-pressed="true"]{border-color:var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--c) 30%,transparent)}
+.aud .clr.arm{border-color:#FF5A4E;color:#FFB4A0;background:rgb(255 90 78/.1)}
+.aud .clr{white-space:nowrap}

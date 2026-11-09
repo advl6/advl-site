@@ -60,6 +60,9 @@ const AUDC = ['#A98BFF', '#B79CFF', '#C9B8FF', '#E3A6FF', '#F2C6FF'];
 const VOICEC = ['#E3A6FF', '#F2C6FF', '#D9A8FF'];
 const GROUPS = [['drums', 'Drums'], ['melody', 'Bass & melody'], ['voice', 'Voice'], ['audio', 'Your audio']];
 
+/* per-sound speed and space effects (11/9) */
+const SPEEDS = [0.25, 0.5, 1, 1.5, 2];
+const FX = [['none', 'None'], ['opera', 'Opera echoes'], ['cathedral', 'Cathedral echo']];
 /* ---------------- state ---------------- */
 const KEY = 'advl-aud-v2';
 function synthLayer(v, o = {}) {
@@ -80,6 +83,7 @@ function fixLayer(L) {
   if (!Array.isArray(L.notes) || L.notes.length !== len) L.notes = Array(len).fill(0);
   L.p = Object.assign({}, BASE, L.p || {});
   ['vol', 'fadeIn', 'fadeOut', 'depth', 'around', 'rev', 'echo', 'eqLo', 'eqHi'].forEach(k => { if (typeof L[k] !== 'number') L[k] = { vol: 70, depth: 20, around: 33, rev: 15, eqLo: 50, eqHi: 50 }[k] || 0; });
+  if (!SPEEDS.includes(L.speed)) L.speed = 1; if (!FX.some(f => f[0] === L.fx)) L.fx = 'none'; if (typeof L.fxAmt !== 'number') L.fxAmt = 60;
   if (L.kind === 'audio') { L.trim = Array.isArray(L.trim) ? L.trim : [0, 1]; L.mode = L.mode === 'steps' ? 'steps' : 'loop'; }
   return L;
 }
@@ -147,6 +151,21 @@ function peaksOf(buf, n = 120) {
 }
 
 /* ---------------- engine ---------------- */
+/* per-sound speed and space effects (11/9) */
+/* a long, dark, slow-blooming tail: stone, height, distance */
+function irCathedral(c) {
+  const secs = 7.5, len = Math.floor(c.sampleRate * secs), b = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let lp = 0;
+    for (let i = 0; i < len; i++) { const x = i / len, n = Math.random() * 2 - 1; lp += (n - lp) * (0.08 + 0.5 * (1 - x) * (1 - x));
+      const bloom = Math.min(1, i / (c.sampleRate * 0.18)); d[i] = lp * bloom * Math.pow(1 - x, 1.6) * 1.6; } }
+  return b;
+}
+/* a medium hall for the opera echoes to land in */
+function irHall(c) {
+  const secs = 2.6, len = Math.floor(c.sampleRate * secs), b = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); let lp = 0; for (let i = 0; i < len; i++) { const n = Math.random() * 2 - 1; lp += (n - lp) * 0.35; d[i] = lp * Math.pow(1 - i / len, 2.2) * 1.4; } }
+  return b;
+}
 function irBuffer(c, room) {
   const secs = 0.6 + n01(room) * 3.4, len = Math.floor(c.sampleRate * secs), b = c.createBuffer(2, len, c.sampleRate);
   for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.6); }
@@ -168,12 +187,22 @@ function makeEngine(c, live) {
   const dly = c.createDelay(2), fb = c.createGain(), dlp = c.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 3500; fb.gain.value = 0.38;
   dly.connect(dlp); dlp.connect(fb); fb.connect(dly); dlp.connect(master); dly.delayTime.value = stepDur() * 3;
   eo.delayTime.value = stepDur() * 3;
-  const e = { ctx: c, live, noise, master, bassBus, mainBus, an, rev, dly, pg, tape, pf, eoIn, eo, ch: new Map(), loops: new Map(), last: new Map() };
+  // cathedral echo: a pause, then a long dark bloom
+  const cath = c.createGain(), cpre = c.createDelay(1), cconv = c.createConvolver(), clp = c.createBiquadFilter(), cout = c.createGain();
+  cpre.delayTime.value = 0.09; cconv.buffer = irCathedral(c); clp.type = 'lowpass'; clp.frequency.value = 5200; cout.gain.value = 0.8;
+  cath.connect(cpre); cpre.connect(cconv); cconv.connect(clp); clp.connect(cout); cout.connect(master);
+  // opera echoes: repeats that bounce left and right across a hall, each one softer and further away
+  const opera = c.createGain(), ohp = c.createBiquadFilter(), olp = c.createBiquadFilter(), dl = c.createDelay(3), dr = c.createDelay(3), fl = c.createGain(), fr = c.createGain(), mg = c.createChannelMerger(2), oconv = c.createConvolver(), oout = c.createGain(), odry = c.createGain();
+  ohp.type = 'highpass'; ohp.frequency.value = 260; olp.type = 'lowpass'; olp.frequency.value = 4200; fl.gain.value = fr.gain.value = 0.56; oconv.buffer = irHall(c); oout.gain.value = 0.55; odry.gain.value = 0.7;
+  opera.connect(ohp); ohp.connect(olp); olp.connect(dl); dl.connect(fl); fl.connect(dr); dr.connect(fr); fr.connect(dl);
+  dl.connect(mg, 0, 0); dr.connect(mg, 0, 1); mg.connect(odry); odry.connect(master); mg.connect(oconv); oconv.connect(oout); oout.connect(master);
+  const e = { ctx: c, live, noise, master, bassBus, mainBus, an, rev, dly, pg, tape, pf, eoIn, eo, cath, opera, odl: dl, odr: dr, ch: new Map(), loops: new Map(), last: new Map() };
   if (live) { e.metro = c.createGain(); e.metro.gain.value = 0.35; e.metro.connect(c.destination); }
   levels(e, true); return e;
 }
 function levels(e, now) {
   const b = n01(S.bass) * 1.4, m = n01(S.vol) * 0.8, t = e.ctx.currentTime;
+  if (e.odl) { e.odl.delayTime.value = stepDur() * 6; e.odr.delayTime.value = stepDur() * 4; }
   if (now) { e.bassBus.gain.value = b; e.master.gain.value = m; e.dly.delayTime.value = stepDur() * 3; return; }
   e.bassBus.gain.setTargetAtTime(b, t, 0.03); e.master.gain.setTargetAtTime(m, t, 0.03); e.dly.delayTime.setTargetAtTime(stepDur() * 3, t, 0.05);
 }
@@ -186,12 +215,12 @@ function chain(e, L) {
   let k = e.ch.get(L.id);
   if (!k) {
     const c = e.ctx;
-    k = { in: c.createGain(), drv: c.createWaveShaper(), flt: c.createBiquadFilter(), lo: c.createBiquadFilter(), hi: c.createBiquadFilter(), fade: c.createGain(), vol: c.createGain(), pan: c.createPanner(), rs: c.createGain(), es: c.createGain(), an: c.createAnalyser() };
+    k = { fx: c.createGain(), fxTo: null, in: c.createGain(), drv: c.createWaveShaper(), flt: c.createBiquadFilter(), lo: c.createBiquadFilter(), hi: c.createBiquadFilter(), fade: c.createGain(), vol: c.createGain(), pan: c.createPanner(), rs: c.createGain(), es: c.createGain(), an: c.createAnalyser() };
     k.flt.type = 'lowpass'; k.lo.type = 'lowshelf'; k.lo.frequency.value = 220; k.hi.type = 'highshelf'; k.hi.frequency.value = 4200;
     k.pan.panningModel = 'HRTF'; k.pan.distanceModel = 'inverse'; k.pan.refDistance = 1; k.pan.rolloffFactor = 0.9;
     k.an.fftSize = 1024; k.an.smoothingTimeConstant = 0.7;
     k.in.connect(k.drv); k.drv.connect(k.flt); k.flt.connect(k.lo); k.lo.connect(k.hi); k.hi.connect(k.fade); k.fade.connect(k.vol); k.vol.connect(k.pan);
-    k.pan.connect(bassy(L) ? e.bassBus : e.mainBus); k.vol.connect(k.rs); k.vol.connect(k.es); k.rs.connect(e.rev); k.es.connect(e.dly); k.vol.connect(k.an);
+    k.pan.connect(bassy(L) ? e.bassBus : e.mainBus); k.vol.connect(k.rs); k.vol.connect(k.es); k.rs.connect(e.rev); k.es.connect(e.dly); k.vol.connect(k.an); k.vol.connect(k.fx);
     e.ch.set(L.id, k); apply(e, L, true);
   }
   return k;
@@ -205,6 +234,9 @@ function apply(e, L, now) {
   set(k.lo.gain, (L.eqLo - 50) / 50 * 12); set(k.hi.gain, (L.eqHi - 50) / 50 * 12);
   set(k.vol.gain, audible(L) ? n01(L.vol) : 0);
   set(k.rs.gain, Math.min(1, n01(L.rev) + n01(L.depth) * 0.35)); set(k.es.gain, n01(L.echo) * 0.8);
+  const to = L.fx === 'opera' ? e.opera : L.fx === 'cathedral' ? e.cath : null;
+  if (k.fxTo !== to) { try { k.fx.disconnect(); } catch (x) {} if (to) k.fx.connect(to); k.fxTo = to; }
+  set(k.fx.gain, to ? n01(L.fxAmt) * (L.fx === 'cathedral' ? 1.1 : 0.9) : 0);
   const ang = (n01(L.around) * 270 - 90) * Math.PI / 180, dist = 1 + n01(L.depth) * 9, x = Math.sin(ang) * dist, z = -Math.cos(ang) * dist;
   if (k.pan.positionX) { set(k.pan.positionX, x); set(k.pan.positionY, 0); set(k.pan.positionZ, z); } else k.pan.setPosition(x, 0, z);
 }
@@ -338,7 +370,7 @@ function trigger(e, L, idx, t, g, sd) {
   const from = e.last.get(L.id); e.last.set(L.id, f);
   MEL[L.voice](e, t, f, gate, p, o, v, from, L);
 }
-const rate = L => Math.pow(2, ((L.p.pitch || 50) - 50) * 24 / 100 / 12);
+const rate = L => Math.pow(2, ((L.p.pitch || 50) - 50) * 24 / 100 / 12) * (L.speed || 1);
 function region(L, b) { const a = clamp(L.trim[0], 0, 1) * b.duration, z = clamp(L.trim[1], 0, 1) * b.duration; return [a, Math.max(0.02, z - a)]; }
 function oneShot(e, L, t, b, semis = 0) { if (!b) return; const s = e.ctx.createBufferSource(), [a, d] = region(L, b); s.buffer = b; s.playbackRate.value = rate(L) * Math.pow(2, semis / 12); s.connect(chain(e, L).in); s.start(t, a, d); }
 function loopStart(e, L, t, b, until, off = 0) {
@@ -390,9 +422,11 @@ function step(e, g, t, sd) {
   const bar = Math.floor(g / 16), sw = sd * 0.5;
   for (const L of S.layers) {
     if (!audible(L) || (L.barsOn && L.barsOn[bar] === false)) continue;
-    const idx = g % L.steps.length; if (!L.steps[idx]) continue;
-    const tt = t + (idx % 2 ? n01(L.p.swing) * sw : 0);
-    trigger(e, L, idx, tt, g, sd);
+    const sp = L.speed || 1;
+    if (sp === 1) { const idx = g % L.steps.length; if (!L.steps[idx]) continue; trigger(e, L, idx, t + (idx % 2 ? n01(L.p.swing) * sw : 0), g, sd); continue; }
+    // its own speed: walk the sound's steps faster or slower than the beat
+    for (let k = Math.ceil(g * sp - 1e-9); k < (g + 1) * sp - 1e-9; k++) { const idx = k % L.steps.length; if (!L.steps[idx]) continue;
+      trigger(e, L, idx, t + (k / sp - g) * sd + (idx % 2 ? n01(L.p.swing) * sw / sp : 0), g, sd / sp); }
   }
 }
 function startLoops(e, t, until, off) { S.layers.forEach(L => { if (L.kind === 'audio' && L.mode === 'loop' && audible(L) && BUF.get(L.file)) loopStart(e, L, t, BUF.get(L.file), until, off); }); }
@@ -585,6 +619,11 @@ async function saveMix(name) {
   const rec = { id, v: 2, name: name || `Mix ${LIB.mixes.length + 1}`, saved: Date.now(), bpm: S.bpm, n: S.layers.length, bars: S.bars, state: JSON.parse(JSON.stringify(Object.assign({}, S, { cur: id }))) };
   await DB.put('mixes', rec); LIB.mixes = [rec, ...LIB.mixes.filter(m => m.id !== id)]; S.cur = id; save(); return rec;
 }
+/* start from scratch: an empty piece (the Library and saved mixes stay) */
+function clearAll() {
+  stop(); const keep = { mode: S.mode, win: S.win }; S = Object.assign(fresh(), { layers: [], cur: null, sel: null }, keep);
+  if (eng) { eng.ch.forEach((k, lid) => dropChain(eng, lid)); levels(eng); } save();
+}
 function openMix(id) {
   const m = LIB.mixes.find(x => x.id === id); if (!m) return false;
   let st = m.state; if (!st) return false; if (!st.v) st = migrate1(st); if (!valid(st)) return false;
@@ -690,7 +729,7 @@ function pathToMelody(path, n) {
 }
 
 window.AUDX = {
-  V, VOICE_ORDER, GROUPS, BASE, SOUNDS, AUDC, get S() { return S; }, set S(v) { S = v; }, save, load, fresh, synthLayer, audioLayer, melodyLayer, fixLayer, sortLayers,
+  V, VOICE_ORDER, GROUPS, BASE, SOUNDS, AUDC, get S() { return S; }, set S(v) { S = v; }, SPEEDS, FX, clearAll, save, load, fresh, synthLayer, audioLayer, melodyLayer, fixLayer, sortLayers,
   byId, groupOf, colorOf, nameOf, shortOf, stepDur, totalSteps, LIB, BUF, fileById, loadLibrary, bufferFor, addFile, removeFile, saveMix, openMix, removeMix,
   ensure, get eng() { return eng; }, get ctx() { return ctx; }, chain, apply, applyAll, levels, setRoom, dropChain, SEQ, play, stop, restartLoop, audition, loopStop,
   renderPiece, renderHit, previewOnce, seek, shapeAt, fadeLens, FADE_IN, FADE_OUT, SESS, sessionStart, sessionStop, wav, mp3, record, pathToMelody, autoAt, audible, mic, n01, clamp, uid, isVideo, usedBytes, MAX_ALL

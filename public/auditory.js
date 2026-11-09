@@ -88,7 +88,7 @@ function transport() {
     <button type="button" class="metro" data-act="metro" aria-pressed="${!!s.metro}">${I.metro}<span><b>Metronome</b><em>${s.metro ? 'On' : 'Off'} · count-in 1 bar when recording</em></span></button>
     <div class="feel" role="group" aria-label="Pick a feel">${FEELS.map(([l, b]) => `<button type="button" data-act="feel" data-v="${b}" aria-pressed="${s.bpm === b}">${esc(l)} ${b}</button>`).join('')}</div>
     <span class="grow"></span>
-    ${isFree() ? '<button type="button" class="pill sm" data-act="resetwin">Reset layout</button>' : ''}<div class="rings">${ring('Bass', 'g.bass', s.bass)}${ring('Volume', 'g.vol', s.vol)}</div>
+    <button type="button" class="pill sm clr${ui.clearArm ? ' arm' : ''}" data-act="clearall">${ui.clearArm ? 'Tap again to clear everything' : 'Clear all'}</button>${isFree() ? '<button type="button" class="pill sm" data-act="resetwin">Reset layout</button>' : ''}<div class="rings">${ring('Bass', 'g.bass', s.bass)}${ring('Volume', 'g.vol', s.vol)}</div>
     ${modeDial()}
   </div>`;
 }
@@ -174,7 +174,7 @@ function layerBody(L) {
       ${L.mode === 'steps' ? steps(L) : ''}
       <div class="g2">${slider('Pitch', 'p.pitch', L.p.pitch, c, L)}${slider('Volume', 'l.vol', L.vol, c, L)}</div>
       <div class="g2">${slider('Fade in', 'l.fadeIn', L.fadeIn, c, L, { max: 8, step: 0.1 })}${slider('Fade out', 'l.fadeOut', L.fadeOut, c, L, { max: 8, step: 0.1 })}</div>
-      <div class="adv">${movePad(L, 110)}</div>
+      <div class="adv">${movePad(L, 110)}</div>${extras(L)}
       <div class="row"><span class="grow"></span><button type="button" class="pill sm" data-act="remove" data-l="${L.id}">Remove layer</button></div>`;
   }
   const D = X.V[L.voice];
@@ -183,7 +183,7 @@ function layerBody(L) {
     ${steps(L)}
     <div class="g3">${slider('Pitch', 'p.pitch', L.p.pitch, c, L)}${slider('Length', 'p.length', L.p.length, c, L)}${slider('Volume', 'l.vol', L.vol, c, L)}</div>
     <div class="g2">${slider('Fade in', 'l.fadeIn', L.fadeIn, c, L, { max: 8, step: 0.1 })}${slider('Fade out', 'l.fadeOut', L.fadeOut, c, L, { max: 8, step: 0.1 })}</div>
-    ${isMel(L) ? `<div class="adv">${movePad(L, 110)}</div>` : ''}
+    ${isMel(L) ? `<div class="adv">${movePad(L, 110)}</div>` : ''}${extras(L)}
     <div class="row"><span class="grow"></span><button type="button" class="pill sm" data-act="remove" data-l="${L.id}">Remove layer</button></div>`;
 }
 function layerRow(L) {
@@ -236,13 +236,22 @@ function room(L, size = 130) {
 }
 const space = L => `<div class="space">${room(L)}<div class="spc">${slider('Depth', 'l.depth', L.depth, col(L), L)}<span class="hint">Near ↔ far</span>${slider('Around', 'l.around', L.around, col(L), L)}<span class="hint">Left · front · right · behind</span></div></div>`;
 
+/* isolate, speed and space effect for one sound (11/9) */
+const SPL = [[0.25, '¼×'], [0.5, '½×'], [1, '1×'], [1.5, '1½×'], [2, '2×']];
+function extras(L) {
+  const c = col(L), sp = (SPL.find(x => x[0] === (L.speed || 1)) || SPL[2])[1], fx = (X.FX.find(f => f[0] === L.fx) || X.FX[0])[1];
+  return `<div class="xtr"><div class="row"><button type="button" class="pill sm iso" data-act="solo" data-l="${L.id}" aria-pressed="${!!L.solo}" style="--c:${c}">${L.solo ? 'Isolated · tap to hear all' : 'Isolate'}</button></div>
+    <span class="k">Speed</span>${chips('speed', SPL.map(x => x[1]), sp, c, ` data-l="${L.id}"`)}
+    <span class="k">Space effect</span>${chips('fx', X.FX.map(f => f[1]), fx, c, ` data-l="${L.id}"`)}
+    ${L.fx && L.fx !== 'none' ? slider('Effect amount', 'l.fxAmt', L.fxAmt ?? 60, c, L) : ''}</div>`;
+}
 /* ---------- casual: selected sound card ---------- */
 function selCard() {
   const L = sel(); if (!L) return '';
   const c = col(L);
   if (L.kind === 'audio') return `<div class="det" style="--c:${c}"><div class="deth"><div><span class="k">Selected layer</span><h3>${esc(X.nameOf(L))}</h3></div></div>
     ${slider('Pitch', 'p.pitch', L.p.pitch, c, L)}${slider('Tone', 'p.tone', L.p.tone, c, L)}${slider('Drive', 'p.drive', L.p.drive, c, L)}
-    <div class="g2">${slider('Fade in', 'l.fadeIn', L.fadeIn, c, L, { max: 8, step: 0.1 })}${slider('Fade out', 'l.fadeOut', L.fadeOut, c, L, { max: 8, step: 0.1 })}</div>${space(L)}</div>`;
+    <div class="g2">${slider('Fade in', 'l.fadeIn', L.fadeIn, c, L, { max: 8, step: 0.1 })}${slider('Fade out', 'l.fadeOut', L.fadeOut, c, L, { max: 8, step: 0.1 })}</div>${extras(L)}${space(L)}</div>`;
   const D = X.V[L.voice];
   return `<div class="det" style="--c:${c}"><div class="deth"><div><span class="k">Selected layer</span><h3>${esc(X.nameOf(L))}</h3></div>${dd('st2:' + L.id, 'Sound style', L.style, Object.keys(D.styles), c)}</div>
     <canvas class="kw" data-kw="${L.id}" aria-hidden="true"></canvas>
@@ -251,7 +260,7 @@ function selCard() {
     ${isMel(L) ? `<div class="g2">${slider('Glide', 'p.glide', L.p.glide, c, L)}${slider('Vibrato', 'p.vibrato', L.p.vibrato, c, L)}</div>` : ''}
     <div class="g2">${slider('Reverb', 'l.rev', L.rev, c, L)}${slider('Echo', 'l.echo', L.echo, c, L)}</div>
     <div class="g2">${slider('Fade in', 'l.fadeIn', L.fadeIn, c, L, { max: 8, step: 0.1 })}${slider('Fade out', 'l.fadeOut', L.fadeOut, c, L, { max: 8, step: 0.1 })}</div>
-    ${space(L)}</div>`;
+    ${extras(L)}${space(L)}</div>`;
 }
 
 /* ---------- make a sound with your voice or hands ---------- */
@@ -383,7 +392,7 @@ function engine() {
     <span class="k" data-filtlbl>Filter · cutoff ${Math.round(120 * Math.pow(2, L.p.tone / 100 * 7.5))} Hz · resonance ${Math.round(L.p.res)}%</span>${filterGraph(L)}
     <div class="g3">${D && D.root ? knob('Vibrato', 'p.vibrato', L.p.vibrato, c, L, 50) + knob('LFO rate', 'p.lfo', L.p.lfo, c, L, 50) + knob('Glide', 'p.glide', L.p.glide, c, L, 50) : knob('Pitch', 'p.pitch', L.p.pitch, c, L, 50) + knob('Punch', 'p.punch', L.p.punch, c, L, 50) + knob('Swing', 'p.swing', L.p.swing, c, L, 50)}${knob('Drive', 'p.drive', L.p.drive, c, L, 50)}${knob('Reverb', 'l.rev', L.rev, c, L, 50)}${knob('Echo', 'l.echo', L.echo, c, L, 50)}</div>
     <div class="g2">${slider('Fade in', 'l.fadeIn', L.fadeIn, c, L, { max: 8, step: 0.1 })}${slider('Fade out', 'l.fadeOut', L.fadeOut, c, L, { max: 8, step: 0.1 })}</div>
-    ${space(L)}
+    ${extras(L)}${space(L)}
     <span class="k">Spectrum</span><canvas class="au-spec" data-spec aria-hidden="true"></canvas></div>`;
 }
 function soundCard() {
@@ -632,6 +641,10 @@ function act(b, e) {
     case 'ddpick': { const [kind, id] = v.split(':'); ui.dd = null;
       if (kind === 'fi' || kind === 'fo') { (kind === 'fi' ? s.fin : s.fout).type = b.dataset.o; X.save(); paint(); break; }
       const T = X.byId(id); if (T) setStyle(T, b.dataset.o); break; }
+    case 'speed': { if (!L) return; const m = SPL.find(x => x[1] === v); if (!m) return; L.speed = m[0]; X.save(); X.eng && X.apply(X.eng, L); X.restartLoop(L); paint(); break; }
+    case 'fx': { if (!L) return; const f = X.FX.find(x => x[1] === v); if (!f) return; L.fx = f[0]; if (typeof L.fxAmt !== 'number') L.fxAmt = 60; X.save(); X.eng && X.apply(X.eng, L); if (!X.SEQ.playing && f[0] !== 'none') X.audition(L); paint(); break; }
+    case 'clearall': if (!ui.clearArm) { ui.clearArm = true; paint(); clearTimeout(ui.clearT); ui.clearT = setTimeout(() => { ui.clearArm = false; paint(); }, 4000); break; }
+      ui.clearArm = false; X.clearAll(); msg('mx', 'Cleared. Add a layer to start again.'); paint(); break;
     case 'resetwin': if (s.win) delete s.win[s.mode]; X.save(); paint(); break;
     case 'sess':
       if (X.SESS.mr) { msg('mx', 'Saving your session…'); X.sessionStop().then(r => { if (r && r.error) msg('mx', r.error, true); else if (r) msg('mx', `${r.name} saved · ${fmtDur(r.dur)}.`); paint(); }); }
@@ -860,7 +873,7 @@ function popHTML() {
   }
   cols.forEach((L, ci) => { if (L.kind === 'audio' && L.mode === 'loop') g += `<div class="vclip" style="--c:${col(L)};grid-column:${ci + 2};grid-row:2 / span 16"><svg viewBox="0 0 40 400" preserveAspectRatio="none" aria-hidden="true"><path d="${waveD(X.fileById(L.file).peaks, 40, 400, true)}"/></svg></div>`; });
   const hid = s.layers.length - cols.length, pl = X.SEQ.playing;
-  return `<div class="hd"><b>18 · advl auditory</b><button type="button" class="cl" data-act="close" aria-label="Close">${I.close}</button></div>
+  return `<div class="hd"><b>01 · advl auditory</b><button type="button" class="cl" data-act="close" aria-label="Close">${I.close}</button></div>
     <div class="trp"><button type="button" class="play${pl ? ' on' : ''}" data-act="play" aria-label="${pl ? 'Stop' : 'Play'}">${pl ? I.stop : I.play}</button><div class="bpm"><b data-bpm>${s.bpm}</b><span> BPM</span></div>
       <button type="button" class="rb" data-act="bpm" data-v="-1" aria-label="Slower">−</button><button type="button" class="rb" data-act="bpm" data-v="1" aria-label="Faster">+</button>
       <select data-in="feel" aria-label="Pick a feel"><option value="">Feel</option>${FEELS.map(([l, b]) => `<option value="${b}"${s.bpm === b ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></div>
