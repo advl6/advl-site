@@ -70,7 +70,17 @@ document.addEventListener('transitionend', e => { if (frameL !== -1 && e.target.
 
 /* ---------- backgrounds ---------- */
 let bgFlip = 0;
+/* phones: Safari paints the strips behind its status bar and toolbar in one solid colour taken from the page;
+   match it to the background on screen so those strips read as part of the page */
+function bgTint(src) { if (!src) return; const im = new Image(); im.onload = () => { try {
+  const c = document.createElement('canvas'); c.width = c.height = 8; const x = c.getContext('2d'); x.drawImage(im, 0, 0, 8, 8);
+  const d = x.getImageData(0, 0, 8, 8).data; const t = [0, 0, 0], b = [0, 0, 0];
+  for (let i = 0; i < 64; i++) { const a = i < 16 ? t : i >= 48 ? b : null; if (a) for (let k = 0; k < 3; k++) a[k] += d[i * 4 + k]; }
+  const col = a => `rgb(${a.map(v => Math.round(v / 16 * .82)).join(',')})`;
+  document.documentElement.style.backgroundColor = col(b); document.body.style.backgroundColor = col(t); $('#bg').style.backgroundColor = col(t);
+  const m = document.querySelector('meta[name="theme-color"]'); m && m.setAttribute('content', col(t)); } catch (e) {} }; im.src = src; }
 function setBg(src, video) {
+  bgTint(src);
   const layers = $$('#bg .bgi'); const next = layers[bgFlip = 1 - bgFlip], prev = layers[1 - bgFlip];
   if (src) next.style.backgroundImage = `url("${src}")`;
   next.classList.toggle('on', !!src); prev.classList.remove('on');

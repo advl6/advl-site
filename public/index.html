@@ -56,7 +56,8 @@ body{margin:0;min-height:100%;color:var(--ink);background:#132126;font:400 16px/
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
 a{color:inherit}img{max-width:100%;display:block}
 :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
-#bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#1A2C31}
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#1A2C31;transition:background-color 2.4s ease}
+html,body{transition:background-color 2.4s ease}
 #bg .bgi{position:absolute;inset:-4%;background:center/cover no-repeat;opacity:0;transition:opacity 2.4s ease}
 #bg .bgi.on{opacity:1}
 #glow{position:absolute;inset:0;opacity:0;transition:opacity 2s;background:radial-gradient(28% 34% at 62% 44%,rgb(140 255 60/.32),transparent 70%),radial-gradient(18% 22% at 58% 66%,rgb(170 255 90/.22),transparent 70%)}
