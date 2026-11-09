@@ -3,17 +3,17 @@
    Shares three.js with the Artifacts model viewer (window.ADVL_THREE). */
 (function () {
   const MODELS = [
-    { name: 'Tree Stool', proj: '09', file: 'models/tree-stool.glb.txt' },
-    { name: 'C-FAI', proj: '03', file: 'models/attuner.glb.txt' },
-    { name: 'Star Headset', proj: '01', file: 'models/star-headset.glb.txt' },
-    { name: 'Lovestool', proj: '09', file: 'models/lovestool.glb.txt' },
-    { name: 'Dish Brain Texture', proj: '08', file: 'models/dish-brain.glb.txt' },
-    { name: 'Finger Anchors', proj: '01', file: 'models/finger-anchors.glb.txt' },
-    { name: 'Digifrend', proj: '07', file: 'models/digifrend.glb.txt' },
-    { name: 'Double Seat Stool', proj: '09', file: 'models/double-seat.glb.txt' },
-    { name: 'Lion Stone', proj: '14', file: 'models/lion-stone.glb.txt' },
-    { name: 'Biochip', proj: '01', file: 'models/biochip.glb.txt' },
-    { name: 'Circle Cat House', proj: '11', file: 'models/circle-cat-house.glb.txt' },
+    { name: 'Tree Stool', proj: '08', file: 'models/tree-stool.glb.txt' },
+    { name: 'C-FAI', proj: '05', file: 'models/attuner.glb.txt' },
+    { name: 'Star Headset', proj: '02', file: 'models/star-headset.glb.txt' },
+    { name: 'Lovestool', proj: '08', file: 'models/lovestool.glb.txt' },
+    { name: 'Dish Brain Texture', proj: '10', file: 'models/dish-brain.glb.txt' },
+    { name: 'Finger Anchors', proj: '02', file: 'models/finger-anchors.glb.txt' },
+    { name: 'Digifrend', proj: '11', file: 'models/digifrend.glb.txt' },
+    { name: 'Double Seat Stool', proj: '08', file: 'models/double-seat.glb.txt' },
+    { name: 'Lion Stone', proj: '13', file: 'models/lion-stone.glb.txt' },
+    { name: 'Biochip', proj: '02', file: 'models/biochip.glb.txt' },
+    { name: 'Circle Cat House', proj: '12', file: 'models/circle-cat-house.glb.txt' },
   ];
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const cache = {};

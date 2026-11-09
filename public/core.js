@@ -78,6 +78,7 @@ function bgTint(src) { if (!src) return; const im = new Image(); im.onload = () 
   for (let i = 0; i < 64; i++) { const a = i < 16 ? t : i >= 48 ? b : null; if (a) for (let k = 0; k < 3; k++) a[k] += d[i * 4 + k]; }
   /* the page darkens its edges except on home, so the strips follow how dark the edge actually reads */
   const home = ['home', 'landing'].includes(document.body.dataset.route), ft = home ? 1 : .38, fb = home ? .85 : document.body.dataset.route === 'lot' ? .36 : .5;
+  if (document.body.dataset.route === 'artifacts') { const lt = 'rgb(226,226,222)', lb = 'rgb(214,214,210)'; document.documentElement.style.backgroundColor = lb; document.body.style.backgroundColor = lt; $('#bg').style.backgroundColor = lt; return; }  /* the room is light */
   const col = (a, f) => `rgb(${a.map(v => Math.round(v / 16 * f)).join(',')})`;
   document.documentElement.style.backgroundColor = col(b, fb); document.body.style.backgroundColor = col(t, ft); $('#bg').style.backgroundColor = col(t, ft);
   const m = document.querySelector('meta[name="theme-color"]'); m && m.setAttribute('content', col(t, ft)); } catch (e) {} }; im.src = src; }
