@@ -406,8 +406,13 @@ function ensure(quiet) {
   return eng;
 }
 /* the first touch on the page wakes the sound (iOS only starts audio inside a tap): resume and play one silent sample */
+/* plus a silent looping <audio> started in the same tap: on iPhone that moves the page into the music audio session,
+   which is what routes web sound to the speaker and past the silent switch on versions without navigator.audioSession */
+const SILENT = 'data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
+let tag = null;
 (function unlock() {
-  const go = () => { try { ensure(false); const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start(0); } catch (e) {}
+  const go = () => { try { if (!tag) { tag = new Audio(SILENT); tag.loop = true; tag.setAttribute('playsinline', ''); tag.volume = 0.01; } tag.play().catch(() => {}); } catch (e) {}
+    try { ensure(false); const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start(0); } catch (e) {}
     if (ctx && ctx.state === 'running') ['touchend', 'pointerup', 'keydown'].forEach(k => removeEventListener(k, go, true)); };
   ['touchend', 'pointerup', 'keydown'].forEach(k => addEventListener(k, go, true));
 })();
@@ -427,7 +432,7 @@ function tick() {
   }
 }
 async function play(from) {
-  ensure();
+  ensure(); if (tag) tag.play().catch(() => {});
   await Promise.all(S.layers.filter(L => L.kind === 'audio' && fileById(L.file)).map(L => bufferFor(L.file).catch(() => null)));
   if (SEQ.playing) return;
   levels(eng); applyAll(eng); eng.eo.delayTime.value = stepDur() * 3;
