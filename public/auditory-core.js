@@ -399,10 +399,18 @@ function startLoops(e, t, until, off) { S.layers.forEach(L => { if (L.kind === '
 
 let ctx = null, eng = null;
 function ensure(quiet) {
+  /* iPhone: web sound normally follows the silent switch; asking for "playback" lets it play like music does */
+  try { if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
   if (!ctx) { const AC = window.AudioContext || window.webkitAudioContext; ctx = new AC({ latencyHint: 'interactive' }); eng = makeEngine(ctx, true); }
-  if (!quiet && ctx.state === 'suspended') ctx.resume();
+  if (!quiet && ctx.state !== 'running') ctx.resume();
   return eng;
 }
+/* the first touch on the page wakes the sound (iOS only starts audio inside a tap): resume and play one silent sample */
+(function unlock() {
+  const go = () => { try { ensure(false); const b = ctx.createBuffer(1, 1, 22050), s = ctx.createBufferSource(); s.buffer = b; s.connect(ctx.destination); s.start(0); } catch (e) {}
+    if (ctx && ctx.state === 'running') ['touchend', 'pointerup', 'keydown'].forEach(k => removeEventListener(k, go, true)); };
+  ['touchend', 'pointerup', 'keydown'].forEach(k => addEventListener(k, go, true));
+})();
 
 /* ---------------- sequencer ---------------- */
 const SEQ = { playing: false, g: 0, next: 0, timer: 0, queue: [], listeners: new Set(), meas: [], rec: null };
