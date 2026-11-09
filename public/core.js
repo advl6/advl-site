@@ -76,9 +76,11 @@ function bgTint(src) { if (!src) return; const im = new Image(); im.onload = () 
   const c = document.createElement('canvas'); c.width = c.height = 8; const x = c.getContext('2d'); x.drawImage(im, 0, 0, 8, 8);
   const d = x.getImageData(0, 0, 8, 8).data; const t = [0, 0, 0], b = [0, 0, 0];
   for (let i = 0; i < 64; i++) { const a = i < 16 ? t : i >= 48 ? b : null; if (a) for (let k = 0; k < 3; k++) a[k] += d[i * 4 + k]; }
-  const col = a => `rgb(${a.map(v => Math.round(v / 16 * .82)).join(',')})`;
-  document.documentElement.style.backgroundColor = col(b); document.body.style.backgroundColor = col(t); $('#bg').style.backgroundColor = col(t);
-  const m = document.querySelector('meta[name="theme-color"]'); m && m.setAttribute('content', col(t)); } catch (e) {} }; im.src = src; }
+  /* the page darkens its edges except on home, so the strips follow how dark the edge actually reads */
+  const home = ['home', 'landing'].includes(document.body.dataset.route), ft = home ? 1 : .38, fb = home ? .85 : document.body.dataset.route === 'lot' ? .36 : .5;
+  const col = (a, f) => `rgb(${a.map(v => Math.round(v / 16 * f)).join(',')})`;
+  document.documentElement.style.backgroundColor = col(b, fb); document.body.style.backgroundColor = col(t, ft); $('#bg').style.backgroundColor = col(t, ft);
+  const m = document.querySelector('meta[name="theme-color"]'); m && m.setAttribute('content', col(t, ft)); } catch (e) {} }; im.src = src; }
 function setBg(src, video) {
   bgTint(src);
   const layers = $$('#bg .bgi'); const next = layers[bgFlip = 1 - bgFlip], prev = layers[1 - bgFlip];
