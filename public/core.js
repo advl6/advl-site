@@ -48,7 +48,7 @@ function perform() {
     timers.push(setTimeout(() => { b.dataset.phase = 'ui'; CFG.onUI && CFG.onUI(route); }, HOLD + 2000 + FRAME));
     return;
   }
-  const hold = RETURNING && route && route.tab !== 'home' ? 60 : HOLD; b.dataset.phase = 'bg';
+  const hold = route && route.tab !== 'home' ? 60 : HOLD;  // a direct link to a page opens straight away (11/9); the bare address and Home keep the full opening b.dataset.phase = 'bg';
   timers.push(setTimeout(() => b.dataset.phase = 'frame', hold));
   timers.push(setTimeout(() => { b.dataset.phase = 'ui'; CFG.onUI && CFG.onUI(route); }, hold + FRAME));
 }
@@ -109,6 +109,8 @@ function go() {
 function render() {
   const r = parse(), prev = route; route = r;
   document.body.dataset.tab = r.tab; document.body.dataset.route = r.id;
+  { const NAMES = { projects: 'Projects', works: 'Works Gallery', background: 'Background', about: 'About', artifacts: 'Artifacts', lot: 'Parking Lot' }, pj = /^p\d\d$/.test(r.id) && D.projects.find(p => 'p' + p.num === r.id);
+    const nm = pj ? strip(pj.full || pj.t) : NAMES[r.id]; document.title = (nm ? nm + ' · ' : '') + 'Ariana Dorothea Levy'; }  // each page names itself in the browser tab (11/9)
   $$('[data-nav]').forEach(a => a.toggleAttribute('aria-current', a.dataset.nav === r.tab));
   A.room && (r.tab === 'artifacts' ? null : A.room.stop());
   const view = $('#view'); view.innerHTML = '';
@@ -340,8 +342,12 @@ A.door = (host, shape) => {
 
 /* ---------- Artifacts room ---------- */
 A.room = null;
-A.mountRoom = (el) => { if (!window.MiniGL || !ART) { el.innerHTML = '<p class="soft">The room needs WebGL, which is off in this browser.</p>'; return; }
-  A.room = window.ROOM(el, ART); A.room.start(); };
+A.mountRoom = async (el) => {
+  const off = () => { el.innerHTML = '<p class="soft">The room needs WebGL, which is off in this browser.</p>'; };
+  if (!window.MiniGL) return off();
+  if (!ART) ART = await fetch('artifacts.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => null);
+  if (!ART) return off();
+  A.room = window.ROOM(el, ART); if (document.body.dataset.tab === 'artifacts') A.room.start(); };
 
 /* ---------- Parking Lot ---------- */
 /* Parking Lot storage: claude.ai's shared store inside the artifact; Supabase (REST, no library) on the public site when ADVL_LOT_DB is set */
@@ -417,7 +423,7 @@ A.screensaver = (layer, btnRandom, fileIn) => {
 /* ---------- boot ---------- */
 A.boot = async cfg => {
   CFG = cfg;
-  try { [D, ART] = await Promise.all([fetch('data.json', { cache: 'no-cache' }).then(r => r.json()), fetch('artifacts.json', { cache: 'no-cache' }).then(r => r.json()).catch(() => null)]); }
+  try { D = await fetch('data.json', { cache: 'no-cache' }).then(r => r.json()); }  // artifacts.json (1.6 MB) now loads only when the Artifacts room opens
   catch (e) { document.body.dataset.phase = 'ui'; $('#view').innerHTML = '<p class="soft">The site content didn’t load. Reload the page to try again.</p>'; return; }
   D.projects = D.projects.filter(p => !p.off);  // projects taken off the site (kept in data.json for the Works gallery)
   A.D = D; cfg.init && cfg.init(D);

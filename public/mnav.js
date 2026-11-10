@@ -45,6 +45,9 @@
   new MutationObserver(paint).observe(document.body, { attributes: true, attributeFilter: ['data-tab'] });
   paint();
 
+  /* the circle steps back while a page is being scrolled, and returns when it rests */
+  let st = 0; document.addEventListener('scroll', () => { if (!mq.matches) return; document.body.classList.add('mscroll'); clearTimeout(st); st = setTimeout(() => document.body.classList.remove('mscroll'), 1400); }, true);
+
   /* slow crossfade through the curated backgrounds, only while the circle is on screen */
   let k = 0, t = 0;
   function next() {
