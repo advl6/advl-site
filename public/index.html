@@ -908,6 +908,24 @@ body.rsm-on[data-route=about] #bg{background-color:#CFC8BA!important}
 body.rsm-on[data-route=about]::before{background:linear-gradient(rgb(207 200 186/.92),rgb(207 200 186/.6))!important}
 }
 @media (prefers-reduced-motion:reduce){.rsm{animation:none}#sand{transition:none}}
+
+/* About in the resume's colours (11/11): sand ground, olive type, Syne lead, a solid olive side column */
+body.rsm-on[data-route=about] .abd-pane{background:rgb(255 255 255/.14);border-color:rgb(95 115 0/.55);-webkit-backdrop-filter:none;backdrop-filter:none}
+body.rsm-on[data-route=about] .abd-l.lead{font-family:'Syne',var(--f-disp);font-weight:500;letter-spacing:-.01em;color:#262D14}
+body.rsm-on[data-route=about] .abd-l.t{color:#47522B}
+body.rsm-on[data-route=about] .abd-n{color:rgb(38 45 20/.35)}
+body.rsm-on[data-route=about] .abd-l.c{color:#5F7300;opacity:1}
+body.rsm-on[data-route=about] .abd-l.code{color:#47522B}
+body.rsm-on[data-route=about] .abd-l .k{color:#C4009B;opacity:1}
+body.rsm-on[data-route=about] .abd-l .s{color:#262D14}
+body.rsm-on[data-route=about] .abd-l .pill{color:#5F7300;border-color:rgb(95 115 0/.6)}
+body.rsm-on[data-route=about] .abd-l .pill:hover,body.rsm-on[data-route=about] .abd-l .pill:focus-visible{background:rgb(95 115 0/.12);box-shadow:none}
+body.rsm-on[data-route=about] .abd-l mark,body.rsm-on[data-route=about] .abd-l .hl{color:#262D14;background:linear-gradient(transparent 60%,rgb(255 49 214/.38) 0);text-shadow:none}
+body.rsm-on[data-route=about] .abd-side{background:#47522B;border-color:transparent}
+body.rsm-on[data-route=about] .abd-facts dt{color:#CFF002;opacity:1}
+body.rsm-on[data-route=about] .abd-facts dd{color:#EDE7D8}
+body.rsm-on[data-route=about] .abd-facts .cm{color:#CFF002;opacity:.7}
+@media (max-width:720px){body.rsm-on[data-route=about] #view>h1.big{font-family:'Syne',var(--f-disp);font-weight:800;letter-spacing:-.035em}}
 </style>
 </head>
 <body>
@@ -1160,7 +1178,7 @@ const cfg={
   v.querySelectorAll('.copy-mail').forEach(b=>b.onclick=()=>{const m=b.parentNode.querySelector('.mail-t');try{navigator.clipboard.writeText(D.email).then(()=>b.textContent='Copied',()=>sel())}catch(e){sel()}function sel(){const r=document.createRange();r.selectNodeContents(m);getSelection().removeAllRanges();getSelection().addRange(r);b.textContent='Selected'}});
   /* about.md / resume.md: the resume tab turns the page to sand; #resume opens it directly */
   const tb=[...v.querySelectorAll('.abd-tabs button')],pane=v.querySelector('.abd-pane'),rs=v.querySelector('.rsm');
-  const show=t=>{const r=t==='resume';tb.forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});pane.hidden=r;rs.hidden=!r;document.body.classList.toggle('rsm-on',r);const vw=document.getElementById('view');if(vw.scrollTo)vw.scrollTo(0,0);rs.scrollTop=0};
+  const show=t=>{const r=t==='resume';tb.forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});pane.hidden=r;rs.hidden=!r;document.body.classList.toggle('rsm-on',matchMedia('(min-width:1024px),(max-width:720px)').matches);  /* the whole About page is olive on sand (11/11), both tabs */const vw=document.getElementById('view');if(vw.scrollTo)vw.scrollTo(0,0);rs.scrollTop=0};
   tb.forEach(b=>b.onclick=()=>show(b.dataset.t));show(A._resume?'resume':'about');A._resume=0},
  artifacts(v){v.innerHTML=`<p class="lvl">${LV.artifacts}</p>`;
   if(!A._roomEl){A._roomEl=document.createElement('div');A._roomEl.className='roomwrap';document.body.insertBefore(A._roomEl,document.getElementById('view'));A.mountRoom(A._roomEl);A._roomEl.addEventListener('advl:artifact',e=>window.ADVL_VIEWER&&ADVL_VIEWER.show(e.detail&&e.detail.model))}
