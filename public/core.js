@@ -94,7 +94,7 @@ function setBg(src, video) {
 
 /* ---------- routing ---------- */
 const TABS = ['landing', 'home', 'projects', 'works', 'background', 'about', 'artifacts', 'lot'];
-function parse() { const h = location.hash.slice(1) || 'landing'; if (/^p\d\d$/.test(h) && D.projects.find(p => 'p' + p.num === h)) return { tab: 'projects', id: h }; return { tab: TABS.includes(h) ? h : 'home', id: TABS.includes(h) ? h : 'home' }; }
+function parse() { let h = location.hash.slice(1) || 'landing'; if (h === 'resume') { A._resume = 1; h = 'about'; }  /* #resume opens About on its resume.md tab */ if (/^p\d\d$/.test(h) && D.projects.find(p => 'p' + p.num === h)) return { tab: 'projects', id: h }; return { tab: TABS.includes(h) ? h : 'home', id: TABS.includes(h) ? h : 'home' }; }
 /* a page change first lets the current page leave (it fades and blurs out with the frame), then swaps in the next */
 const OUT = 380; let swapT = 0;
 function go() {
