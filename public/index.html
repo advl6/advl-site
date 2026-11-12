@@ -849,8 +849,8 @@ body.mscroll:not(.mnav-open) .mdial{opacity:.26}
 body .lead,body .blocks p,body .abd-l:not(.h){hyphens:manual}
 
 /* resume.md tab of About (11/11): olive on sand, Syne, the Lion Stone behind the name */
-#sand{position:fixed;inset:0;z-index:2;pointer-events:none;background:#D9D0C2;opacity:0;transition:opacity 2.4s ease}
-body.rsm-on[data-route=about] #sand{opacity:.93}
+#sand{position:fixed;inset:0;z-index:2;pointer-events:none;background:#C9C0B0;mix-blend-mode:screen;opacity:0;transition:opacity 2.4s ease}  /* screened over the page's glowing background, so its colour and forms still show through the sand */
+body.rsm-on[data-route=about] #sand{opacity:1}
 body.rsm-on[data-route=about]{--acc:#5F7300}
 body.rsm-on[data-route=about] #frame rect.halo{opacity:0}
 body.rsm-on[data-route=about] .wm,body.rsm-on[data-route=about] .tk-btn{color:#262D14;transition:color 1.2s ease}
@@ -921,10 +921,10 @@ body.rsm-on[data-route=about] .abd-l .s{color:#262D14}
 body.rsm-on[data-route=about] .abd-l .pill{color:#5F7300;border-color:rgb(95 115 0/.6)}
 body.rsm-on[data-route=about] .abd-l .pill:hover,body.rsm-on[data-route=about] .abd-l .pill:focus-visible{background:rgb(95 115 0/.12);box-shadow:none}
 body.rsm-on[data-route=about] .abd-l mark,body.rsm-on[data-route=about] .abd-l .hl{color:#262D14;background:linear-gradient(transparent 60%,rgb(255 49 214/.38) 0);text-shadow:none}
-body.rsm-on[data-route=about] .abd-side{background:#47522B;border-color:transparent}
-body.rsm-on[data-route=about] .abd-facts dt{color:#CFF002;opacity:1}
-body.rsm-on[data-route=about] .abd-facts dd{color:#EDE7D8}
-body.rsm-on[data-route=about] .abd-facts .cm{color:#CFF002;opacity:.7}
+body.rsm-on[data-route=about] .abd-side{background:rgb(71 82 43/.1);border-color:rgb(95 115 0/.45)}
+body.rsm-on[data-route=about] .abd-facts dt{color:#5F7300;opacity:1}
+body.rsm-on[data-route=about] .abd-facts dd{color:#262D14}
+body.rsm-on[data-route=about] .abd-facts .cm{color:#5F7300;opacity:.8}
 @media (max-width:720px){body.rsm-on[data-route=about] #view>h1.big{font-family:'Syne',var(--f-disp);font-weight:800;letter-spacing:-.035em}}
 </style>
 </head>
