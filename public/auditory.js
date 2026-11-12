@@ -88,7 +88,7 @@ function transport() {
     <button type="button" class="metro" data-act="metro" aria-pressed="${!!s.metro}">${I.metro}<span><b>Metronome</b><em>${s.metro ? 'On' : 'Off'} · count-in 1 bar when recording</em></span></button>
     <div class="feel" role="group" aria-label="Pick a feel">${FEELS.map(([l, b]) => `<button type="button" data-act="feel" data-v="${b}" aria-pressed="${s.bpm === b}">${esc(l)} ${b}</button>`).join('')}</div>
     <span class="grow"></span>
-    <button type="button" class="pill sm clr${ui.clearArm ? ' arm' : ''}" data-act="clearall">${ui.clearArm ? 'Tap again to clear everything' : 'Clear all'}</button>${isFree() ? '<button type="button" class="pill sm" data-act="resetwin">Reset layout</button>' : ''}<div class="rings">${ring('Bass', 'g.bass', s.bass)}${ring('Volume', 'g.vol', s.vol)}</div>
+    <button type="button" class="pill sm" data-act="undo">Undo</button><button type="button" class="pill sm clr${ui.clearArm ? ' arm' : ''}" data-act="clearall">${ui.clearArm ? 'Tap again to clear everything' : 'Clear all'}</button>${isFree() ? '<button type="button" class="pill sm" data-act="resetwin">Reset layout</button>' : ''}<div class="rings">${ring('Bass', 'g.bass', s.bass)}${ring('Volume', 'g.vol', s.vol)}</div>
     ${modeDial()}
   </div>`;
 }
@@ -570,7 +570,7 @@ async function exportMix(fmt) {
   const cur = X.LIB.mixes.find(m => m.id === S().cur), name = cur ? cur.name : 'mix';
   msg('mx', `Making your ${fmt.toUpperCase()}…`);
   try {
-    const buf = await X.renderPiece(), blob = fmt === 'mp3' ? await X.mp3(buf) : X.wav(buf), a = document.createElement('a');
+    const F = fmt.toUpperCase(), buf = await X.renderPiece(p => msg('mx', `Making your ${F}… ${Math.round(p * (fmt === 'mp3' ? 60 : 100))}%`)), blob = fmt === 'mp3' ? await X.mp3(buf, 192, p => msg('mx', `Making your ${F}… ${60 + Math.round(p * 40)}%`)) : X.wav(buf), a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = `advl-auditory-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mix'}-${S().bpm}bpm.${fmt}`;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); msg('mx', `Downloaded ${a.download}`);
   } catch (e) { msg('mx', fmt === 'mp3' ? 'MP3 needs a connection the first time. Try WAV, or try again.' : 'Export didn’t work. Try again.', true); }
@@ -643,8 +643,9 @@ function act(b, e) {
       const T = X.byId(id); if (T) setStyle(T, b.dataset.o); break; }
     case 'speed': { if (!L) return; const m = SPL.find(x => x[1] === v); if (!m) return; L.speed = m[0]; X.save(); X.eng && X.apply(X.eng, L); X.restartLoop(L); paint(); break; }
     case 'fx': { if (!L) return; const f = X.FX.find(x => x[1] === v); if (!f) return; L.fx = f[0]; if (typeof L.fxAmt !== 'number') L.fxAmt = 60; X.save(); X.eng && X.apply(X.eng, L); if (!X.SEQ.playing && f[0] !== 'none') X.audition(L); paint(); break; }
+    case 'undo': msg('mx', X.undo() ? 'Undone.' : 'Nothing to undo.'); paint(); break;
     case 'clearall': if (!ui.clearArm) { ui.clearArm = true; paint(); clearTimeout(ui.clearT); ui.clearT = setTimeout(() => { ui.clearArm = false; paint(); }, 4000); break; }
-      ui.clearArm = false; X.clearAll(); msg('mx', 'Cleared. Add a layer to start again.'); paint(); break;
+      ui.clearArm = false; X.clearAll(); msg('mx', 'Cleared. Add a layer to start again, or Undo to bring it back.'); paint(); break;
     case 'resetwin': if (s.win) delete s.win[s.mode]; X.save(); paint(); break;
     case 'sess':
       if (X.SESS.mr) { msg('mx', 'Saving your session…'); X.sessionStop().then(r => { if (r && r.error) msg('mx', r.error, true); else if (r) msg('mx', `${r.name} saved · ${fmtDur(r.dur)}.`); paint(); }); }
@@ -828,6 +829,7 @@ function onUp(e) {
   else if (d.type === 'bars') drawViz();
 }
 function onKey(e) {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) { e.preventDefault(); msg('mx', X.undo() ? 'Undone.' : 'Nothing to undo.'); paint(); return; }
   const kn = e.target.closest && e.target.closest('[data-kn]');
   if (kn && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown'].includes(e.key)) {
     e.preventDefault(); const L = kn.dataset.l ? X.byId(kn.dataset.l) : null, key = kn.dataset.kn, cur = key.startsWith('g.') ? S()[key.slice(2)] : key.startsWith('p.') ? L.p[key.slice(2)] : L[key.slice(2)];

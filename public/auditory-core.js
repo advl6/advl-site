@@ -112,7 +112,18 @@ function load() {
 }
 let S = load();
 let saveT = 0;
-const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 300); };
+/* undo (2.2): each saved change keeps the piece as it was before; window positions, mode and selection are left out */
+const HIST = [], content = () => { const o = Object.assign({}, S); delete o.win; delete o.mode; delete o.sel; return JSON.stringify(o); };
+let snap = content();
+const flush = () => { clearTimeout(saveT); saveT = 0; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} const now = content(); if (now !== snap) { HIST.push(snap); if (HIST.length > 60) HIST.shift(); snap = now; } };
+const save = () => { clearTimeout(saveT); saveT = setTimeout(flush, 300); };
+function undo() {
+  if (saveT) flush(); if (!HIST.length) return false;
+  const prev = HIST.pop(), was = SEQ.playing, keep = { mode: S.mode, win: S.win, sel: S.sel }; stop();
+  S = Object.assign(fresh(), JSON.parse(prev), keep); S.layers.forEach(fixLayer); if (S.sel && !S.layers.some(L => L.id === S.sel)) S.sel = S.layers[0] ? S.layers[0].id : null;
+  if (eng) { eng.ch.forEach((k, lid) => dropChain(eng, lid)); levels(eng); setRoom(eng); }
+  snap = prev; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} if (was) play(); return true;
+}
 const byId = id => S.layers.find(L => L.id === id);
 const groupOf = L => L.kind === 'audio' ? (L.origin === 'rec' ? 'voice' : 'audio') : (L.origin === 'hum' || L.origin === 'move' ? 'voice' : V[L.voice].g);
 const colorOf = L => L.kind === 'audio' ? (L.color || AUDC[0]) : (L.color || V[L.voice].c);
@@ -189,14 +200,14 @@ function makeEngine(c, live) {
   eo.delayTime.value = stepDur() * 3;
   // cathedral echo: a pause, then a long dark bloom
   const cath = c.createGain(), cpre = c.createDelay(1), cconv = c.createConvolver(), clp = c.createBiquadFilter(), cout = c.createGain();
-  cpre.delayTime.value = 0.09; cconv.buffer = irCathedral(c); clp.type = 'lowpass'; clp.frequency.value = 5200; cout.gain.value = 0.8;
+  cpre.delayTime.value = 0.09; clp.type = 'lowpass'; clp.frequency.value = 5200; cout.gain.value = 0.8;
   cath.connect(cpre); cpre.connect(cconv); cconv.connect(clp); clp.connect(cout); cout.connect(master);
   // opera echoes: repeats that bounce left and right across a hall, each one softer and further away
   const opera = c.createGain(), ohp = c.createBiquadFilter(), olp = c.createBiquadFilter(), dl = c.createDelay(3), dr = c.createDelay(3), fl = c.createGain(), fr = c.createGain(), mg = c.createChannelMerger(2), oconv = c.createConvolver(), oout = c.createGain(), odry = c.createGain();
-  ohp.type = 'highpass'; ohp.frequency.value = 260; olp.type = 'lowpass'; olp.frequency.value = 4200; fl.gain.value = fr.gain.value = 0.56; oconv.buffer = irHall(c); oout.gain.value = 0.55; odry.gain.value = 0.7;
+  ohp.type = 'highpass'; ohp.frequency.value = 260; olp.type = 'lowpass'; olp.frequency.value = 4200; fl.gain.value = fr.gain.value = 0.56; oout.gain.value = 0.55; odry.gain.value = 0.7;
   opera.connect(ohp); ohp.connect(olp); olp.connect(dl); dl.connect(fl); fl.connect(dr); dr.connect(fr); fr.connect(dl);
   dl.connect(mg, 0, 0); dr.connect(mg, 0, 1); mg.connect(odry); odry.connect(master); mg.connect(oconv); oconv.connect(oout); oout.connect(master);
-  const e = { ctx: c, live, noise, master, bassBus, mainBus, an, rev, dly, pg, tape, pf, eoIn, eo, cath, opera, odl: dl, odr: dr, ch: new Map(), loops: new Map(), last: new Map() };
+  const e = { ctx: c, live, noise, master, bassBus, mainBus, an, rev, dly, pg, tape, pf, eoIn, eo, cath, opera, cconv, oconv, odl: dl, odr: dr, ch: new Map(), loops: new Map(), last: new Map() };
   if (live) { e.metro = c.createGain(); e.metro.gain.value = 0.35; e.metro.connect(c.destination); }
   levels(e, true); return e;
 }
@@ -235,6 +246,8 @@ function apply(e, L, now) {
   set(k.vol.gain, audible(L) ? n01(L.vol) : 0);
   set(k.rs.gain, Math.min(1, n01(L.rev) + n01(L.depth) * 0.35)); set(k.es.gain, n01(L.echo) * 0.8);
   const to = L.fx === 'opera' ? e.opera : L.fx === 'cathedral' ? e.cath : null;
+  // the two big spaces are built the first time a sound uses them, not on the first tap (2.2)
+  if (to === e.cath && !e.cconv.buffer) e.cconv.buffer = irCathedral(e.ctx); if (to === e.opera && !e.oconv.buffer) e.oconv.buffer = irHall(e.ctx);
   if (k.fxTo !== to) { try { k.fx.disconnect(); } catch (x) {} if (to) k.fx.connect(to); k.fxTo = to; }
   set(k.fx.gain, to ? n01(L.fxAmt) * (L.fx === 'cathedral' ? 1.1 : 0.9) : 0);
   const ang = (n01(L.around) * 270 - 90) * Math.PI / 180, dist = 1 + n01(L.depth) * 9, x = Math.sin(ang) * dist, z = -Math.cos(ang) * dist;
@@ -456,7 +469,9 @@ const SEQ = { playing: false, g: 0, next: 0, timer: 0, queue: [], listeners: new
 function click(t, accent) { const c = ctx, o = c.createOscillator(), g = c.createGain(); o.frequency.value = accent ? 2000 : 1400; env(g.gain, t, accent ? 0.9 : 0.55, 0.001, 0.05); o.connect(g); g.connect(eng.metro); o.start(t); o.stop(t + 0.08); }
 function tick() {
   const end = Math.min(S.end, totalSteps()), start = Math.min(S.start, end - 1);
-  while (SEQ.next < ctx.currentTime + 0.12) {
+  // notes are scheduled a little ahead; when the browser is busy and a tick arrives late, look further ahead so the beat holds (2.2)
+  const nowT = performance.now(); if (SEQ.lastTick && nowT - SEQ.lastTick > 70) SEQ.look = Math.min(0.4, (SEQ.look || 0.14) + 0.06); SEQ.lastTick = nowT;
+  while (SEQ.next < ctx.currentTime + (SEQ.look || 0.14)) {
     const sd = stepDur(), g = SEQ.g;
     if (g === start) { const span = (end - start) * sd; fades(eng, SEQ.next, span); startLoops(eng, SEQ.next, SEQ.next + span); }
     pieceShape(eng, g, SEQ.next, sd, SEQ.jump); SEQ.jump = false;
@@ -472,7 +487,7 @@ async function play(from) {
   levels(eng); applyAll(eng); eng.eo.delayTime.value = stepDur() * 3;
   SEQ.playing = true; SEQ.g = Math.min(S.start, S.end - 1); SEQ.next = ctx.currentTime + 0.08; SEQ.queue.length = 0; SEQ.jump = true;
   if (from != null && from > SEQ.g) { seek(from, true); }
-  tick(); SEQ.timer = setInterval(tick, 25); emit('play');
+  SEQ.look = 0.14; SEQ.lastTick = 0; tick(); SEQ.timer = setInterval(tick, 25); emit('play');
   requestAnimationFrame(frame);
 }
 /* jump the playhead to step g (play from here, skim) */
@@ -554,13 +569,14 @@ function previewOnce(L) {
   for (let i = 0; i < L.steps.length; i++) if (L.steps[i]) trigger(e, L, i, t0 + i * sd, i, sd);
   setTimeout(() => dropChain(e, L.id), (L.steps.length * sd + 3) * 1000);
 }
-async function renderPiece() {
+async function renderPiece(onP) {
   const sd = stepDur(), start = S.start, end = Math.min(S.end, totalSteps()), span = (end - start) * sd;
   for (const L of S.layers) if (L.kind === 'audio' && fileById(L.file)) { try { await bufferFor(L.file); } catch (e) {} }
   const sr = 44100, OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext, oc = new OAC(2, Math.ceil(sr * (span + 2.5)), sr), e = makeEngine(oc, false);
   S.layers.forEach(L => chain(e, L)); fades(e, 0.02, span); startLoops(e, 0.02, 0.02 + span);
   for (let g = start; g < end; g++) { pieceShape(e, g, 0.02 + (g - start) * sd, sd, g === start); step(e, g, 0.02 + (g - start) * sd, sd); }
-  return oc.startRendering();
+  const total = span + 2.5, iv = onP ? setInterval(() => onP(Math.min(1, oc.currentTime / total)), 200) : 0;
+  try { return await oc.startRendering(); } finally { clearInterval(iv); }
 }
 function wav(buf) {
   const ch = buf.numberOfChannels, n = buf.length, v = new DataView(new ArrayBuffer(44 + n * ch * 2)), w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
@@ -571,11 +587,13 @@ function wav(buf) {
   return new Blob([v], { type: 'audio/wav' });
 }
 let lameP = null;
-const loadLame = () => lameP || (lameP = new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js'; s.onload = () => window.lamejs ? ok(window.lamejs) : no(new Error('mp3')); s.onerror = () => { lameP = null; no(new Error('mp3')); }; document.head.appendChild(s); }));
-async function mp3(buf, kbps = 192) {
+const loadLame = () => lameP || (lameP = new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'lame.min.js';  /* lamejs 1.2.1, served from the site (2.2) */ s.onload = () => window.lamejs ? ok(window.lamejs) : no(new Error('mp3')); s.onerror = () => { lameP = null; no(new Error('mp3')); }; document.head.appendChild(s); }));
+async function mp3(buf, kbps = 192, onP) {
   const lame = await loadLame(), toI = d => { const r = new Int16Array(d.length); for (let i = 0; i < d.length; i++) { const s = clamp(d[i], -1, 1); r[i] = s < 0 ? s * 0x8000 : s * 0x7fff; } return r; };
   const ch = Math.min(2, buf.numberOfChannels), L = toI(buf.getChannelData(0)), R = ch > 1 ? toI(buf.getChannelData(1)) : null, enc = new lame.Mp3Encoder(ch, buf.sampleRate, kbps), parts = [];
-  for (let i = 0; i < L.length; i += 1152) { const d = R ? enc.encodeBuffer(L.subarray(i, i + 1152), R.subarray(i, i + 1152)) : enc.encodeBuffer(L.subarray(i, i + 1152)); if (d.length) parts.push(new Int8Array(d)); }
+  let lastY = performance.now();
+  for (let i = 0; i < L.length; i += 1152) { if (performance.now() - lastY > 40) { if (onP) onP(i / L.length); await new Promise(r => setTimeout(r)); lastY = performance.now(); }
+    const d = R ? enc.encodeBuffer(L.subarray(i, i + 1152), R.subarray(i, i + 1152)) : enc.encodeBuffer(L.subarray(i, i + 1152)); if (d.length) parts.push(new Int8Array(d)); }
   const f = enc.flush(); if (f.length) parts.push(new Int8Array(f));
   return new Blob(parts, { type: 'audio/mpeg' });
 }
@@ -729,7 +747,7 @@ function pathToMelody(path, n) {
 }
 
 window.AUDX = {
-  V, VOICE_ORDER, GROUPS, BASE, SOUNDS, AUDC, get S() { return S; }, set S(v) { S = v; }, SPEEDS, FX, clearAll, save, load, fresh, synthLayer, audioLayer, melodyLayer, fixLayer, sortLayers,
+  V, VOICE_ORDER, GROUPS, BASE, SOUNDS, AUDC, get S() { return S; }, set S(v) { S = v; }, SPEEDS, FX, clearAll, undo, get canUndo() { return HIST.length > 0 || !!saveT; }, save, load, fresh, synthLayer, audioLayer, melodyLayer, fixLayer, sortLayers,
   byId, groupOf, colorOf, nameOf, shortOf, stepDur, totalSteps, LIB, BUF, fileById, loadLibrary, bufferFor, addFile, removeFile, saveMix, openMix, removeMix,
   ensure, get eng() { return eng; }, get ctx() { return ctx; }, chain, apply, applyAll, levels, setRoom, dropChain, SEQ, play, stop, restartLoop, audition, loopStop,
   renderPiece, renderHit, previewOnce, seek, shapeAt, fadeLens, FADE_IN, FADE_OUT, SESS, sessionStart, sessionStop, wav, mp3, record, pathToMelody, autoAt, audible, mic, n01, clamp, uid, isVideo, usedBytes, MAX_ALL
