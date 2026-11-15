@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://advl.studio/sitemap.xml
