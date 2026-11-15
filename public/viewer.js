@@ -20,12 +20,12 @@
     { id: 'dress', name: 'The Petrol Dress', proj: '09 The Petrol Dress', file: 'models/petrol-dress.glb.txt', mb: 0.8 },
     { id: 'brain', name: 'Dish Brain Texture', proj: '10 Chaos / a soap dish', file: 'models/dish-brain.glb.txt', mb: 3.5 },
     { id: 'digifrend', name: 'Digifrend', proj: '11 digifrends', file: 'models/digifrend.glb.txt', mb: 4.5 },
-    { id: 'cathouse', name: 'Stacking Cat House', proj: '12 Lurvig Cat House', file: 'models/cat-house.glb.txt', mb: 1.0 },
-    { id: 'circlecat', name: 'Circle Cat House', proj: '12 Lurvig Cat House', file: 'models/circle-cat-house.glb.txt', mb: 1.9 },
-    { id: 'sculptprobe', name: 'Sculpt Probe 4', proj: '13 Personal Projects', file: 'models/sculptprobe4.glb.txt', mb: 2.3 },
-    { id: 'lion', name: 'Lion Stone', proj: '13 Personal Projects', file: 'models/lion-stone.glb.txt', mb: 3.5 },
-    { id: 'nomadn2', name: 'Nomad Study (N2)', proj: '15 Early Projects and Process', file: 'models/nomad-n2.glb.txt', mb: 3.5 },
-    { id: 'stair', name: 'Spiral Staircase', proj: '15 Early Projects and Process', file: 'models/spiral-stair.glb.txt', mb: 2.0 },
+    { id: 'cathouse', name: 'Stacking Cat House', proj: 'Lurvig Cat House', file: 'models/cat-house.glb.txt', mb: 1.0 },
+    { id: 'circlecat', name: 'Circle Cat House', proj: 'Lurvig Cat House', file: 'models/circle-cat-house.glb.txt', mb: 1.9 },
+    { id: 'sculptprobe', name: 'Sculpt Probe 4', proj: '12 Personal Projects', file: 'models/sculptprobe4.glb.txt', mb: 2.3 },
+    { id: 'lion', name: 'Lion Stone', proj: '12 Personal Projects', file: 'models/lion-stone.glb.txt', mb: 3.5 },
+    { id: 'nomadn2', name: 'Nomad Study (N2)', proj: 'Early Projects and Process', file: 'models/nomad-n2.glb.txt', mb: 3.5 },
+    { id: 'stair', name: 'Spiral Staircase', proj: 'Early Projects and Process', file: 'models/spiral-stair.glb.txt', mb: 2.0 },
     { id: 'grasstree', name: 'The Grass Tree', proj: 'The Grass Tree', file: 'models/grass-tree.glb.txt', mb: 0.2 },
   ];
   const CDN = 'https://cdn.jsdelivr.net/npm/three@0.128.0/';

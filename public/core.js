@@ -97,7 +97,7 @@ const TABS = ['landing', 'home', 'projects', 'works', 'background', 'about', 'ar
 /* real page addresses (11/14): /learning-bodies, /about, /resume… The hash still drives navigation inside the site (old #p02 links keep working);
    after each page renders the address bar is rewritten to the page's own path. public/<path>.html copies (tools/build_pages.py) give each address its own title and link preview. */
 const pathOf = id => id === 'landing' ? '/' : /^p\d\d$/.test(id) ? '/' + ((D.projects.find(p => 'p' + p.num === id) || {}).path || id) : '/' + id;
-const idOfPath = () => { const s = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, '').replace(/\.html$/, '')); if (!s || s === 'index') return ''; const p = D.projects.find(p => !p.off && (p.path === s || p.slug === s)); return p ? 'p' + p.num : s; };
+const idOfPath = () => { const s = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, '').replace(/\.html$/, '')); if (!s || s === 'index') return ''; const p = D.projects.find(p => !p.off && (p.path === s || p.slug === s)); if (!p && (A.moved || []).includes(s)) return 'works';  /* pages moved to the Works Gallery */ return p ? 'p' + p.num : s; };
 function parse() { let h = location.hash.slice(1) || idOfPath() || 'landing'; if (h === 'resume') { A._resume = 1; h = 'about'; }  /* #resume opens About on its resume.md tab */ if (/^p\d\d$/.test(h) && D.projects.find(p => 'p' + p.num === h)) return { tab: 'projects', id: h }; return { tab: TABS.includes(h) ? h : 'home', id: TABS.includes(h) ? h : 'home' }; }
 /* a page change first lets the current page leave (it fades and blurs out with the frame), then swaps in the next */
 const OUT = 380; let swapT = 0;
@@ -431,6 +431,7 @@ A.boot = async cfg => {
   CFG = cfg;
   try { D = await fetch('data.json', { cache: 'no-cache' }).then(r => r.json()); }  // artifacts.json (1.6 MB) now loads only when the Artifacts room opens
   catch (e) { document.body.dataset.phase = 'ui'; $('#view').innerHTML = '<p class="soft">The site content didn’t load. Reload the page to try again.</p>'; return; }
+  A.moved = D.projects.filter(p => p.off).flatMap(p => [p.was, p.slug]).filter(Boolean);  // old addresses of pages now in the Works Gallery
   D.projects = D.projects.filter(p => !p.off);  // projects taken off the site (kept in data.json for the Works gallery)
   A.D = D; cfg.init && cfg.init(D);
   go();

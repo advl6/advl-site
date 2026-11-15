@@ -11,9 +11,9 @@
     { name: 'Finger Anchors', proj: '02', file: 'models/finger-anchors.glb.txt' },
     { name: 'Digifrend', proj: '11', file: 'models/digifrend.glb.txt' },
     { name: 'Double Seat Stool', proj: '08', file: 'models/double-seat.glb.txt' },
-    { name: 'Lion Stone', proj: '13', file: 'models/lion-stone.glb.txt' },
+    { name: 'Lion Stone', proj: '12', file: 'models/lion-stone.glb.txt' },
     { name: 'Biochip', proj: '02', file: 'models/biochip.glb.txt' },
-    { name: 'Circle Cat House', proj: '12', file: 'models/circle-cat-house.glb.txt' },
+    { name: 'Circle Cat House', proj: '', file: 'models/circle-cat-house.glb.txt' },
   ];
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const cache = {};
