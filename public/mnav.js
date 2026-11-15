@@ -19,6 +19,13 @@
   top.innerHTML = `<span class="o">const levels = {</span>${LV.map(([k, n], i) => `<a href="#${k}" data-k="${k}" style="--i:${i}">&nbsp;&nbsp;L${i}: '${n.toLowerCase()}',<span class="c"> // here</span></a>`).join('')}<span class="o">}</span>`;
   gl.setAttribute('aria-controls', 'mtop');
   document.body.append(gl, top, wrap);
+  /* version and decisions counter (11/15), right of the goto line; phones put it on its own line under it. Numbers: data.json site.v / site.decisions (ledger: tools/decisions.md) */
+  const ctr = document.createElement('span'); ctr.className = 'mctr'; ctr.setAttribute('aria-label', 'Site version and decisions made');
+  document.body.append(ctr);
+  fetch('data.json').then(r => r.json()).then(d => { const s = d.site || {}; if (!s.v) return; ctr.innerHTML = `<i>//</i> <em>v${s.v}</em> <i>·</i> <b>${Number(s.decisions || 0).toLocaleString('en-US')}</b> <strong>decisions made</strong>`; place(); }).catch(() => {});
+  const place = () => { const r = gl.getBoundingClientRect(), on = getComputedStyle(gl).display !== 'none' && r.width > 0; ctr.hidden = !on || !ctr.innerHTML; if (!on) return;
+    if (mq.matches) { ctr.style.left = r.left + 'px'; ctr.style.top = (r.bottom + 2) + 'px'; } else { ctr.style.left = (r.right + 18) + 'px'; ctr.style.top = r.top + 'px'; } ctr.style.lineHeight = r.height + 'px'; };
+  new ResizeObserver(place).observe(gl); addEventListener('resize', place); addEventListener('hashchange', () => setTimeout(place, 60)); addEventListener('popstate', () => setTimeout(place, 60)); setTimeout(place, 600);
   const hub = wrap.querySelector('.hub'), lab = hub.querySelector('b'), fan = wrap.querySelector('.mfan');
   const pics = [...wrap.querySelectorAll('.pics img')];
 
