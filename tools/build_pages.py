@@ -19,7 +19,7 @@ def sub(s,pat,rep):
 urls=[SITE+'/']
 for path,name,desc in pages:
     title=(name+' · ' if name else '')+BASE; e=lambda x:html.escape(x,quote=True)
-    og='img/og/'+path+'.jpg'; img=SITE+'/'+og+'?v=2' if os.path.exists(PUB+og) else SITE+'/img/og.jpg?v=2'
+    img=SITE+'/img/og/card.jpg'  # one of the three business cards, picked at random by worker.js (11/15)
     s=src
     s=sub(s,r'<title>[^<]*</title>','<title>'+e(title)+'</title>')
     s=sub(s,r'<meta name="description" content="[^"]*">','<meta name="description" content="'+e(desc)+'">')
