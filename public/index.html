@@ -926,6 +926,20 @@ body.rsm-on[data-route=about] .abd-facts dt{color:#5F7300;opacity:1}
 body.rsm-on[data-route=about] .abd-facts dd{color:#262D14}
 body.rsm-on[data-route=about] .abd-facts .cm{color:#5F7300;opacity:.8}
 @media (max-width:720px){body.rsm-on[data-route=about] #view>h1.big{font-family:'Syne',var(--f-disp);font-weight:800;letter-spacing:-.035em}}
+
+/* 11/14 audit pass: pages with pale backgrounds get a deeper veil so text and thumbnails hold; small mono lines a step larger on desktop */
+body[data-route=p04] .frost,body[data-route=p14] .frost{background:linear-gradient(rgb(10 14 26/.5),rgb(10 14 26/.62))}
+@media (min-width:1024px){
+.abd-l.c{font-size:.76rem}
+.abd-l.code{font-size:.84rem}
+.pjd-tabs,.abd-tabs{font-size:.72rem}
+.abd-facts{font-size:.76rem}
+}
+@media (max-width:720px){
+.abd-l.c{font-size:.72rem}
+.abd-l.code{font-size:.78rem}
+.abd-facts{font-size:.68rem}
+}
 </style>
 </head>
 <body>

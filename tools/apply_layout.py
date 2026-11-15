@@ -3,7 +3,7 @@ Usage: python3 tools/apply_layout.py layout.json   (the saved document's data)
 Each saved lane maps to the tab section with the same heading; new headings become new sections
 (their text is empty, the heading is Ariana's own). "Top of page" fills the tab's hero.
 Sections that exist in data.json but not in the saved order keep their text with no images."""
-import json,sys
+import json,sys,os
 L=json.load(open(sys.argv[1]))
 fn='public/data.json';d=json.load(open(fn))
 p=[x for x in d['projects'] if x['num']==L['num']][0]
@@ -11,7 +11,7 @@ alt={}
 def walk(o):
   if isinstance(o,dict): [walk(v) for v in o.values()]
   elif isinstance(o,list):
-    if len(o)==2 and all(isinstance(x,str) for x in o) and o[0].endswith('.webp'): alt.setdefault(o[0],o[1])
+    if len(o)==2 and all(isinstance(x,str) for x in o) and (o[0].endswith('.webp') or (' ' not in o[0] and '/' not in o[0] and os.path.exists('public/g/'+o[0]+'.webp'))): alt.setdefault(o[0],o[1])  # short keys are g/<key>.webp
     else: [walk(v) for v in o]
 walk(p)
 A=lambda k:[k,alt.get(k,k.split('/')[-1].split('.')[0].replace('_',' '))]
