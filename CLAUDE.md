@@ -26,6 +26,8 @@ Portfolio of Ariana Dorothea Levy. Static site served by a Cloudflare Worker (st
   - `v/hq/*.mp4` — full-quality films (split parts play back to back).
 - `tools/` — build scripts from the original workspace (`build_data.py` generated `data.json`; it depends on source media that is not in this repo, so for content changes edit `public/data.json` directly). `supabase_parking_lot.sql` creates the message table. `tools/artifact/index.html` is the claude.ai preview version of the page.
 
+  - 02 Learning Bodies narrow column (live 11/16): all its tabs carry `narrow` + `tw` (tab option `tw`: narrow column widened to min(27.2vw,376px) and the h1 kept on one line, `white-space:nowrap`). Wording (11/16): Ariana passed every piece of our flagged wording as is (KeyShot caption, Works Gallery line, alt text, About labels); the wording pass is closed. Decisions counter: live page https://claude.ai/artifact/Hg467Bmkk7kFrJB1HqWBGM (db `counter/main`), kept in step with tools/decisions.md and data.json `site`.
+
 ## Parking Lot
 Supabase table `lot_messages` (id, created_at, name, body, author_token). Visitors post without signing in and can delete only their own messages (RPC `delete_own_message`). Ariana moderates in Supabase > Table Editor.
 
