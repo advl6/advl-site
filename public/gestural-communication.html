@@ -851,6 +851,21 @@ body.mscroll:not(.mnav-open) .mdial{opacity:.26}
 }
 body .lead,body .blocks p,body .abd-l:not(.h){hyphens:manual}
 
+/* decisions.log tab of About (11/16): business-card style counter */
+.dcs{max-width:1100px;margin:0 auto;color:#262D14}
+.dcs-card{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(18px,4vw,56px);align-items:center;position:relative;padding:clamp(18px,3.4vw,48px);border-radius:22px;background:radial-gradient(90% 120% at 30% 40%,rgb(241 228 236/.75) 0,rgb(230 220 203/.6) 55%,rgb(217 208 194/.55) 100%);box-shadow:0 30px 60px -24px rgb(60 36 16/.35)}
+.dcs-card::after{content:"";position:absolute;inset:14px;border:1px solid rgb(107 66 38/.45);border-radius:14px;pointer-events:none}
+.dcs-hg svg{width:100%;max-height:56vh;aspect-ratio:320/500;display:block;margin:0 auto;overflow:visible}
+.dcs-cap{text-align:center;font:500 .72rem var(--f-mono);color:#6B4226;margin:14px 0 0}.dcs-cap i{font-style:normal;opacity:.6}
+.dcs h2{margin:0;white-space:nowrap;hyphens:manual;font:800 clamp(30px,3.9vw,60px)/.92 'Syne',sans-serif;letter-spacing:-.045em;color:#262D14}
+.dcs-num{font:800 clamp(64px,7.6vw,124px)/.85 'Syne',sans-serif;letter-spacing:-.05em;color:#FF31D6;margin:18px 0 10px}
+.dcs-sub{font:400 .78rem var(--f-mono);color:#5F7300;margin:0}.dcs-sub em{font-style:normal;color:#4E79B8}
+.dcs-ex{margin-top:22px;font:400 .82rem/1.75 var(--f-mono);color:#6B4226}.dcs-ex .k{color:#C4009B}
+.dcs-r{padding-left:2ch}.dcs-r b{font-weight:700;color:#262D14}.dcs-b{display:block;height:3px;background:rgb(107 66 38/.18);border-radius:3px;margin:3px 0 2px;overflow:hidden}.dcs-b i{display:block;height:100%;background:#FF31D6}
+.dcs-t{display:block;color:#8A7A66;font-size:.72rem;line-height:1.4;margin-bottom:6px}
+.dcs-bar{border-top:1.5px dashed #6B4226;margin:20px 0 0;padding-top:12px;font:500 .78rem var(--f-mono);color:#6B4226}.dcs-bar b{font-weight:500;color:#C4009B}
+.dcs-note{font:400 .74rem var(--f-mono);color:#8A7A66;margin:10px 0 0}
+@media (max-width:1023px){.dcs-card{grid-template-columns:minmax(0,1fr)}.dcs-hg{max-width:240px;margin:0 auto}}
 /* resume.md tab of About (11/11): olive on sand, Syne, the Lion Stone behind the name */
 #sand{position:fixed;inset:0;z-index:2;pointer-events:none;background:#C9C0B0;mix-blend-mode:screen;opacity:0;transition:opacity 2.4s ease}  /* screened over the page's glowing background, so its colour and forms still show through the sand */
 body.rsm-on[data-route=about] #sand{opacity:1}
@@ -894,9 +909,12 @@ body.rsm-on[data-route=about] .abd-tabs button,body.rsm-on[data-route=about] .ab
 @media (min-width:1024px){
 .rsm{position:absolute;left:max(64px,6vw);right:14px;top:106px;bottom:calc(20px + 1vh);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgb(95 115 0/.5) transparent;padding:26px calc(max(64px,6vw) - 14px) 90px 0;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 26px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(180deg,transparent 0,#000 26px,#000 calc(100% - 40px),transparent)}
 .rsm-h{min-height:min(660px,74vh)}
+.dcs{position:absolute;left:max(64px,6vw);right:max(64px,6vw);top:106px;bottom:calc(20px + 1vh);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding:22px 4px 40px;display:grid;align-content:safe center;max-width:none}.dcs[hidden]{display:none}
+.dcs-card{max-width:1180px;margin:0 auto;width:100%}
 }
 @media (max-width:720px){
 .rsm{margin-top:18px;padding-bottom:60px}
+.dcs{margin-top:18px;padding-bottom:60px}
 .rsm-stone{right:-30%;top:-64px;width:96%;opacity:.9}
 .rsm-name{font-size:11.6vw}
 .rsm-sub{margin:24px 0 14px}
@@ -945,7 +963,7 @@ body[data-route=p04] .frost,body[data-route=p14] .frost{background:linear-gradie
 }
 
 /* version + decisions counter beside the goto line (11/15) */
-.mctr{position:fixed;z-index:23;font:400 .72rem/1 var(--f-mono);letter-spacing:.01em;color:#CFF002;white-space:nowrap;pointer-events:none;text-shadow:none;transition:opacity 1.2s ease}
+.mctr{position:fixed;z-index:23;font:400 .72rem/1 var(--f-mono);letter-spacing:.01em;color:#CFF002;white-space:nowrap;pointer-events:auto;cursor:pointer;text-decoration:none;text-shadow:none;transition:opacity 1.2s ease}
 .mctr i{font-style:normal;opacity:.45}.mctr em{font-style:normal;color:#8DB6E6}.mctr b{font-weight:600;color:#FF31D6}.mctr strong{font-weight:700;opacity:.85}
 body.rsm-on[data-route=about] .mctr{color:#5F7300}body.rsm-on[data-route=about] .mctr em{color:#4E79B8}body.rsm-on[data-route=about] .mctr b{color:#C4009B}
 .mctr{opacity:0}body[data-phase=ui] .mctr{opacity:.9}body.cine .mctr,body[data-route=landing] .mctr{opacity:0}
@@ -1098,10 +1116,35 @@ function abDesk(D){const d=document.createElement('div');d.innerHTML=D.about;con
   rest.forEach((p,i)=>{L.push(['c','// '+(heads[i]||'more')],['t',p],['',''])});
   const links=(D.links||[]).map(([n,u])=>`<span class="k">${n.toLowerCase()}</span><a class="pill" href="${u}" target="_blank" rel="noopener" aria-label="${n} (opens in a new tab)">↗</a>`).join(', ');
   L.push(['code','<span class="k">export</span> {'],['code',`&nbsp;&nbsp;<span class="k">email</span>: <span class="s mail-t">'${esc(D.email)}'</span>,<button type="button" class="pill copy-mail">Copy</button>`],['code','&nbsp;&nbsp;'+links],['code','}']);
-  return `<div class="abd"><h1 class="big">About</h1><nav class="abd-tabs" aria-label="About files"><button type="button" data-t="about" class="on" aria-pressed="true">about.md</button><button type="button" data-t="resume" aria-pressed="false">resume.md</button><a href="#background">cv.json</a></nav>
+  return `<div class="abd"><h1 class="big">About</h1><nav class="abd-tabs" aria-label="About files"><button type="button" data-t="about" class="on" aria-pressed="true">about.md</button><button type="button" data-t="resume" aria-pressed="false">resume.md</button><button type="button" data-t="decisions" aria-pressed="false">decisions.log</button><a href="#background">cv.json</a></nav>
    <div class="abd-pane"><div class="abd-ed">${L.map(([t,x],i)=>`<div class="abd-row"><span class="abd-n" aria-hidden="true">${i+1}</span>${t==='lead'||t==='t'?`<p class="abd-l ${t}">${x}</p>`:`<div class="abd-l ${t}">${x}</div>`}</div>`).join('')}</div>
    <aside class="abd-side">${D.portrait?`<figure class="feature abd-pic pf${D.portraitRound?' rd':''}"><img src="${D.portrait}" alt="Portrait of Ariana Dorothea Levy" decoding="async"></figure>`:`<figure class="feature abd-pic" aria-label="Featured image"><span>Featured image</span><small>A space for a portrait or a chosen work</small></figure>`}
-   <dl class="abd-facts"><div><dt>mfa</dt><dd>Design · California College of the Arts · 2024</dd></div><div><dt>ba</dt><dd>Fine Art · Drew University · 2019</dd></div><div><dt>based</dt><dd>San Francisco</dd></div><div><dt>speaks</dt><dd>English · German <span class="cm">// native</span></dd></div></dl></aside></div><div class="rsm" hidden>${rsm(D)}</div></div>`}
+   <dl class="abd-facts"><div><dt>mfa</dt><dd>Design · California College of the Arts · 2024</dd></div><div><dt>ba</dt><dd>Fine Art · Drew University · 2019</dd></div><div><dt>based</dt><dd>San Francisco</dd></div><div><dt>speaks</dt><dd>English · German <span class="cm">// native</span></dd></div></dl></aside></div><div class="rsm" hidden>${rsm(D)}</div>${dcs(D)}</div>`}
+/* decisions.log (11/16): the decisions counter as a tab of About, in the business-card style: a magenta wireframe hourglass whose sand
+   falls as the chat history is read, the total in Syne, sources in the export { } style. Data: data.json site {v, decisions, sources, note, updated}. */
+function dcs(D){const S=D.site||{},src=S.sources||[],f=n=>Number(n||0).toLocaleString('en-US');let T=0,R=0;
+ const rows=src.map(s=>{const t=+s.turns||0,r=Math.min(+s.read||0,t||1e9);T+=t;R+=r;const p=t?Math.round(r/t*100):(s.done?100:0);
+  return `<div class="dcs-r"><span>${esc(s.name||'')}: </span><b>${f(s.count)}</b><span class="dcs-b"><i style="width:${p}%"></i></span><span class="dcs-t">// ${t?f(r)+' / '+f(t)+' turns read · '+p+'%'+(s.status?' · '+esc(s.status):''):esc(s.status||'read in full')}</span></div>`}).join('');
+ return `<section class="dcs" hidden aria-label="Decisions made"><div class="dcs-card"><div class="dcs-hg"><svg viewBox="-160 -250 320 500" role="img" aria-label="Hourglass: ${T?Math.round(R/T*100):0}% of the chat history read"></svg><p class="dcs-cap">// hourglass <i>· history read</i></p></div>
+  <div class="dcs-tx"><h2>Decisions<br>made</h2><p class="dcs-num">${f(S.decisions)}</p><p class="dcs-sub"><em>// v${esc(S.v||'')}</em>${S.updated?' · updated '+esc(S.updated):''}</p>
+  <div class="dcs-ex"><span class="k">export</span> {${rows}}</div><p class="dcs-bar"><b>read</b>(${f(R)} / ${f(T)} turns · ${T?Math.round(R/T*100):0}%)</p>${S.note?`<p class="dcs-note">${esc(S.note)}</p>`:''}</div></div></section>`}
+function dcsDraw(box,D){const svg=box.querySelector('svg');if(!svg||svg.childNodes.length)return;const S=D.site||{};let T=0,R=0;(S.sources||[]).forEach(s=>{const t=+s.turns||0;T+=t;R+=Math.min(+s.read||0,t)});const fr=T?R/T:0;
+ const NS='http://www.w3.org/2000/svg',H=200,W=120,el=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e};
+ const prof=y=>{const a=Math.abs(y)/H;return W*(.07+.93*Math.pow(Math.sin(Math.min(a,1)*Math.PI/2),1.7)*(a>.9?1-(a-.9)*1.6:1))};
+ const sil=[];for(let y=-H;y<=H;y+=4)sil.push([prof(y),y]);
+ const d='M'+sil.map(([x,y])=>x.toFixed(1)+','+y).join(' L')+' L'+sil.slice().reverse().map(([x,y])=>(-x).toFixed(1)+','+y).join(' L')+'Z';
+ const defs=el('defs',{}),cp=el('clipPath',{id:'dcs-in'},defs);el('path',{d},cp);
+ const pt=el('pattern',{id:'dcs-gr',width:6,height:6,patternUnits:'userSpaceOnUse'},defs);el('rect',{width:6,height:6,fill:'#B88A5E'},pt);el('circle',{cx:1.5,cy:1.5,r:.9,fill:'#6B4226',opacity:.55},pt);el('circle',{cx:4.5,cy:4.2,r:.7,fill:'#FF31D6',opacity:.5},pt);
+ el('ellipse',{cx:0,cy:H+30,rx:W*1.05,ry:9,fill:'none',stroke:'#6B4226','stroke-dasharray':'3 5',opacity:.5});
+ const sand=el('g',{'clip-path':'url(#dcs-in)'}),top=(1-fr)*H*.82,bot=fr*H*.82;
+ if(top>1){el('rect',{x:-W,y:-top-4,width:2*W,height:top+4,fill:'url(#dcs-gr)'},sand);el('ellipse',{cx:0,cy:-top-4,rx:prof(-top-4),ry:prof(-top-4)*.2,fill:'#C99A6C'},sand)}
+ if(bot>1){const yb=H-bot;el('rect',{x:-W,y:yb,width:2*W,height:bot+4,fill:'url(#dcs-gr)'},sand);el('path',{d:`M${-W},${yb} Q0,${yb-Math.min(30,bot*.6)} ${W},${yb} Z`,fill:'url(#dcs-gr)'},sand)}
+ if(fr<1&&top>1){const s=el('line',{x1:0,y1:0,x2:0,y2:H-bot-2,stroke:'#6B4226','stroke-width':2,'stroke-dasharray':'2 6'},sand);if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&s.animate)s.animate([{strokeDashoffset:0},{strokeDashoffset:-32}],{duration:900,iterations:Infinity})}
+ const w=el('g',{fill:'none',stroke:'#FF31D6','stroke-width':.8});
+ for(let y=-H;y<=H;y+=10){const r=prof(y);el('ellipse',{cx:0,cy:y,rx:r.toFixed(1),ry:(r*.2).toFixed(1),opacity:Math.abs(y)%40===0?.95:.45},w)}
+ for(let k=0;k<16;k++){const a=k/16*Math.PI*2,c=Math.cos(a),s=Math.sin(a);el('path',{d:'M'+sil.map(([x,y])=>(x*c).toFixed(1)+','+(y+x*.2*s).toFixed(1)).join(' L'),opacity:s>0?.9:.3},w)}
+ for(const y of [-H-8,H+8]){el('ellipse',{cx:0,cy:y,rx:W*1.18,ry:W*.24,fill:'rgb(241 228 236/.6)',stroke:'#6B4226','stroke-width':1.2});el('ellipse',{cx:0,cy:y+(y<0?-10:10),rx:W*1.18,ry:W*.24,fill:'none',stroke:'#6B4226','stroke-width':1.2})}
+ for(const x of [-W*1.08,W*1.08])el('line',{x1:x,y1:-H-6,x2:x,y2:H+6,stroke:'#6B4226','stroke-width':1.6})}
 /* resume.md (11/11): the playful resume as a tab of About. Olive on sand, the Lion Stone wireframe behind the name, no boxes; roles as rows with the skills Ariana assigned (data.json resume.skills, keyed by employer + role). */
 function rsm(D){const R=D.resume||{},slug=x=>x.toLowerCase().replace(/&amp;|&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const it=a=>{const d=document.createElement('div');d.innerHTML=a;const q=k=>d.querySelector(k)?.innerHTML||'';const [role,loc='']=q('.role').split(' · ');return{org:q('h3'),when:q('.when'),role,loc,text:d.querySelector('article>p:not(.role)')?.innerHTML||''}};
@@ -1200,9 +1243,9 @@ const cfg={
    <div class="slab">${D.about}<p class="langs"><b>Languages</b> ${esc(D.languages||'')}</p><p class="contact"><span class="mail-t">${esc(D.email)}</span><button type="button" class="copy-mail">Copy email</button></p><p class="contact links">${(D.links||[]).map(([n,u])=>`<a class="soc" href="${u}" target="_blank" rel="noopener">${n}<span aria-hidden="true"> ↗</span></a>`).join('')}</p></div></div>${abDesk(D)}`;
   v.querySelectorAll('.copy-mail').forEach(b=>b.onclick=()=>{const m=b.parentNode.querySelector('.mail-t');try{navigator.clipboard.writeText(D.email).then(()=>b.textContent='Copied',()=>sel())}catch(e){sel()}function sel(){const r=document.createRange();r.selectNodeContents(m);getSelection().removeAllRanges();getSelection().addRange(r);b.textContent='Selected'}});
   /* about.md / resume.md: the resume tab turns the page to sand; #resume opens it directly */
-  const tb=[...v.querySelectorAll('.abd-tabs button')],pane=v.querySelector('.abd-pane'),rs=v.querySelector('.rsm');
-  const show=t=>{const r=t==='resume';tb.forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});pane.hidden=r;rs.hidden=!r;document.body.classList.toggle('rsm-on',matchMedia('(min-width:1024px),(max-width:720px)').matches);  /* the whole About page is olive on sand (11/11), both tabs */const vw=document.getElementById('view');if(vw.scrollTo)vw.scrollTo(0,0);rs.scrollTop=0};
-  tb.forEach(b=>b.onclick=()=>show(b.dataset.t));show(A._resume?'resume':'about');A._resume=0},
+  const tb=[...v.querySelectorAll('.abd-tabs button')],pane=v.querySelector('.abd-pane'),rs=v.querySelector('.rsm'),dc=v.querySelector('.dcs');
+  const show=t=>{const r=t==='resume';tb.forEach(b=>{const on=b.dataset.t===t;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});const d=t==='decisions';pane.hidden=r||d;rs.hidden=!r;dc.hidden=!d;A._decOn=d;if(d)dcsDraw(dc,D);try{history.replaceState(null,'',t==='resume'?'/resume':d?'/decisions':'/about')}catch(e){}document.body.classList.toggle('rsm-on',matchMedia('(min-width:1024px),(max-width:720px)').matches);  /* the whole About page is olive on sand (11/11), both tabs */const vw=document.getElementById('view');if(vw.scrollTo)vw.scrollTo(0,0);rs.scrollTop=0};
+  tb.forEach(b=>b.onclick=()=>show(b.dataset.t));show(A._resume?'resume':A._dec?'decisions':'about');A._resume=0;A._dec=0},
  artifacts(v){v.innerHTML=`<p class="lvl">${LV.artifacts}</p>`;
   if(!A._roomEl){A._roomEl=document.createElement('div');A._roomEl.className='roomwrap';document.body.insertBefore(A._roomEl,document.getElementById('view'));A.mountRoom(A._roomEl);A._roomEl.addEventListener('advl:artifact',e=>window.ADVL_VIEWER&&ADVL_VIEWER.show(e.detail&&e.detail.model))}
   else A.room&&A.room.start();A._roomEl.style.display='block'},

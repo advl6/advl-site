@@ -10,7 +10,7 @@ src=open(PUB+'index.html').read();D=json.load(open(PUB+'data.json'))
 strip=lambda s:html.unescape(re.sub(r'<[^>]+>','',s or ''))
 BASE='Ariana Dorothea Levy'
 DESC=re.search(r'<meta name="description" content="([^"]*)"',src).group(1)
-pages=[('home','',DESC),('projects','Projects',DESC),('works','Works Gallery',DESC),('background','Background',DESC),('about','About',DESC),('resume','Resume',DESC),('artifacts','Artifacts',DESC),('lot','Parking Lot',DESC)]
+pages=[('home','',DESC),('projects','Projects',DESC),('works','Works Gallery',DESC),('background','Background',DESC),('about','About',DESC),('resume','Resume',DESC),('decisions','Decisions made',DESC),('artifacts','Artifacts',DESC),('lot','Parking Lot',DESC)]
 for p in D['projects']:
     if p.get('off') or not p.get('path'): continue
     t=strip(p.get('full') or p['t']); pages.append((p['path'],t,t+(' · '+strip(p['meta']) if p.get('meta') else '')+' · '+BASE))

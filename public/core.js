@@ -98,7 +98,7 @@ const TABS = ['landing', 'home', 'projects', 'works', 'background', 'about', 'ar
    after each page renders the address bar is rewritten to the page's own path. public/<path>.html copies (tools/build_pages.py) give each address its own title and link preview. */
 const pathOf = id => id === 'landing' ? '/' : /^p\d\d$/.test(id) ? '/' + ((D.projects.find(p => 'p' + p.num === id) || {}).path || id) : '/' + id;
 const idOfPath = () => { const s = decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, '').replace(/\.html$/, '')); if (!s || s === 'index') return ''; const p = D.projects.find(p => !p.off && (p.path === s || p.slug === s)); if (!p && (A.moved || []).includes(s)) return 'works';  /* pages moved to the Works Gallery */ return p ? 'p' + p.num : s; };
-function parse() { let h = location.hash.slice(1) || idOfPath() || 'landing'; if (h === 'resume') { A._resume = 1; h = 'about'; }  /* #resume opens About on its resume.md tab */ if (/^p\d\d$/.test(h) && D.projects.find(p => 'p' + p.num === h)) return { tab: 'projects', id: h }; return { tab: TABS.includes(h) ? h : 'home', id: TABS.includes(h) ? h : 'home' }; }
+function parse() { let h = location.hash.slice(1) || idOfPath() || 'landing'; if (h === 'resume') { A._resume = 1; h = 'about'; } if (h === 'decisions') { A._dec = 1; h = 'about'; }  /* #resume opens About on its resume.md tab */ if (/^p\d\d$/.test(h) && D.projects.find(p => 'p' + p.num === h)) return { tab: 'projects', id: h }; return { tab: TABS.includes(h) ? h : 'home', id: TABS.includes(h) ? h : 'home' }; }
 /* a page change first lets the current page leave (it fades and blurs out with the frame), then swaps in the next */
 const OUT = 380; let swapT = 0;
 function go() {
@@ -112,7 +112,7 @@ function go() {
 }
 function render() {
   const r = parse(), prev = route; route = r;
-  try { const want = A._resume ? '/resume' : pathOf(r.id); if (location.protocol !== 'file:' && location.pathname + location.hash !== want) history.replaceState(null, '', want + location.search); } catch (e) {}
+  try { const want = A._resume ? '/resume' : A._dec ? '/decisions' : pathOf(r.id); if (location.protocol !== 'file:' && location.pathname + location.hash !== want) history.replaceState(null, '', want + location.search); } catch (e) {}
   document.body.dataset.tab = r.tab; document.body.dataset.route = r.id;
   { const NAMES = { projects: 'Projects', works: 'Works Gallery', background: 'Background', about: 'About', artifacts: 'Artifacts', lot: 'Parking Lot' }, pj = /^p\d\d$/.test(r.id) && D.projects.find(p => 'p' + p.num === r.id);
     const nm = pj ? strip(pj.full || pj.t) : NAMES[r.id]; document.title = (nm ? nm + ' · ' : '') + 'Ariana Dorothea Levy'; }  // each page names itself in the browser tab (11/9)

@@ -20,7 +20,7 @@
   gl.setAttribute('aria-controls', 'mtop');
   document.body.append(gl, top, wrap);
   /* version and decisions counter (11/15), right of the goto line; phones put it on its own line under it. Numbers: data.json site.v / site.decisions (ledger: tools/decisions.md) */
-  const ctr = document.createElement('span'); ctr.className = 'mctr'; ctr.setAttribute('aria-label', 'Site version and decisions made');
+  const ctr = document.createElement('a'); ctr.href = '#decisions'; ctr.className = 'mctr';  /* opens About > decisions.log (11/16) */ ctr.setAttribute('aria-label', 'Site version and decisions made');
   document.body.append(ctr);
   fetch('data.json').then(r => r.json()).then(d => { const s = d.site || {}; if (!s.v) return; ctr.innerHTML = `<i>//</i> <em>v${s.v}</em> <i>·</i> <b>${Number(s.decisions || 0).toLocaleString('en-US')}</b> <strong>decisions made</strong>`; place(); }).catch(() => {});
   const place = () => { const r = gl.getBoundingClientRect(), on = getComputedStyle(gl).display !== 'none' && r.width > 0; ctr.hidden = !on || !ctr.innerHTML; if (!on) return;

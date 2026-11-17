@@ -10,12 +10,14 @@ Ariana asked (11/15) for an exact, gross count of every decision she has made bu
 | Building your own website (2410891c…) | 450 | 0 | 0 |
 | DJ mixing software in C++ (ef0cce24…) | 66 | 0 | 0 |
 | Rhino 3DM installation (912ce0af…) | 53 | 0 | 0 |
-| Claude Code session 99f620c9 (this working chat), from the 11/8 summary through 11/16 16:51 | all | all | 267 (72 from the pre-11/9 messages in the session summary, 140 from 11/9 to 11/15 12:29, 55 from 11/15 12:29 to 11/16 16:51: last card picks and exports, Claudia Sonnek Levy's card, wording passed as is, 02 narrow column, live counter page) |
-| **Total** | | | **267** |
+| Claude Code session 99f620c9 (this working chat), from the 11/8 summary through 11/16 18:27 | all | all | 277 (72 from the pre-11/9 messages in the session summary, 140 from 11/9 to 11/15 12:29, 55 from 11/15 12:29 to 11/16 16:51: last card picks and exports, Claudia Sonnek Levy's card, wording passed as is, 02 narrow column, live counter page; 10 more by 18:27: hourglass counter in the card style, decisions.log tab, idle-time counting, push) |
+| **Total** | | | **277** |
 
 Earlier parts of the working chat that were compacted before the 11/8 summary still need counting from the session transcript.
 
 Live counter page (claude.ai artifact, Ariana watches it): https://claude.ai/artifact/Hg467Bmkk7kFrJB1HqWBGM — update its db doc `counter/main` (total, v, sources[{name, turns, read, count, status}], note, updated) with ArtifactData every time this table changes.
+
+Background counting: a send_later in the working chat every ~45 min reads ~40 more turns while Ariana is away (her request 11/16) and pushes only data.json `site` + this ledger (counter data, approved 11/16).
 
 ## How to update
 - After each working session, count Ariana's decisions in that session, add them here and to `site.decisions`.
