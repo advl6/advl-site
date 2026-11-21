@@ -10,8 +10,8 @@ Ariana asked (11/15) for an exact, gross count of every decision she has made bu
 | Building your own website (2410891c…) | 450 | 10 (turns 0–9; next page token t10) | 5 |
 | DJ mixing software in C++ (ef0cce24…) | 66 | 0 | 0 |
 | Rhino 3DM installation (912ce0af…) | 53 | 0 | 0 |
-| Claude Code session 99f620c9 (this working chat), from the 11/8 summary through 11/16 18:27 | all | all | 277 (72 from the pre-11/9 messages in the session summary, 140 from 11/9 to 11/15 12:29, 55 from 11/15 12:29 to 11/16 16:51: last card picks and exports, Claudia Sonnek Levy's card, wording passed as is, 02 narrow column, live counter page; 10 more by 18:27: hourglass counter in the card style, decisions.log tab, idle-time counting, push) |
-| **Total** | | | **282** |
+| Claude Code session 99f620c9 (this working chat), from the 11/8 summary through 11/20 17:30 | all | all | 278 (72 from the pre-11/9 messages in the session summary, 140 from 11/9 to 11/15 12:29, 55 from 11/15 12:29 to 11/16 16:51: last card picks and exports, Claudia Sonnek Levy's card, wording passed as is, 02 narrow column, live counter page; 10 more by 18:27: hourglass counter in the card style, decisions.log tab, idle-time counting, push; 1 on 11/20: counter-only updates don't raise the version) |
+| **Total** | | | **283** |
 
 The session transcript only keeps messages from 11/15 on, so the part of the working chat before 11/8 cannot be recounted (checked 11/16).
 
