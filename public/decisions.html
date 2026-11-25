@@ -963,10 +963,13 @@ body[data-route=p04] .frost,body[data-route=p14] .frost{background:linear-gradie
 }
 
 /* version + decisions counter beside the goto line (11/15) */
-.mctr{position:fixed;z-index:23;font:400 .72rem/1 var(--f-mono);letter-spacing:.01em;color:#CFF002;white-space:nowrap;pointer-events:auto;cursor:pointer;text-decoration:none;text-shadow:none;transition:opacity 1.2s ease}
-.mctr i{font-style:normal;opacity:.45}.mctr em{font-style:normal;color:#8DB6E6}.mctr b{font-weight:600;color:#FF31D6}.mctr strong{font-weight:700;opacity:.85}
-body.rsm-on[data-route=about] .mctr{color:#5F7300}body.rsm-on[data-route=about] .mctr em{color:#4E79B8}body.rsm-on[data-route=about] .mctr b{color:#C4009B}
-.mctr{opacity:0}body[data-phase=ui] .mctr{opacity:.9}body.cine .mctr,body[data-route=landing] .mctr{opacity:0}
+/* version + decisions line (11/24): same size, weight and colour as the goto line, on every screen */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.mctr{position:fixed;z-index:23;font:400 .72rem/1 var(--f-mono);letter-spacing:.01em;color:#CFF002;white-space:nowrap;pointer-events:auto;cursor:pointer;text-decoration:none;text-shadow:none;-webkit-text-size-adjust:100%;transition:opacity 1.2s ease}
+.mctr i,.mctr em,.mctr b,.mctr strong{font:inherit;font-style:normal;color:inherit}
+body.rsm-on[data-route=about] .mctr{color:#5F7300}
+.mctr{opacity:0}body[data-phase=ui] .mctr{opacity:.78}body[data-phase=ui] .mctr:hover{opacity:.95}body.cine .mctr,body[data-route=landing] .mctr{opacity:0}
+@media (max-width:720px){.mctr{font-size:.59rem}body[data-phase=ui] .mctr{opacity:.72}}
 </style>
 </head>
 <body>
